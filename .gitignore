@@ -1,0 +1,4 @@
+bin/*
+COMP4300/Debug*
+COMP4300/Release*
+COMP4300/COMP4300.vcxproj.user
