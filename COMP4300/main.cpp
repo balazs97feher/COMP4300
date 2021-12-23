@@ -128,15 +128,16 @@ int main()
     int textSize;
     stream >> textSize;
 
-    sf::Color textColor;
-    stream >> textColor.r >> textColor.g >> textColor.g;
+    int r, g, b;
+    stream >> r >> g >> b;
+    sf::Color textColor(r, g, b);
 
     std::vector<BouncingShape> shapes;
     ShapeFactory shapeFactory{ font, textColor };
 
-    std::getline(configuration, nextLine);
-    while(!configuration.eof())
+    do
     {
+        std::getline(configuration, nextLine);
         stream = std::stringstream{ nextLine };
 
         std::string shape, text;
@@ -144,7 +145,6 @@ int main()
 
         sf::Vector2f startingPos, velocity;
         stream >> startingPos.x >> startingPos.y >> velocity.x >> velocity.y;
-        int r, g, b;
         stream >> r >> g >> b;
         sf::Color shapeColor(r, g, b);
 
@@ -162,10 +162,7 @@ int main()
 
             shapes.push_back(shapeFactory.makeRectangle(text, rectangleSize, shapeColor, velocity, startingPos));
         }
-
-        std::getline(configuration, nextLine);
-    }
-
+    } while (!configuration.eof());
 
     sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Bouncing Shapes");
 
