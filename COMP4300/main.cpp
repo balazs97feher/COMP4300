@@ -16,15 +16,20 @@ namespace fs = std::filesystem;
 class BouncingShape
 {
 public:
-    BouncingShape(std::unique_ptr<sf::Shape> &&shape, const sf::Vector2f velocity, const sf::Text& text, const sf::Vector2f &startingPos)
+    BouncingShape(std::unique_ptr<sf::Shape> &&shape, const sf::Vector2f velocity, const sf::Text& text)
         : mShape(std::move(shape)), mVelocity(velocity), mText(text)
     {
-        mShape->setPosition(startingPos);
-        mText.setPosition(startingPos);
     }
 
     void update(sf::RenderWindow &window)
     {
+        const auto wSize = window.getSize();
+        const auto sSize = mShape->getLocalBounds();
+        const auto sPos = mShape->getPosition();
+
+        if (sPos.x <= 0 || sPos.x + sSize.width >= wSize.x) mVelocity.x *= -1;
+        if (sPos.y <= 0 || sPos.y + sSize.height >= wSize.y) mVelocity.y *= -1;
+
         mText.move(mVelocity);
         mShape->move(mVelocity);
 
@@ -47,22 +52,34 @@ public:
     {
         sf::Text shapeText{ text, mFont };
         shapeText.setFillColor(mColor);
+        const auto localBounds = shapeText.getLocalBounds();
+        const float textWidth = localBounds.width;
+        const float textHeight = localBounds.height;
+        shapeText.setPosition({ startingPos.x + (2 * radius - textWidth) / 2.0f, startingPos.y + (2 * radius - textHeight) / 2.0f });
 
         std::unique_ptr<sf::Shape> shape = std::make_unique<sf::CircleShape>(radius);
         shape->setFillColor(color);
+        shape->setPosition(startingPos);
 
-        return BouncingShape{ std::move(shape), velocity, shapeText, startingPos };
+        const auto shapeBounds = shape->getGlobalBounds();
+
+        return BouncingShape{ std::move(shape), velocity, shapeText };
     }
 
     BouncingShape makeRectangle(const std::string& text, const sf::Vector2f& size, const sf::Color& color, const sf::Vector2f& velocity, const sf::Vector2f& startingPos)
     {
         sf::Text shapeText{ text, mFont };
         shapeText.setFillColor(mColor);
+        const auto localBounds = shapeText.getLocalBounds();
+        const float textWidth = localBounds.width;
+        const float textHeight = localBounds.height;
+        shapeText.setPosition({ startingPos.x + (size.x - textWidth) / 2.0f, startingPos.y + (size.y - textHeight) / 2.0f });
 
         std::unique_ptr<sf::Shape> shape = std::make_unique<sf::RectangleShape>(size);
         shape->setFillColor(color);
+        shape->setPosition(startingPos);
 
-        return BouncingShape{ std::move(shape), velocity, shapeText, startingPos };
+        return BouncingShape{ std::move(shape), velocity, shapeText };
     }
 
 private:
