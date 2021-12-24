@@ -21,7 +21,7 @@ const EntityVector& EntityManager::getEntities(const EntityTag tag)
 
 shared_ptr<Entity> EntityManager::addEntity(const EntityTag tag)
 {
-    auto newEntity = make_shared<Entity>(tag, mTotalEntities++);
+    auto newEntity = shared_ptr<Entity>(new Entity(tag, mTotalEntities++));
     mToAdd.push_back(newEntity);
 
     return newEntity;

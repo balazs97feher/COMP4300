@@ -2,6 +2,8 @@
 
 #include <string>
 
+class EntityManager;
+
 enum class EntityTag
 {
     Default
@@ -9,14 +11,16 @@ enum class EntityTag
 
 class Entity
 {
-public:
-    Entity(const EntityTag tag, const size_t id);
+    friend class EntityManager;
 
+public:
     const EntityTag tag() const;
     bool isAlive() const;
     void destroy();
 
 private:
+    Entity(const EntityTag tag, const size_t id);
+    
     const EntityTag mTag;
     const size_t mId;
     bool mAlive;
