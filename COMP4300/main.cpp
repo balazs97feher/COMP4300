@@ -6,7 +6,7 @@
 int main()
 {
     Game game;
-    game.init("config.txt");
+    game.init("./config/config_assignment02.txt");
     game.run();
 
     return 0;
