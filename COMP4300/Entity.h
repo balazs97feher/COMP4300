@@ -9,7 +9,10 @@ class EntityManager;
 
 enum class EntityTag
 {
-    Default
+    Default,
+    Player,
+    Enemy,
+    Bullet,
 };
 
 class Entity

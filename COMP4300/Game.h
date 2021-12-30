@@ -2,13 +2,14 @@
 
 #include "EntityManager.h"
 
+#include <random>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
 
-struct PlayerConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
-struct EnemyConfig { int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
-struct BulletConfig { int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
+struct PlayerConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
+struct EnemyConfig { uint32_t SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
+struct BulletConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
 
 class Game
 {
@@ -24,9 +25,9 @@ private:
     EntityManager mEntityManager;
     sf::Font mFont;
     sf::Text mText;
-    PlayerConfig mPlayerConfig;
-    EnemyConfig mEnemyConfig;
-    BulletConfig mBulletConfig; 
+    PlayerConfig mPlayerCfg;
+    EnemyConfig mEnemyCfg;
+    BulletConfig mBulletCfg; 
     int mScore;
     int mCurrentFrame;
     int mLastEnemySpawnTime;

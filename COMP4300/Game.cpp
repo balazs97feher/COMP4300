@@ -58,23 +58,25 @@ void Game::init(const std::string& config)
             PlayerConfig pcfg;
             configuration >> pcfg.SR >> pcfg.CR >> pcfg.S >> pcfg.FR >> pcfg.FG
                 >> pcfg.FB >> pcfg.OR >> pcfg.OG >> pcfg.OB >> pcfg.OT >> pcfg.V;
-            mPlayerConfig = pcfg;
+            mPlayerCfg = pcfg;
         }
         else if (configType == "Enemy")
         {
             EnemyConfig ecfg;
             configuration >> ecfg.SR >> ecfg.CR >> ecfg.SMIN >> ecfg.SMAX >> ecfg.OR
                 >> ecfg.OG >> ecfg.OB >> ecfg.OT >> ecfg.VMIN >> ecfg.VMAX >> ecfg.L >> ecfg.SI;
-            mEnemyConfig = ecfg;
+            mEnemyCfg = ecfg;
         }
         else if (configType == "Bullet")
         {
             BulletConfig bcfg;
             configuration >> bcfg.SR >> bcfg.CR >> bcfg.S >> bcfg.FR >> bcfg.FG >> bcfg.FB
                 >> bcfg.OR >> bcfg.OG >> bcfg.OB >> bcfg.OT >> bcfg.V >> bcfg.L;
-            mBulletConfig = bcfg;
+            mBulletCfg = bcfg;
         }
     }
+
+    spawnPlayer();
 }
 
 void Game::pause()
@@ -103,6 +105,22 @@ void Game::sCollision()
 
 void Game::spawnPlayer()
 {
+    mPlayer = mEntityManager.addEntity(EntityTag::Player);
+    
+    const auto wSize = mRenderWindow.getSize();
+    mPlayer->cTransform = make_shared<CTransform>(sf::Vector2f(wSize.x / 2 - mPlayerCfg.SR, wSize.y / 2 - mPlayerCfg.SR),
+        sf::Vector2f{ 0.0, mPlayerCfg.S }, 0.0f);
+
+    const sf::Color fillColor(mPlayerCfg.FR, mPlayerCfg.FG, mPlayerCfg.FB);
+    const sf::Color outlineColor(mPlayerCfg.OR, mPlayerCfg.OG, mPlayerCfg.OB);
+    mPlayer->cShape = make_shared<CShape>(mPlayerCfg.CR, mPlayerCfg.V, fillColor,
+        outlineColor, mPlayerCfg.OT);
+
+    mPlayer->cCollision = make_shared<CCollision>(mPlayerCfg.CR);
+
+    mPlayer->cScore = make_shared<CScore>(0);
+
+    mPlayer->cInput = make_shared<CInput>();
 }
 
 void Game::spawnEnemy()
