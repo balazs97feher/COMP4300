@@ -147,17 +147,56 @@ void Game::sMovement()
 
 void Game::sUserInput()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) mPlayer->cInput->up = true;
-    else mPlayer->cInput->up = false;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) mPlayer->cInput->left = true;
-    else mPlayer->cInput->left = false;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) mPlayer->cInput->down = true;
-    else mPlayer->cInput->down = false;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) mPlayer->cInput->right = true;
-    else mPlayer->cInput->right = false;
+    sf::Event event;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) mPaused = !mPaused;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) mRunning = false;
+    while (mRenderWindow.pollEvent(event))
+    {
+        if (event.type == sf::Event::Closed) mRunning = false;
+
+        if (event.type == sf::Event::KeyPressed)
+        {
+            switch (event.key.code)
+            {
+                case sf::Keyboard::W:
+                    mPlayer->cInput->up = true;
+                    break;
+                case sf::Keyboard::A:
+                    mPlayer->cInput->left = true;
+                    break;
+                case sf::Keyboard::S:
+                    mPlayer->cInput->down = true;
+                    break;
+                case sf::Keyboard::D:
+                    mPlayer->cInput->right = true;
+                    break;
+            }
+        }
+
+        if (event.type == sf::Event::KeyReleased)
+        {
+            switch (event.key.code)
+            {
+                case sf::Keyboard::W:
+                    mPlayer->cInput->up = false;
+                    break;
+                case sf::Keyboard::A:
+                    mPlayer->cInput->left = false;
+                    break;
+                case sf::Keyboard::S:
+                    mPlayer->cInput->down = false;
+                    break;
+                case sf::Keyboard::D:
+                    mPlayer->cInput->right = false;
+                    break;
+                case sf::Keyboard::P:
+                    mPaused = !mPaused;
+                    break;
+                case sf::Keyboard::Escape:
+                    mRunning = false;
+                    break;
+            }
+        }
+    }
 }
 
 void Game::sLifespan()
@@ -195,6 +234,8 @@ void Game::sRender()
     mRenderWindow.clear();
     for (auto& e : mEntityManager.getEntities())
     {
+        e->cTransform->angle += 1.0f;
+        e->cShape->circle.setRotation(e->cTransform->angle);
         e->cShape->circle.setPosition(e->cTransform->pos);
         mRenderWindow.draw(e->cShape->circle);
     }
