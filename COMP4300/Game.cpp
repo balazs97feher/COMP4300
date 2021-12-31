@@ -1,16 +1,39 @@
 #include "Game.h"
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <numbers>
 
+#include <SFML/Window.hpp>
+
 namespace fs = std::filesystem;
 using namespace std;
 
 void Game::run()
 {
+    while (mRunning)
+    {
+        if (mPaused)
+        {
+            sRender();
+            sUserInput();
+        }
+        else
+        {
+            mEntityManager.update();
+
+            sEnemySpawner();
+            sMovement();
+            sCollision();
+            sUserInput();
+
+            sRender();
+            mCurrentFrame++;
+        }
+    }
 }
 
 void Game::init(const std::string& config)
@@ -97,10 +120,44 @@ void Game::pause()
 
 void Game::sMovement()
 {
+    sf::Vector2f playerVelocity;
+    if (mPlayer->cInput->left)
+    {
+        playerVelocity.x -= mPlayerCfg.S;
+    }
+    if (mPlayer->cInput->up)
+    {
+        playerVelocity.y -= mPlayerCfg.S;
+    }
+    if (mPlayer->cInput->right)
+    {
+        playerVelocity.x += mPlayerCfg.S;
+    }
+    if (mPlayer->cInput->down)
+    {
+        playerVelocity.y += mPlayerCfg.S;
+    }
+    mPlayer->cTransform->velocity = playerVelocity;
+
+    for (auto& e : mEntityManager.getEntities())
+    {
+        e->cTransform->pos += e->cTransform->velocity;
+    }
 }
 
 void Game::sUserInput()
 {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) mPlayer->cInput->up = true;
+    else mPlayer->cInput->up = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) mPlayer->cInput->left = true;
+    else mPlayer->cInput->left = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) mPlayer->cInput->down = true;
+    else mPlayer->cInput->down = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) mPlayer->cInput->right = true;
+    else mPlayer->cInput->right = false;
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) mPaused = !mPaused;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) mRunning = false;
 }
 
 void Game::sLifespan()
@@ -109,14 +166,39 @@ void Game::sLifespan()
 
 void Game::sEnemySpawner()
 {
+    if ((mCurrentFrame % mEnemyCfg.SI) == 0)
+    {
+        spawnEnemy();
+    }
 }
 
 void Game::sCollision()
 {
+    mPlayer->cTransform->pos.x = clamp(mPlayer->cTransform->pos.x, (float)mPlayerCfg.SR, (float)(mWindowSize.x - mPlayerCfg.SR));
+    mPlayer->cTransform->pos.y = clamp(mPlayer->cTransform->pos.y, (float)mPlayerCfg.SR, (float)(mWindowSize.y - mPlayerCfg.SR));
+
+    for (auto& e : mEntityManager.getEntities(EntityTag::Enemy))
+    {
+        if ((e->cTransform->pos.x <= mEnemyCfg.SR) || (e->cTransform->pos.x + mEnemyCfg.SR >= mWindowSize.x))
+        {
+            e->cTransform->velocity.x *= -1;
+        }
+        if ((e->cTransform->pos.y <= mEnemyCfg.SR) || (e->cTransform->pos.y + mEnemyCfg.SR >= mWindowSize.y))
+        {
+            e->cTransform->velocity.y *= -1;
+        }
+    }
 }
 
 void Game::sRender()
 {
+    mRenderWindow.clear();
+    for (auto& e : mEntityManager.getEntities())
+    {
+        e->cShape->circle.setPosition(e->cTransform->pos);
+        mRenderWindow.draw(e->cShape->circle);
+    }
+    mRenderWindow.display();
 }
 
 void Game::spawnPlayer()
@@ -124,7 +206,7 @@ void Game::spawnPlayer()
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
     
     mPlayer->cTransform = make_shared<CTransform>(sf::Vector2f(mWindowSize.x / 2 - mPlayerCfg.SR, mWindowSize.y / 2 - mPlayerCfg.SR),
-        sf::Vector2f{ 0.0, mPlayerCfg.S }, 0.0f);
+        sf::Vector2f{ 0, 0 }, 0.0f);
 
     const sf::Color fillColor(mPlayerCfg.FR, mPlayerCfg.FG, mPlayerCfg.FB);
     const sf::Color outlineColor(mPlayerCfg.OR, mPlayerCfg.OG, mPlayerCfg.OB);

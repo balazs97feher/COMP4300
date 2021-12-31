@@ -29,11 +29,11 @@ private:
     PlayerConfig mPlayerCfg;
     EnemyConfig mEnemyCfg;
     BulletConfig mBulletCfg; 
-    int mScore;
-    int mCurrentFrame;
-    int mLastEnemySpawnTime;
-    bool mPaused;
-    bool mRunning;
+    int mScore = 0;
+    int mCurrentFrame = 0;
+    int mLastEnemySpawnTime = 0;
+    bool mPaused = false;
+    bool mRunning = true;
 
     std::random_device dev;
     std::mt19937 rng;
