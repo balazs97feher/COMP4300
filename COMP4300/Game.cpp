@@ -1,8 +1,10 @@
 #include "Game.h"
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <numbers>
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -38,6 +40,7 @@ void Game::init(const std::string& config)
             const uint32_t wStyle = (fullScreenMode == 1) ? (sf::Style::Fullscreen | sf::Style::Default) : sf::Style::Default;
             mRenderWindow.create(sf::VideoMode(wWidth, wHeight), "Shooter", wStyle);
             mRenderWindow.setFramerateLimit(frameLimit);
+            mWindowSize = mRenderWindow.getSize();
         }
         else if (configType == "Font")
         {
@@ -66,6 +69,11 @@ void Game::init(const std::string& config)
             configuration >> ecfg.SR >> ecfg.CR >> ecfg.SMIN >> ecfg.SMAX >> ecfg.OR
                 >> ecfg.OG >> ecfg.OB >> ecfg.OT >> ecfg.VMIN >> ecfg.VMAX >> ecfg.L >> ecfg.SI;
             mEnemyCfg = ecfg;
+
+            nextEnemyPosX = make_unique<std::uniform_int_distribution<>>(0, mWindowSize.x - mEnemyCfg.SR);
+            nextEnemyPosY = make_unique<std::uniform_int_distribution<>>(0, mWindowSize.y - mEnemyCfg.SR);
+            nextEnemyVCount = make_unique<std::uniform_int_distribution<>>(ecfg.VMIN, ecfg.VMAX);
+            nextEnemySpeed = make_unique<std::uniform_real_distribution<>>(ecfg.SMIN, ecfg.SMAX);
         }
         else if (configType == "Bullet")
         {
@@ -75,6 +83,10 @@ void Game::init(const std::string& config)
             mBulletCfg = bcfg;
         }
     }
+
+    rng = mt19937(dev());
+    nextColorComp = make_unique<std::uniform_int_distribution<short>>(0, 255);
+    nextAngle = make_unique<std::uniform_real_distribution<>>(0, 2 * numbers::pi);
 
     spawnPlayer();
 }
@@ -103,17 +115,20 @@ void Game::sCollision()
 {
 }
 
+void Game::sRender()
+{
+}
+
 void Game::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
     
-    const auto wSize = mRenderWindow.getSize();
-    mPlayer->cTransform = make_shared<CTransform>(sf::Vector2f(wSize.x / 2 - mPlayerCfg.SR, wSize.y / 2 - mPlayerCfg.SR),
+    mPlayer->cTransform = make_shared<CTransform>(sf::Vector2f(mWindowSize.x / 2 - mPlayerCfg.SR, mWindowSize.y / 2 - mPlayerCfg.SR),
         sf::Vector2f{ 0.0, mPlayerCfg.S }, 0.0f);
 
     const sf::Color fillColor(mPlayerCfg.FR, mPlayerCfg.FG, mPlayerCfg.FB);
     const sf::Color outlineColor(mPlayerCfg.OR, mPlayerCfg.OG, mPlayerCfg.OB);
-    mPlayer->cShape = make_shared<CShape>(mPlayerCfg.CR, mPlayerCfg.V, fillColor,
+    mPlayer->cShape = make_shared<CShape>(mPlayerCfg.SR, mPlayerCfg.V, fillColor,
         outlineColor, mPlayerCfg.OT);
 
     mPlayer->cCollision = make_shared<CCollision>(mPlayerCfg.CR);
@@ -125,6 +140,26 @@ void Game::spawnPlayer()
 
 void Game::spawnEnemy()
 {
+    auto enemy = mEntityManager.addEntity(EntityTag::Enemy);
+
+    const auto posX = (*nextEnemyPosX)(rng);
+    const auto posY = (*nextEnemyPosY)(rng);
+    const auto speed = (*nextEnemySpeed)(rng);
+    const auto vAngle = (*nextAngle)(rng);
+    const auto vCount = (*nextEnemyVCount)(rng);
+
+    enemy->cTransform = make_shared<CTransform>(sf::Vector2f(posX, posY),
+        sf::Vector2f(mPlayerCfg.S * sin(vAngle), mPlayerCfg.S * cos(vAngle)), 0.0f);
+
+    const sf::Color fillColor((*nextColorComp)(rng), (*nextColorComp)(rng), (*nextColorComp)(rng));
+    const sf::Color outlineColor(mEnemyCfg.OR, mEnemyCfg.OG, mEnemyCfg.OB);
+    enemy->cShape = make_shared<CShape>(mEnemyCfg.SR, vCount, fillColor, outlineColor, mEnemyCfg.OT);
+
+    enemy->cCollision = make_shared<CCollision>(mEnemyCfg.CR);
+
+    enemy->cScore = make_shared<CScore>(vCount * 100);
+
+    enemy->cInput = make_shared<CInput>();
 }
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)

@@ -22,6 +22,7 @@ public:
 
 private:
     sf::RenderWindow mRenderWindow;
+    sf::Vector2u mWindowSize;
     EntityManager mEntityManager;
     sf::Font mFont;
     sf::Text mText;
@@ -34,6 +35,15 @@ private:
     bool mPaused;
     bool mRunning;
 
+    std::random_device dev;
+    std::mt19937 rng;
+    std::unique_ptr<std::uniform_int_distribution<>> nextEnemyPosX;
+    std::unique_ptr<std::uniform_int_distribution<>> nextEnemyPosY;
+    std::unique_ptr<std::uniform_int_distribution<>> nextEnemyVCount;
+    std::unique_ptr<std::uniform_int_distribution<short>> nextColorComp;
+    std::unique_ptr<std::uniform_real_distribution<>> nextEnemySpeed;
+    std::unique_ptr<std::uniform_real_distribution<>> nextAngle;
+
     std::shared_ptr<Entity> mPlayer;
     void pause();
 
@@ -42,6 +52,7 @@ private:
     void sLifespan();
     void sEnemySpawner();
     void sCollision();
+    void sRender();
 
     void spawnPlayer();
     void spawnEnemy();
