@@ -55,6 +55,7 @@ private:
     void sCollision();
     void sRender();
 
+    bool collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const;
     void spawnPlayer();
     void spawnEnemy();
     void spawnSmallEnemies(const std::shared_ptr<Entity>& enemy);

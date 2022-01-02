@@ -258,17 +258,20 @@ void Game::sCollision()
 
         for (auto& other : mEntityManager.getEntities())
         {
-            if ((one->tag() == EntityTag::Enemy || one->tag() == EntityTag::SmallEnemy) && other->tag() == EntityTag::Bullet)
+            if (((one->tag() == EntityTag::Enemy) || (one->tag() == EntityTag::SmallEnemy)) && (other->tag() == EntityTag::Bullet)
+                && collide(one, other))
             {
-                const auto distVec = one->cTransform->pos - other->cTransform->pos;
-                const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
-                if (distSq <= pow(one->cCollision->radius + other->cCollision->radius, 2))
-                {
-                    mScore += one->cScore->score;
-                    one->destroy();
-                    other->destroy();
-                    if (one->tag() == EntityTag::Enemy) spawnSmallEnemies(one);
-                }
+                mScore += one->cScore->score;
+                one->destroy();
+                other->destroy();
+                if (one->tag() == EntityTag::Enemy) spawnSmallEnemies(one);
+            }
+
+            if ((one->tag() == EntityTag::Player) && (other->tag() == EntityTag::Enemy) && collide(one, other))
+            {
+                one->destroy();
+                other->destroy();
+                spawnPlayer();
             }
         }
     }
@@ -301,6 +304,13 @@ void Game::sRender()
     mRenderWindow.display();
 }
 
+bool Game::collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const
+{
+    const auto distVec = one->cTransform->pos - other->cTransform->pos;
+    const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
+    return distSq <= pow(one->cCollision->radius + other->cCollision->radius, 2);
+}
+
 void Game::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
@@ -314,8 +324,6 @@ void Game::spawnPlayer()
         outlineColor, mPlayerCfg.OT);
 
     mPlayer->cCollision = make_shared<CCollision>(mPlayerCfg.CR);
-
-    mPlayer->cScore = make_shared<CScore>(0);
 
     mPlayer->cInput = make_shared<CInput>();
 }

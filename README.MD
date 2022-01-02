@@ -5,7 +5,7 @@ The game must have the following features:
 
 ### Player:
 - [x] The player is represented by a shape which is defined in the config file.
-- [ ] The player must spawn in the center of the screen at the beginning of the game, and after it dies. (collides with an enemy)
+- [x] The player must spawn in the center of the screen at the beginning of the game, and after it dies. (collides with an enemy)
 - [x] The player moves by a speed read from the config file in these directions:
   - Up: 'W' key
   - Left: 'A' key
