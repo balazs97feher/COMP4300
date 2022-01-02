@@ -12,7 +12,7 @@ The game must have the following features:
   - Down: 'S' key
   - Right: 'D' key
 - [x] The player is confined to move only within the bounds of the window.
-- [ ] The player will shoot a bullet toward the mouse pointer when the left mouse button is clicked. The speed, size and lifespan of the bullets are read from the config file.
+- [x] The player will shoot a bullet toward the mouse pointer when the left mouse button is clicked. The speed, size and lifespan of the bullets are read from the config file.
 
 ### Special Ability:
 Come up with a 'special move' which is fired by the player when the right mouse button is clicked. This special ability must:
@@ -40,8 +40,8 @@ the original enemy. These small entities travel outward at angles at fixed inter
 - [ ] The score should be displayed with the font specified by the config file in the top-left corner of the screen.
 
 ### Drawing:
-- [ ] In the render system, all entities should be given a slow rotation.
-- [ ] Any Entity with a lifespan is currently alive, it should have its color alpha channel set to a ratio depending on how long it has left to live. For example, if an Entity has a 100 frame life span, and it has been alive for 50 frames, its alpha value should be set to 0.5 * 255. The alpha should go from 255 when it is first spwaned, to 0 on the last frame it is alive.
+- [x] In the render system, all entities should be given a slow rotation.
+- [x] Any Entity with a lifespan is currently alive, it should have its color alpha channel set to a ratio depending on how long it has left to live. For example, if an Entity has a 100 frame life span, and it has been alive for 50 frames, its alpha value should be set to 0.5 * 255. The alpha should go from 255 when it is first spwaned, to 0 on the last frame it is alive.
 
 ### Miscellaneous:
 - [x] The 'P' key should pause the game.

@@ -50,6 +50,7 @@ private:
     void sMovement();
     void sUserInput();
     void sLifespan();
+    void sAttack();
     void sEnemySpawner();
     void sCollision();
     void sRender();

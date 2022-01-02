@@ -18,17 +18,19 @@ void Game::run()
     {
         if (mPaused)
         {
-            sRender();
             sUserInput();
+            sRender();
         }
         else
         {
             mEntityManager.update();
 
-            sEnemySpawner();
+            sUserInput();
             sMovement();
             sCollision();
-            sUserInput();
+            sEnemySpawner();
+            sAttack();
+            sLifespan();
 
             sRender();
             mCurrentFrame++;
@@ -196,11 +198,34 @@ void Game::sUserInput()
                     break;
             }
         }
+
+        if (event.type == sf::Event::MouseButtonPressed)
+        {
+            if (event.mouseButton.button == sf::Mouse::Button::Left) mPlayer->cInput->shoot = true;
+            mPlayer->cInput->mousePos = sf::Vector2i{ event.mouseButton.x, event.mouseButton.y };
+        }
     }
 }
 
 void Game::sLifespan()
 {
+    for (auto& e : mEntityManager.getEntities())
+    {
+        if (e->cLifeSpan)
+        {
+            e->cLifeSpan->remaining--;
+            if (e->cLifeSpan->remaining == 0) e->destroy();
+        }
+    }
+}
+
+void Game::sAttack()
+{
+    if (mPlayer->cInput->shoot)
+    {
+        spawnBullet(mPlayer, mPlayer->cInput->mousePos);
+        mPlayer->cInput->shoot = false;
+    }
 }
 
 void Game::sEnemySpawner()
@@ -237,6 +262,14 @@ void Game::sRender()
         e->cTransform->angle += 1.0f;
         e->cShape->circle.setRotation(e->cTransform->angle);
         e->cShape->circle.setPosition(e->cTransform->pos);
+
+        if (e->cLifeSpan)
+        {
+            auto fillColor = e->cShape->circle.getFillColor();
+            const uint8_t alpha = ((float)e->cLifeSpan->remaining / e->cLifeSpan->total) * 255;
+            e->cShape->circle.setFillColor({ fillColor.r, fillColor.g, fillColor.b, alpha });
+        }
+
         mRenderWindow.draw(e->cShape->circle);
     }
     mRenderWindow.display();
@@ -291,6 +324,20 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos)
 {
+    const auto dirVec = sf::Vector2f(mousePos.x, mousePos.y) - entity->cTransform->pos;
+    const auto bulletVel = dirVec * (mBulletCfg.S / sqrtf(dirVec.x * dirVec.x + dirVec.y * dirVec.y));
+
+    auto bullet = mEntityManager.addEntity(EntityTag::Bullet);
+
+    bullet->cTransform = make_shared<CTransform>(entity->cTransform->pos, bulletVel, 0.0f);
+    
+    const sf::Color fillColor(mBulletCfg.FR, mBulletCfg.FG, mBulletCfg.FB);
+    const sf::Color outlineColor(mBulletCfg.OR, mBulletCfg.OG, mBulletCfg.OB);
+    bullet->cShape = make_shared<CShape>(mBulletCfg.SR, mBulletCfg.V, fillColor, outlineColor, mBulletCfg.OT);
+
+    bullet->cCollision = make_shared<CCollision>(mBulletCfg.CR);
+
+    bullet->cLifeSpan = make_shared<CLifeSpan>(mBulletCfg.L);
 }
 
 void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)

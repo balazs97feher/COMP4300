@@ -58,6 +58,7 @@ class CInput
 {
 public:
     bool up, left, right, down, shoot;
+    sf::Vector2i mousePos;
 
-    CInput() : up{ false }, left{ false }, right{ false }, down{ false }, shoot{ false } {}
+    CInput() : up{ false }, left{ false }, right{ false }, down{ false }, shoot{ false }, mousePos{0, 0} {}
 };
