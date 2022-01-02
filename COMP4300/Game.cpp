@@ -241,15 +241,32 @@ void Game::sCollision()
     mPlayer->cTransform->pos.x = clamp(mPlayer->cTransform->pos.x, (float)mPlayerCfg.SR, (float)(mWindowSize.x - mPlayerCfg.SR));
     mPlayer->cTransform->pos.y = clamp(mPlayer->cTransform->pos.y, (float)mPlayerCfg.SR, (float)(mWindowSize.y - mPlayerCfg.SR));
 
-    for (auto& e : mEntityManager.getEntities(EntityTag::Enemy))
+    for (auto& one : mEntityManager.getEntities())
     {
-        if ((e->cTransform->pos.x <= mEnemyCfg.SR) || (e->cTransform->pos.x + mEnemyCfg.SR >= mWindowSize.x))
+        if (one->tag() == EntityTag::Enemy)
         {
-            e->cTransform->velocity.x *= -1;
+            if ((one->cTransform->pos.x <= mEnemyCfg.SR) || (one->cTransform->pos.x + mEnemyCfg.SR >= mWindowSize.x))
+            {
+                one->cTransform->velocity.x *= -1;
+            }
+            if ((one->cTransform->pos.y <= mEnemyCfg.SR) || (one->cTransform->pos.y + mEnemyCfg.SR >= mWindowSize.y))
+            {
+                one->cTransform->velocity.y *= -1;
+            }
         }
-        if ((e->cTransform->pos.y <= mEnemyCfg.SR) || (e->cTransform->pos.y + mEnemyCfg.SR >= mWindowSize.y))
+
+        for (auto& other : mEntityManager.getEntities())
         {
-            e->cTransform->velocity.y *= -1;
+            if (one->tag() == EntityTag::Enemy && other->tag() == EntityTag::Bullet)
+            {
+                const auto distVec = one->cTransform->pos - other->cTransform->pos;
+                const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
+                if (distSq <= pow(one->cCollision->radius + other->cCollision->radius, 2))
+                {
+                    one->destroy();
+                    other->destroy();
+                }
+            }
         }
     }
 }
@@ -265,9 +282,11 @@ void Game::sRender()
 
         if (e->cLifeSpan)
         {
-            auto fillColor = e->cShape->circle.getFillColor();
+            const auto fillColor = e->cShape->circle.getFillColor();
+            const auto outlineColor = e->cShape->circle.getOutlineColor();
             const uint8_t alpha = ((float)e->cLifeSpan->remaining / e->cLifeSpan->total) * 255;
             e->cShape->circle.setFillColor({ fillColor.r, fillColor.g, fillColor.b, alpha });
+            e->cShape->circle.setOutlineColor({ outlineColor.r, outlineColor.g, outlineColor.b, alpha });
         }
 
         mRenderWindow.draw(e->cShape->circle);
@@ -325,7 +344,7 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos)
 {
     const auto dirVec = sf::Vector2f(mousePos.x, mousePos.y) - entity->cTransform->pos;
-    const auto bulletVel = dirVec * (mBulletCfg.S / sqrtf(dirVec.x * dirVec.x + dirVec.y * dirVec.y));
+    const auto bulletVel = dirVec * (mBulletCfg.S / sqrtf(pow(dirVec.x, 2) + pow(dirVec.y, 2)));
 
     auto bullet = mEntityManager.addEntity(EntityTag::Bullet);
 
