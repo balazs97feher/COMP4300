@@ -12,6 +12,7 @@ enum class EntityTag
     Default,
     Player,
     Enemy,
+    SmallEnemy,
     Bullet,
 };
 

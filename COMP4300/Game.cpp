@@ -80,6 +80,7 @@ void Game::init(const std::string& config)
                 exit(-1);
             }
             mText.setFont(mFont);
+            mText.setPosition({ 10, 10 });
         }
         else if (configType == "Player")
         {
@@ -257,14 +258,16 @@ void Game::sCollision()
 
         for (auto& other : mEntityManager.getEntities())
         {
-            if (one->tag() == EntityTag::Enemy && other->tag() == EntityTag::Bullet)
+            if ((one->tag() == EntityTag::Enemy || one->tag() == EntityTag::SmallEnemy) && other->tag() == EntityTag::Bullet)
             {
                 const auto distVec = one->cTransform->pos - other->cTransform->pos;
                 const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
                 if (distSq <= pow(one->cCollision->radius + other->cCollision->radius, 2))
                 {
+                    mScore += one->cScore->score;
                     one->destroy();
                     other->destroy();
+                    if (one->tag() == EntityTag::Enemy) spawnSmallEnemies(one);
                 }
             }
         }
@@ -291,6 +294,10 @@ void Game::sRender()
 
         mRenderWindow.draw(e->cShape->circle);
     }
+
+    mText.setString(to_string(mScore));
+    mRenderWindow.draw(mText);
+
     mRenderWindow.display();
 }
 
@@ -333,15 +340,33 @@ void Game::spawnEnemy()
     enemy->cCollision = make_shared<CCollision>(mEnemyCfg.CR);
 
     enemy->cScore = make_shared<CScore>(vCount * 100);
-
-    enemy->cInput = make_shared<CInput>();
 }
 
-void Game::spawnSmallEnemies(std::shared_ptr<Entity> enemy)
+void Game::spawnSmallEnemies(const std::shared_ptr<Entity>& enemy)
 {
+    const auto pointCount = enemy->cShape->circle.getPointCount();
+    const float speed = sqrt(pow(enemy->cTransform->velocity.y, 2.0f) + pow(enemy->cTransform->velocity.y, 2.0f));
+
+    for (size_t i = 0; i < pointCount; i++)
+    {
+        const auto smallEnemy = mEntityManager.addEntity(EntityTag::SmallEnemy);
+
+        const float angle = i * (2 * numbers::pi) / pointCount;
+        const auto velocity = sf::Vector2f{ sin(angle), cos(angle) } * speed;
+        smallEnemy->cTransform = make_shared<CTransform>(enemy->cTransform->pos, velocity, 0);
+        
+        smallEnemy->cShape = make_shared<CShape>(mEnemyCfg.SR / 2, pointCount, enemy->cShape->circle.getFillColor(),
+            enemy->cShape->circle.getOutlineColor(), mEnemyCfg.OT);
+    
+        smallEnemy->cCollision = make_shared<CCollision>(mEnemyCfg.CR / 2);
+
+        smallEnemy->cScore = make_shared<CScore>(enemy->cScore->score * 2);
+
+        smallEnemy->cLifeSpan = make_shared<CLifeSpan>(mEnemyCfg.L);
+    }
 }
 
-void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos)
+void Game::spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vector2i& mousePos)
 {
     const auto dirVec = sf::Vector2f(mousePos.x, mousePos.y) - entity->cTransform->pos;
     const auto bulletVel = dirVec * (mBulletCfg.S / sqrtf(pow(dirVec.x, 2) + pow(dirVec.y, 2)));

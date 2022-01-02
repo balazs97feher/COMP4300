@@ -57,8 +57,8 @@ private:
 
     void spawnPlayer();
     void spawnEnemy();
-    void spawnSmallEnemies(std::shared_ptr<Entity> enemy);
-    void spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos);
+    void spawnSmallEnemies(const std::shared_ptr<Entity>& enemy);
+    void spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vector2i& mousePos);
     void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
 };
