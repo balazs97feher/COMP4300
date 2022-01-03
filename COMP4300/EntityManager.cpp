@@ -5,7 +5,7 @@
 using namespace std;
 
 EntityManager::EntityManager()
-    : mTotalEntities(0)
+    : mTotalEntities{ 0 }
 {
 }
 
