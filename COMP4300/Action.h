@@ -20,9 +20,14 @@ enum class ActionType
 class Action
 {
 public:
+    Action() : type{ ActionType::Default }, eventType{ InputEventType::Default } {}
     Action(const ActionType a, const InputEventType t) : type{ a }, eventType{ t } {}
 
-    const ActionType type;
-    const InputEventType eventType;
+    ActionType getType() const { return type; }
+    InputEventType getEventType() const { return eventType; }
+
+private:
+    ActionType type;
+    InputEventType eventType;
 };
 
