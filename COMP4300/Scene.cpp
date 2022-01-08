@@ -9,7 +9,7 @@ const ActionMap& Scene::getActionMap() const
     return mActionMap;
 }
 
-void Scene::registerAction(const int code, const Action action)
+void Scene::registerAction(const int code, const ActionType action)
 {
     mActionMap[code] = action;
 }
