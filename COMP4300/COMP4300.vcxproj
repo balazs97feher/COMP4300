@@ -163,7 +163,6 @@
   <ItemGroup>
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
-    <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -175,7 +174,6 @@
     <ClInclude Include="Components.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
-    <ClInclude Include="Game.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ScenePlay.h" />

@@ -17,7 +17,7 @@ enum class EntityTag
     Bullet,
 };
 
-typedef std::tuple<CTransform, CShape, CCollision, CInput, CScore, CLifeSpan> ComponentTuple;
+typedef std::tuple<CTransform, CShape, CCollision, CScore, CLifeSpan> ComponentTuple;
 
 class Entity
 {

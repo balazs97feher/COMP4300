@@ -67,12 +67,3 @@ public:
     CLifeSpan() = default;
     CLifeSpan(const int t) : remaining{ t }, total{ t } {}
 };
-
-class CInput : public Component
-{
-public:
-    bool up, left, right, down, shoot;
-    sf::Vector2i mousePos;
-
-    CInput() : up{ false }, left{ false }, right{ false }, down{ false }, shoot{ false }, mousePos{0, 0} {}
-};

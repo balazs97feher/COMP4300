@@ -254,8 +254,6 @@ void ScenePlay::spawnPlayer()
     mPlayer->addComponent<CShape>(mPlayerCfg.SR, mPlayerCfg.V, fillColor, outlineColor, mPlayerCfg.OT);
 
     mPlayer->addComponent<CCollision>(mPlayerCfg.CR);
-
-    mPlayer->addComponent<CInput>();
 }
 
 void ScenePlay::spawnEnemy()
