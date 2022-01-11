@@ -9,6 +9,11 @@ class GameEngine;
 
 typedef std::unordered_map<int, ActionType> ActionMap;
 
+enum class SceneId
+{
+    Play
+};
+
 class Scene
 {
 public:
@@ -20,7 +25,7 @@ public:
     virtual void sDoAction(const Action action) = 0;
     virtual void sRender() = 0;
 
-    const ActionMap& getActionMap() const;
+    const ActionMap& getKbdActionMap() const;
     void registerAction(const int code, const ActionType action);
 
 protected:
@@ -29,7 +34,7 @@ protected:
     int mCurrentFrame;
     bool mPaused;
     bool mHasEnded;
-    ActionMap mActionMap;
+    ActionMap mKbdActionMap;
 
 };
 

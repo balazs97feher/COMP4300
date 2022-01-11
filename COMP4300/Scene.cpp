@@ -4,12 +4,12 @@ Scene::Scene(GameEngine& engine) : mEngine{engine}, mCurrentFrame{0}, mPaused{fa
 {
 }
 
-const ActionMap& Scene::getActionMap() const
+const ActionMap& Scene::getKbdActionMap() const
 {
-    return mActionMap;
+    return mKbdActionMap;
 }
 
 void Scene::registerAction(const int code, const ActionType action)
 {
-    mActionMap[code] = action;
+    mKbdActionMap[code] = action;
 }

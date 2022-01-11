@@ -9,6 +9,7 @@ ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
     registerAction(sf::Keyboard::S, ActionType::MoveDown);
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::Space, ActionType::Shoot);
+    registerAction(sf::Keyboard::Escape, ActionType::Quit);
 }
 
 void ScenePlay::initialize()
