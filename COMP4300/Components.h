@@ -3,22 +3,33 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
-class CTransform
+class Component
+{
+public:
+    Component() : has{ false } {}
+    ~Component() = default;
+
+    bool has;
+};
+
+class CTransform : public Component
 {
 public:
     sf::Vector2f pos; // indicates the center of the entity
     sf::Vector2f velocity;
     float angle;
 
+    CTransform() = default;
     CTransform(const sf::Vector2f& p, const sf::Vector2f& v, const float a)
         : pos{ p }, velocity{ v }, angle{ a } {}
 };
 
-class CShape
+class CShape : public Component
 {
 public:
     sf::CircleShape circle;
 
+    CShape() = default;
     CShape(const float radius, const int points, const sf::Color& fill, const sf::Color& outline, const float thickness)
         : circle{ radius, points }
     {
@@ -29,36 +40,30 @@ public:
     }
 };
 
-class CCollision
+class CCollision : public Component
 {
 public:
     float radius;
 
+    CCollision() = default;
     CCollision(const float r) : radius{ r } {}
 };
 
-class CScore
+class CScore : public Component
 {
 public:
     int score;
 
+    CScore() = default;
     CScore(const int s) : score(s) {}
 };
 
-class CLifeSpan
+class CLifeSpan : public Component
 {
 public:
+    int total;
     int remaining;
-    const int total;
 
+    CLifeSpan() = default;
     CLifeSpan(const int t) : remaining{ t }, total{ t } {}
-};
-
-class CInput
-{
-public:
-    bool up, left, right, down, shoot;
-    sf::Vector2i mousePos;
-
-    CInput() : up{ false }, left{ false }, right{ false }, down{ false }, shoot{ false }, mousePos{0, 0} {}
 };

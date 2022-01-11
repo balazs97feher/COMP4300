@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 
 class EntityManager;
 
@@ -16,6 +17,8 @@ enum class EntityTag
     Bullet,
 };
 
+typedef std::tuple<CTransform, CShape, CCollision, CScore, CLifeSpan> ComponentTuple;
+
 class Entity
 {
     friend class EntityManager;
@@ -25,12 +28,32 @@ public:
     bool isAlive() const;
     void destroy();
 
-    std::shared_ptr<CTransform> cTransform;
-    std::shared_ptr<CShape> cShape;
-    std::shared_ptr<CCollision> cCollision;
-    std::shared_ptr<CInput> cInput;
-    std::shared_ptr<CScore> cScore;
-    std::shared_ptr<CLifeSpan> cLifeSpan;
+    template<typename T>
+    T& getComponent()
+    {
+        return std::get<T>(mComponents);
+    }
+
+    template<typename T>
+    const T& getComponent() const
+    {
+        return std::get<T>(mComponents);
+    }
+
+    template<typename T>
+    bool hasComponent() const
+    {
+        return getComponent<T>().has;
+    }
+
+    template<typename T, typename... Targs>
+    T& addComponent(Targs&&... args)
+    {
+        auto& component = getComponent<T>();
+        component = T(std::forward<Targs>(args)...);
+        component.has = true;
+        return component;
+    }
 
 private:
     Entity(const EntityTag tag, const size_t id);
@@ -38,5 +61,6 @@ private:
     const EntityTag mTag;
     const size_t mId;
     bool mAlive;
+    ComponentTuple mComponents;
 };
 
