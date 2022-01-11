@@ -21,6 +21,8 @@ ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::Space, ActionType::Shoot);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
+
+    initialize();
 }
 
 void ScenePlay::initialize()
@@ -84,18 +86,18 @@ void ScenePlay::initialize()
                 >> bcfg.OR >> bcfg.OG >> bcfg.OB >> bcfg.OT >> bcfg.V >> bcfg.L;
             mBulletCfg = bcfg;
         }
-
-        rng = mt19937(dev());
-        nextColorComp = make_unique<std::uniform_int_distribution<short>>(0, 255);
-        nextAngle = make_unique<std::uniform_real_distribution<>>(0, 2 * numbers::pi);
-
-        spawnPlayer();
     }
+
+    rng = mt19937(dev());
+    nextColorComp = make_unique<std::uniform_int_distribution<short>>(0, 255);
+    nextAngle = make_unique<std::uniform_real_distribution<>>(0, 2 * numbers::pi);
+
+    spawnPlayer();
 }
 
 void ScenePlay::update()
 {
-    while (!mHasEnded)
+    if (!mHasEnded)
     {
         mEntityManager.update();
 
@@ -111,23 +113,31 @@ void ScenePlay::update()
 
 void ScenePlay::sDoAction(const Action action)
 {
+    auto newVelocity = mPlayer->getComponent<CTransform>().velocity;
+
     switch (action.getType())
     {
         case ActionType::MoveUp:
-            if (action.getEventType() == InputEventType::Released) mPlayer->getComponent<CTransform>().velocity.y -= mPlayerCfg.S;
+            if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
+            else newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
             break;
         case ActionType::MoveLeft:
-            if (action.getEventType() == InputEventType::Released) mPlayer->getComponent<CTransform>().velocity.x -= mPlayerCfg.S;
+            if (action.getEventType() == InputEventType::Pressed) newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
+            else newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
             break;
         case ActionType::MoveDown:
-            if (action.getEventType() == InputEventType::Released) mPlayer->getComponent<CTransform>().velocity.y += mPlayerCfg.S;
+            if (action.getEventType() == InputEventType::Pressed) newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
+            else newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
             break;
         case ActionType::MoveRight:
-            if (action.getEventType() == InputEventType::Released) mPlayer->getComponent<CTransform>().velocity.x += mPlayerCfg.S;
+            if (action.getEventType() == InputEventType::Pressed) newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
+            else newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
             break;
         default:
             break;
     }
+
+    mPlayer->getComponent<CTransform>().velocity = newVelocity;
 }
 
 void ScenePlay::sRender()
