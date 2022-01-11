@@ -33,6 +33,19 @@ void GameEngine::changeScene(const SceneId id)
     mCurrentScene = id;
 }
 
+void GameEngine::createScene(const SceneId id)
+{
+    switch (id)
+    {
+        case SceneId::Play:
+            mSceneMap[id] = std::make_unique<ScenePlay>(*this);
+        default:
+            break;
+    }
+
+    changeScene(id);
+}
+
 sf::Vector2u GameEngine::windowSize() const
 {
     return mWindowSize;

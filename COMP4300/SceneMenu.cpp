@@ -24,28 +24,67 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    mContinueText.setFont(mFont);
-    mContinueText.setCharacterSize(mCharSize);
-    mContinueText.setFillColor(mInactiveColor);
-    mContinueText.setString("CONTINUE");
-    mContinueText.setPosition({ (mEngine.windowSize().x / 2.0f) - (mContinueText.getLocalBounds().width / 2), mEngine.windowSize().y / 3.0f });
-    mRestartText.setFont(mFont);
-    mRestartText.setCharacterSize(mCharSize);
-    mRestartText.setFillColor(mInactiveColor);
-    mRestartText.setString("RESTART");
-    mRestartText.setPosition({ (mEngine.windowSize().x / 2.0f) - (mRestartText.getLocalBounds().width / 2), mEngine.windowSize().y * 2 / 3.0f });
+    auto continueGame = [this]() {
+        this->mEngine.changeScene(SceneId::Play);
+    };
+    addItem("CONTINUE", continueGame);
+
+    auto restartGame = [this]() {
+        this->mEngine.createScene(SceneId::Play);
+    };
+    addItem("RESTART", restartGame);
 }
 
 void SceneMenu::update()
 {
+    for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
+    mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
 }
 
 void SceneMenu::sDoAction(const Action action)
 {
+    if (action.getEventType() != InputEventType::Released) return;
+
+    switch (action.getType())
+    {
+        case ActionType::MoveDown:
+            mSelectedIdx = (mSelectedIdx + 1) % mItems.size();
+            break;
+        case ActionType::MoveUp:
+            mSelectedIdx = (mSelectedIdx - 1) % mItems.size();
+            break;
+        case ActionType::Select:
+            mItems[mSelectedIdx].execute();
+            break;
+        default:
+            break;
+    }
 }
 
 void SceneMenu::sRender()
 {
-    mEngine.drawToWindow(mContinueText);
-    mEngine.drawToWindow(mRestartText);
+    for (const auto& item : mItems)
+    {
+        mEngine.drawToWindow(item.mText);
+    }
+}
+
+void SceneMenu::addItem(const std::string& text, std::function<void(void)> action)
+{
+    mItems.emplace_back(this, text, action);
+    
+    for (size_t i = 0; i < mItems.size(); i++)
+    {
+        mItems[i].mText.setPosition({ (mEngine.windowSize().x / 2.0f) - (mItems[i].mText.getLocalBounds().width / 2),
+            mEngine.windowSize().y * (i + 1) / (mItems.size() + 1.0f) });
+    }
+}
+
+SceneMenu::Item::Item(SceneMenu* menu, const std::string& text, std::function<void(void)> action)
+    : mMenu{menu}, execute{action}
+{
+    mText.setString(text);
+    mText.setFillColor(mMenu->mInactiveColor);
+    mText.setCharacterSize(mMenu->mCharSize);
+    mText.setFont(mMenu->mFont);
 }

@@ -15,6 +15,7 @@ public:
     void quit();
 
     void changeScene(const SceneId id);
+    void createScene(const SceneId id);
 
     sf::Vector2u windowSize() const;
     void drawToWindow(const sf::Drawable& drawable);
