@@ -104,7 +104,6 @@ void ScenePlay::update()
         sMovement();
         sCollision();
         sEnemySpawner();
-        sAttack();
         sLifespan();
 
         mCurrentFrame++;
@@ -133,6 +132,8 @@ void ScenePlay::sDoAction(const Action action)
             if (action.getEventType() == InputEventType::Pressed) newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
             else newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
             break;
+        case ActionType::Shoot:
+            spawnBullet(mPlayer, mEngine.mousePos());
         default:
             break;
     }
@@ -182,10 +183,6 @@ void ScenePlay::sLifespan()
             if (e->getComponent<CLifeSpan>().remaining == 0) e->destroy();
         }
     }
-}
-
-void ScenePlay::sAttack()
-{
 }
 
 void ScenePlay::sEnemySpawner()

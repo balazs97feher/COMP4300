@@ -44,7 +44,6 @@ private:
 
     void sMovement();
     void sLifespan();
-    void sAttack();
     void sEnemySpawner();
     void sCollision();
 
