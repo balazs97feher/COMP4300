@@ -24,6 +24,16 @@ void GameEngine::quit()
     mRunning = false;
 }
 
+const sf::Vector2u& GameEngine::windowSize() const
+{
+    return mWindowSize;
+}
+
+void GameEngine::drawToWindow(const sf::Drawable& drawable)
+{
+    mRenderWindow.draw(drawable);
+}
+
 Scene* GameEngine::currentScene()
 {
     return mSceneMap[mCurrentScene].get();
@@ -31,6 +41,7 @@ Scene* GameEngine::currentScene()
 
 void GameEngine::update()
 {
+    currentScene()->update();
 }
 
 void GameEngine::sUserInput()
@@ -54,4 +65,7 @@ void GameEngine::sUserInput()
 
 void GameEngine::sRender()
 {
+    mRenderWindow.clear();
+    currentScene()->sRender();
+    mRenderWindow.display();
 }
