@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scene.h"
-#include "ScenePlay.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -14,6 +13,8 @@ public:
 
     void run();
     void quit();
+
+    void changeScene(const SceneId id);
 
     sf::Vector2u windowSize() const;
     void drawToWindow(const sf::Drawable& drawable);

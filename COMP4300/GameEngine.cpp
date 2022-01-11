@@ -1,10 +1,14 @@
 #include "GameEngine.h"
+#include "SceneMenu.h"
+#include "ScenePlay.h"
 
 #include <SFML/Window/Event.hpp>
 
 GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Play}, mRunning{true}
 {
     mSceneMap[SceneId::Play] = std::make_unique<ScenePlay>(*this);
+    mSceneMap[SceneId::Menu] = std::make_unique<SceneMenu>(*this);
+
     mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "Shooter");
     mRenderWindow.setFramerateLimit(60);
 }
@@ -22,6 +26,11 @@ void GameEngine::run()
 void GameEngine::quit()
 {
     mRunning = false;
+}
+
+void GameEngine::changeScene(const SceneId id)
+{
+    mCurrentScene = id;
 }
 
 sf::Vector2u GameEngine::windowSize() const

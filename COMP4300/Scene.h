@@ -11,6 +11,7 @@ typedef std::unordered_map<int, ActionType> ActionMap;
 
 enum class SceneId
 {
+    Menu,
     Play
 };
 

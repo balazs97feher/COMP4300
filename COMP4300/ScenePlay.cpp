@@ -113,24 +113,26 @@ void ScenePlay::update()
 void ScenePlay::sDoAction(const Action action)
 {
     auto newVelocity = mPlayer->getComponent<CTransform>().velocity;
-
     switch (action.getType())
     {
+        case ActionType::Quit:
+            mEngine.changeScene(SceneId::Menu);
+            return;
         case ActionType::MoveUp:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
-            else newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
+            else newVelocity.y =  (newVelocity.y == 0) ? 0 : min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
             break;
         case ActionType::MoveLeft:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
-            else newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
+            else newVelocity.x = (newVelocity.x == 0) ? 0 : min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
             break;
         case ActionType::MoveDown:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
-            else newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
+            else newVelocity.y = (newVelocity.y == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
             break;
         case ActionType::MoveRight:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
-            else newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
+            else newVelocity.x = (newVelocity.x == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
             break;
         case ActionType::Shoot:
             spawnBullet(mPlayer, mEngine.mousePos());
