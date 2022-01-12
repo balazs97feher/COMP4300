@@ -40,13 +40,14 @@ public:
     }
 };
 
-class CCollision : public Component
+class CBoundingBox : public Component
 {
 public:
-    float radius;
+    sf::Vector2f size;
+    sf::Vector2f halfSize;
 
-    CCollision() = default;
-    CCollision(const float r) : radius{ r } {}
+    CBoundingBox() = default;
+    CBoundingBox(const sf::Vector2f& s) : size{ s }, halfSize{ s.x / 2, s.y / 2 } {}
 };
 
 class CScore : public Component

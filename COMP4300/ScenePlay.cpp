@@ -240,8 +240,13 @@ void ScenePlay::sCollision()
 bool ScenePlay::collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const
 {
     const auto distVec = one->getComponent<CTransform>().pos - other->getComponent<CTransform>().pos;
-    const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
-    return distSq <= pow(one->getComponent<CCollision>().radius + other->getComponent<CCollision>().radius, 2);
+    const auto dx = abs(distVec.x);
+    const auto dy = abs(distVec.y);
+
+    const auto overlap = sf::Vector2f{ (one->getComponent<CBoundingBox>().halfSize.x + other->getComponent<CBoundingBox>().halfSize.x - dx),
+        (one->getComponent<CBoundingBox>().halfSize.y + other->getComponent<CBoundingBox>().halfSize.y - dy) };
+
+    return overlap.x > 0 && overlap.y > 0;
 }
 
 void ScenePlay::spawnPlayer()
@@ -255,7 +260,7 @@ void ScenePlay::spawnPlayer()
     const sf::Color outlineColor(mPlayerCfg.OR, mPlayerCfg.OG, mPlayerCfg.OB);
     mPlayer->addComponent<CShape>(mPlayerCfg.SR, mPlayerCfg.V, fillColor, outlineColor, mPlayerCfg.OT);
 
-    mPlayer->addComponent<CCollision>(mPlayerCfg.CR);
+    mPlayer->addComponent<CBoundingBox>(sf::Vector2f{ mPlayerCfg.CR * 2.0f, mPlayerCfg.CR * 2.0f });
 }
 
 void ScenePlay::spawnEnemy()
@@ -275,7 +280,7 @@ void ScenePlay::spawnEnemy()
     const sf::Color outlineColor(mEnemyCfg.OR, mEnemyCfg.OG, mEnemyCfg.OB);
     enemy->addComponent<CShape>(mEnemyCfg.SR, vCount, fillColor, outlineColor, mEnemyCfg.OT);
 
-    enemy->addComponent<CCollision>(mEnemyCfg.CR);
+    enemy->addComponent<CBoundingBox>(sf::Vector2f{ mEnemyCfg.CR * 2.0f, mEnemyCfg.CR * 2.0f });
 
     enemy->addComponent<CScore>(vCount * 100);
 }
@@ -296,7 +301,7 @@ void ScenePlay::spawnSmallEnemies(const std::shared_ptr<Entity>& enemy)
         smallEnemy->addComponent<CShape>(mEnemyCfg.SR / 2, pointCount, enemy->getComponent<CShape>().circle.getFillColor(),
             enemy->getComponent<CShape>().circle.getOutlineColor(), mEnemyCfg.OT);
 
-        smallEnemy->addComponent<CCollision>(mEnemyCfg.CR / 2);
+        smallEnemy->addComponent<CBoundingBox>(sf::Vector2f{ (float)mEnemyCfg.CR, (float)mEnemyCfg.CR });
 
         smallEnemy->addComponent<CScore>(enemy->getComponent<CScore>().score * 2);
 
@@ -317,7 +322,7 @@ void ScenePlay::spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vec
     const sf::Color outlineColor(mBulletCfg.OR, mBulletCfg.OG, mBulletCfg.OB);
     bullet->addComponent<CShape>(mBulletCfg.SR, mBulletCfg.V, fillColor, outlineColor, mBulletCfg.OT);
 
-    bullet->addComponent<CCollision>(mBulletCfg.CR);
+    bullet->addComponent<CBoundingBox>(sf::Vector2f{ mBulletCfg.CR * 2.0f, mBulletCfg.CR * 2.0f });
 
     bullet->addComponent<CLifeSpan>(mBulletCfg.L);
 }
