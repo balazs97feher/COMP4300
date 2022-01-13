@@ -16,7 +16,8 @@ enum class ActionType
     MoveDown,
     MoveRight,
     Quit,
-    Select
+    Select,
+    ToggleBBDraw
 };
 
 class Action

@@ -13,7 +13,7 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
+ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}, mDrawBB{false}
 {
     registerAction(sf::Keyboard::W, ActionType::MoveUp);
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
@@ -21,6 +21,7 @@ ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::Space, ActionType::Shoot);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
+    registerAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
 
     initialize();
 }
@@ -116,7 +117,10 @@ void ScenePlay::sDoAction(const Action action)
     switch (action.getType())
     {
         case ActionType::Quit:
-            mEngine.changeScene(SceneId::Menu);
+            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
+            return;
+        case ActionType::ToggleBBDraw:
+            if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
             return;
         case ActionType::MoveUp:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
@@ -161,6 +165,12 @@ void ScenePlay::sRender()
         }
 
         mEngine.drawToWindow(e->getComponent<CShape>().circle);
+
+        if (mDrawBB && e->getComponent<CBoundingBox>().has)
+        {
+            e->getComponent<CBoundingBox>().rect.setPosition(e->getComponent<CTransform>().pos);
+            mEngine.drawToWindow(e->getComponent<CBoundingBox>().rect);
+        }
     }
 
     mText.setString(to_string(mScore));
@@ -240,8 +250,13 @@ void ScenePlay::sCollision()
 bool ScenePlay::collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const
 {
     const auto distVec = one->getComponent<CTransform>().pos - other->getComponent<CTransform>().pos;
-    const auto distSq = pow(distVec.x, 2) + pow(distVec.y, 2);
-    return distSq <= pow(one->getComponent<CCollision>().radius + other->getComponent<CCollision>().radius, 2);
+    const auto dx = abs(distVec.x);
+    const auto dy = abs(distVec.y);
+
+    const auto overlap = sf::Vector2f{ (one->getComponent<CBoundingBox>().halfSize.x + other->getComponent<CBoundingBox>().halfSize.x - dx),
+        (one->getComponent<CBoundingBox>().halfSize.y + other->getComponent<CBoundingBox>().halfSize.y - dy) };
+
+    return overlap.x > 0 && overlap.y > 0;
 }
 
 void ScenePlay::spawnPlayer()
@@ -255,7 +270,7 @@ void ScenePlay::spawnPlayer()
     const sf::Color outlineColor(mPlayerCfg.OR, mPlayerCfg.OG, mPlayerCfg.OB);
     mPlayer->addComponent<CShape>(mPlayerCfg.SR, mPlayerCfg.V, fillColor, outlineColor, mPlayerCfg.OT);
 
-    mPlayer->addComponent<CCollision>(mPlayerCfg.CR);
+    mPlayer->addComponent<CBoundingBox>(sf::Vector2f{ mPlayerCfg.CR * 2.0f, mPlayerCfg.CR * 2.0f });
 }
 
 void ScenePlay::spawnEnemy()
@@ -275,7 +290,7 @@ void ScenePlay::spawnEnemy()
     const sf::Color outlineColor(mEnemyCfg.OR, mEnemyCfg.OG, mEnemyCfg.OB);
     enemy->addComponent<CShape>(mEnemyCfg.SR, vCount, fillColor, outlineColor, mEnemyCfg.OT);
 
-    enemy->addComponent<CCollision>(mEnemyCfg.CR);
+    enemy->addComponent<CBoundingBox>(sf::Vector2f{ mEnemyCfg.CR * 2.0f, mEnemyCfg.CR * 2.0f });
 
     enemy->addComponent<CScore>(vCount * 100);
 }
@@ -296,7 +311,7 @@ void ScenePlay::spawnSmallEnemies(const std::shared_ptr<Entity>& enemy)
         smallEnemy->addComponent<CShape>(mEnemyCfg.SR / 2, pointCount, enemy->getComponent<CShape>().circle.getFillColor(),
             enemy->getComponent<CShape>().circle.getOutlineColor(), mEnemyCfg.OT);
 
-        smallEnemy->addComponent<CCollision>(mEnemyCfg.CR / 2);
+        smallEnemy->addComponent<CBoundingBox>(sf::Vector2f{ (float)mEnemyCfg.CR, (float)mEnemyCfg.CR });
 
         smallEnemy->addComponent<CScore>(enemy->getComponent<CScore>().score * 2);
 
@@ -317,7 +332,7 @@ void ScenePlay::spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vec
     const sf::Color outlineColor(mBulletCfg.OR, mBulletCfg.OG, mBulletCfg.OB);
     bullet->addComponent<CShape>(mBulletCfg.SR, mBulletCfg.V, fillColor, outlineColor, mBulletCfg.OT);
 
-    bullet->addComponent<CCollision>(mBulletCfg.CR);
+    bullet->addComponent<CBoundingBox>(sf::Vector2f{ mBulletCfg.CR * 2.0f, mBulletCfg.CR * 2.0f });
 
     bullet->addComponent<CLifeSpan>(mBulletCfg.L);
 }

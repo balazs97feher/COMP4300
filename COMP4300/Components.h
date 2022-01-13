@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
 class Component
@@ -40,13 +41,21 @@ public:
     }
 };
 
-class CCollision : public Component
+class CBoundingBox : public Component
 {
 public:
-    float radius;
+    sf::Vector2f size;
+    sf::Vector2f halfSize;
+    sf::RectangleShape rect;
 
-    CCollision() = default;
-    CCollision(const float r) : radius{ r } {}
+    CBoundingBox() = default;
+    CBoundingBox(const sf::Vector2f& s) : size{ s }, halfSize{ s.x / 2, s.y / 2 }, rect{ size }
+    {
+        rect.setOrigin(halfSize);
+        rect.setFillColor(sf::Color{ 255, 255, 255, 0 });
+        rect.setOutlineColor(sf::Color{ 255, 255, 255 });
+        rect.setOutlineThickness(1);
+    }
 };
 
 class CScore : public Component
