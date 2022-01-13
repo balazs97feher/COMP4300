@@ -13,7 +13,7 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
+ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}, mDrawBB{false}
 {
     registerAction(sf::Keyboard::W, ActionType::MoveUp);
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
@@ -21,6 +21,7 @@ ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::Space, ActionType::Shoot);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
+    registerAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
 
     initialize();
 }
@@ -116,7 +117,10 @@ void ScenePlay::sDoAction(const Action action)
     switch (action.getType())
     {
         case ActionType::Quit:
-            mEngine.changeScene(SceneId::Menu);
+            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
+            return;
+        case ActionType::ToggleBBDraw:
+            if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
             return;
         case ActionType::MoveUp:
             if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
@@ -161,6 +165,12 @@ void ScenePlay::sRender()
         }
 
         mEngine.drawToWindow(e->getComponent<CShape>().circle);
+
+        if (mDrawBB && e->getComponent<CBoundingBox>().has)
+        {
+            e->getComponent<CBoundingBox>().rect.setPosition(e->getComponent<CTransform>().pos);
+            mEngine.drawToWindow(e->getComponent<CBoundingBox>().rect);
+        }
     }
 
     mText.setString(to_string(mScore));

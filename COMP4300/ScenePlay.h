@@ -30,6 +30,7 @@ private:
     BulletConfig mBulletCfg;
     int mScore = 0;
     int mLastEnemySpawnTime = 0;
+    bool mDrawBB;
 
     std::random_device dev;
     std::mt19937 rng;
