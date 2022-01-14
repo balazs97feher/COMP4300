@@ -1,3 +1,4 @@
+assets/
 Texture megaman_standing textures/megaman_standing.png
 Texture megaman_running textures/megaman_running.png
 Texture dirt_tile textures/dirt_tile.png
@@ -6,4 +7,5 @@ Animation megaman_stand megaman_standing 1 0
 Animation megaman_run megaman_running 4 30
 Animation dirt_tile dirt_tile 1 0
 Animation grass_tile grass_tile 1 0
+Sound jump sounds/jump.wav
 Font ayar fonts/ayar.ttf
