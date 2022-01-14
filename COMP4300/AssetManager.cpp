@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include "AssetManager.h"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -23,8 +24,8 @@ void AssetManager::loadAssets()
     std::ifstream assets{ assetFile };
     if (!assets.is_open()) exit(-1);
 
-    string assetType, assetName, assetPath;
-    int frameCount;
+    string assetType, assetName, assetPath, textureName;
+    int startFrame, frameCount, speed;
     assets >> assetType;
     while (!assets.eof())
     {
@@ -32,6 +33,11 @@ void AssetManager::loadAssets()
         {
             assets >> assetName >> assetPath >> frameCount;
             addTexture(assetName, assetPath, frameCount);
+        }
+        if (assetType == "Animation")
+        {
+            assets >> assetName >> textureName >> startFrame >> frameCount >> speed;
+            addAnimation(assetName, textureName, startFrame, frameCount, speed);
         }
         else if (assetType == "Sound")
         {
@@ -53,6 +59,11 @@ void AssetManager::addTexture(const std::string& name, const std::string& path, 
     mTextures[name] = TextureSheet{};
     if (!mTextures[name].texture.loadFromFile(mPathToAssets + path)) exit(-1);
     mTextures[name].frameCount = frameCount;
+}
+
+void AssetManager::addAnimation(const std::string& name, const std::string& textureName, const int startFrame, const int frameCount, const int speed)
+{
+    mAnimations.emplace(name, Animation(getTexture(textureName), startFrame, frameCount, speed));
 }
 
 void AssetManager::addSound(const std::string& name, const std::string& path)
@@ -80,6 +91,19 @@ TextureSheet& AssetManager::getTexture(const std::string& name)
     catch (const std::out_of_range&)
     {
         cerr << "Texture " << name << " does not exist." << endl;
+        exit(-1);
+    }
+}
+
+Animation& AssetManager::getAnimation(const std::string& name)
+{
+    try
+    {
+        return mAnimations.at(name);
+    }
+    catch (const std::out_of_range&)
+    {
+        cerr << "Animation " << name << " does not exist." << endl;
         exit(-1);
     }
 }
