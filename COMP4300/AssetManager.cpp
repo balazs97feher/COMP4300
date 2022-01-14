@@ -24,13 +24,14 @@ void AssetManager::loadAssets()
     if (!assets.is_open()) exit(-1);
 
     string assetType, assetName, assetPath;
+    int frameCount;
     assets >> assetType;
     while (!assets.eof())
     {
         if (assetType == "Texture")
         {
-            assets >> assetName >> assetPath;
-            addTexture(assetName, assetPath);
+            assets >> assetName >> assetPath >> frameCount;
+            addTexture(assetName, assetPath, frameCount);
         }
         else if (assetType == "Sound")
         {
@@ -47,10 +48,11 @@ void AssetManager::loadAssets()
     }
 }
 
-void AssetManager::addTexture(const std::string& name, const std::string& path)
+void AssetManager::addTexture(const std::string& name, const std::string& path, const int frameCount)
 {
-    mTextures[name] = sf::Texture{};
-    if (!mTextures[name].loadFromFile(mPathToAssets + path)) exit(-1);
+    mTextures[name] = TextureSheet{};
+    if (!mTextures[name].texture.loadFromFile(mPathToAssets + path)) exit(-1);
+    mTextures[name].frameCount = frameCount;
 }
 
 void AssetManager::addSound(const std::string& name, const std::string& path)
@@ -69,7 +71,7 @@ void AssetManager::addFont(const std::string& name, const std::string& path)
     if (!mFonts[name].loadFromFile(mPathToAssets + path)) exit(-1);
 }
 
-sf::Texture& AssetManager::getTexture(const std::string& name)
+TextureSheet& AssetManager::getTexture(const std::string& name)
 {
     try
     {
