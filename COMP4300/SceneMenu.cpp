@@ -44,6 +44,8 @@ void SceneMenu::update()
 {
     for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
     mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
+
+    mCurrentFrame++;
 }
 
 void SceneMenu::sDoAction(const Action action)

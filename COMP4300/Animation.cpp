@@ -33,8 +33,3 @@ sf::Vector2u Animation::getSize() const
 {
     return mSize;
 }
-
-void Animation::flipHorizontally()
-{
-    mSprite.setScale(-1.0f, 1.0f);
-}
