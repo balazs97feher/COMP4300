@@ -27,7 +27,7 @@ private:
     const sf::Vector2u mSize;
     const uint8_t mStartFrame;
     const uint8_t mFrameCount;
-    uint8_t mCurrentFrame;
+    uint32_t mCurrentFrame;
     uint8_t mSpeed;
 };
 
