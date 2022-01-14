@@ -19,6 +19,11 @@ bool Animation::hasEnded() const
     return mCurrentFrame == 0;
 }
 
+sf::Sprite& Animation::getSprite()
+{
+    return mSprite;
+}
+
 sf::Vector2u Animation::getSize() const
 {
     return mSize;

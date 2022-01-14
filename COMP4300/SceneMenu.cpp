@@ -33,6 +33,11 @@ void SceneMenu::initialize()
         this->mEngine.createScene(SceneId::Play);
     };
     addItem("RESTART", restartGame);
+
+    auto goToAnimation = [this]() {
+        this->mEngine.changeScene(SceneId::Animation);
+    };
+    addItem("ANIMATION PLAYGROUND", goToAnimation);
 }
 
 void SceneMenu::update()

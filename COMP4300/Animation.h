@@ -18,6 +18,7 @@ public:
 
     void update();
     bool hasEnded() const;
+    sf::Sprite& getSprite();
     sf::Vector2u getSize() const;
     void flipHorizontally();
 
