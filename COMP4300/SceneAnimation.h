@@ -16,5 +16,12 @@ public:
 
 private:
     AssetManager mAssetManager;
+    EntityManager mEntityManager;
+
+    std::shared_ptr<Entity> mPlayer;
+
+    void sMovement();
+    void sAnimation();
+    void spawnPlayer();
 };
 
