@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+#include "SceneAnimation.h"
 #include "SceneMenu.h"
 #include "ScenePlay.h"
 
@@ -8,6 +9,7 @@ GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Play}
 {
     mSceneMap[SceneId::Play] = std::make_unique<ScenePlay>(*this);
     mSceneMap[SceneId::Menu] = std::make_unique<SceneMenu>(*this);
+    mSceneMap[SceneId::Animation] = std::make_unique<SceneAnimation>(*this);
 
     mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "Shooter");
     mRenderWindow.setFramerateLimit(60);

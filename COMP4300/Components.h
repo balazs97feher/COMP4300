@@ -4,6 +4,8 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <string>
+
 class Component
 {
 public:
@@ -17,12 +19,22 @@ class CTransform : public Component
 {
 public:
     sf::Vector2f pos; // indicates the center of the entity
+    sf::Vector2f prevPos; // indicates the entity's position on the previous frame
     sf::Vector2f velocity;
     float angle;
 
     CTransform() = default;
     CTransform(const sf::Vector2f& p, const sf::Vector2f& v, const float a)
-        : pos{ p }, velocity{ v }, angle{ a } {}
+        : pos{ p }, prevPos{ p }, velocity{ v }, angle{ a } {}
+};
+
+class CAnimation : public Component
+{
+public:
+    std::string animation;
+
+    CAnimation() = default;
+    CAnimation(const std::string& a) : animation{ a } {}
 };
 
 class CShape : public Component
