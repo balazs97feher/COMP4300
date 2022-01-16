@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Physics.h"
 #include "Scene.h"
 
 #include <SFML/Graphics/Font.hpp>
@@ -42,6 +43,8 @@ private:
     std::unique_ptr<std::uniform_real_distribution<>> nextAngle;
 
     std::shared_ptr<Entity> mPlayer;
+
+    Physics mPhysics;
 
     void sMovement();
     void sLifespan();
