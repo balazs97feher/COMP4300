@@ -8,11 +8,12 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <numbers>
 
 namespace fs = std::filesystem;
 using namespace std;
 
-SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }, mBeam{sf::PrimitiveType::Lines, 2}
+SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }
 {
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
 
@@ -25,8 +26,7 @@ void SceneVision::initialize()
     mLightSource.setRadius(mRadius);
     mLightSource.setOrigin(mRadius / 2, mRadius / 2);
 
-    mBeamOrigin = { mEngine.windowSize().x / 2.0f, mEngine.windowSize().y / 2.0f };
-    mBeam[0] = sf::Vertex{ mBeamOrigin, sf::Color::Green };
+    maxBeamSize = sqrt(pow(mEngine.windowSize().x, 2) + pow(mEngine.windowSize().y, 2));
 
     const fs::path configFile{ "./config/config_vision.txt" };
     if (!fs::exists(configFile))
@@ -62,8 +62,8 @@ void SceneVision::update()
 {
     const auto mousePos = mEngine.mousePos();
     mLightSource.setPosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    mBeam[1] = sf::Vertex{ { static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)}, mBeamColor };
 
+    sBeamCast();
     sPhysics();
 }
 
@@ -82,35 +82,70 @@ void SceneVision::sDoAction(const Action action)
 void SceneVision::sRender()
 {
     for (const auto& shape : mShapes) mEngine.drawToWindow(shape);
+
     mEngine.drawToWindow(mLightSource);
-    mEngine.drawToWindow(mBeam);
+
+    for (const auto& beam : mBeams) mEngine.drawToWindow(beam);
+
+    sf::CircleShape dot;
+    dot.setRadius(2);
+    dot.setFillColor(sf::Color::Green);
+    for (const auto& intersection : mIntersections)
+    {
+        dot.setPosition(intersection);
+        mEngine.drawToWindow(dot);
+    }
+}
+
+void SceneVision::sBeamCast()
+{
+    constexpr int beamCount = 16;
+    mBeams.clear();
+
+    for (size_t i = 0; i < beamCount; i++) castBeam(i * 2 * numbers::pi / beamCount);
 }
 
 void SceneVision::sPhysics()
 {
-    vector<sf::Vector2f> intersections;
+    mIntersections.clear();
 
-    for (const auto& shape : mShapes)
+    for (auto& beam : mBeams)
     {
-        for (size_t i = 0; i < shape.getPointCount() - 1; i++)
+        vector<sf::Vector2f> intersections;
+
+        for (const auto& shape : mShapes)
         {
-            if (const auto intersect = Physics::lineSegmentsIntersect(mBeam[0].position, mBeam[1].position,
-                shape.getPoint(i), shape.getPoint(i + 1)))
+            for (size_t i = 0; i < shape.getPointCount() - 1; i++)
             {
-                intersections.push_back(intersect.value());
+                if (const auto intersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+                    shape.getPoint(i), shape.getPoint(i + 1)))
+                {
+                    intersections.push_back(intersect.value());
+                }
+            }
+            if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+                shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
+            {
+                intersections.push_back(loopAroundIntersect.value());
             }
         }
-        if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(mBeam[0].position, mBeam[1].position,
-            shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
-        {
-            intersections.push_back(loopAroundIntersect.value());
-        }
+
+        const auto sourcePos = mLightSource.getPosition();
+        sort(intersections.begin(), intersections.end(), [&sourcePos](const sf::Vector2f& i1, const sf::Vector2f& i2) {
+            return (pow(sourcePos.x - i1.x, 2) + pow(sourcePos.y - i1.y, 2)) < (pow(sourcePos.x - i2.x, 2) + pow(sourcePos.y - i2.y, 2));
+        });
+
+        if (!intersections.empty()) beam[1] = sf::Vertex{ intersections[0], mBeamColor };
+
+        mIntersections.insert(mIntersections.end(), intersections.begin(), intersections.end());
     }
-    if (intersections.empty()) return;
+}
 
-    sort(intersections.begin(), intersections.end(), [this](const sf::Vector2f& i1, const sf::Vector2f& i2) {
-        return (pow(mBeamOrigin.x - i1.x, 2) + pow(mBeamOrigin.y - i1.y, 2)) < (pow(mBeamOrigin.x - i2.x, 2) + pow(mBeamOrigin.y - i2.y, 2));
-    });
+void SceneVision::castBeam(const float angle)
+{
+    auto& beam = mBeams.emplace_back(sf::PrimitiveType::Lines, 2);
 
-    mBeam[1] = sf::Vertex{ intersections[0], mBeamColor };
+    const auto sourcePos = mLightSource.getPosition();
+    beam[0] = sf::Vertex{ sourcePos, mBeamColor };
+    beam[1] = sf::Vertex{ {sourcePos.x + maxBeamSize * cos(angle), sourcePos.y + maxBeamSize * sin(angle)}, mBeamColor };
 }

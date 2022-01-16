@@ -18,16 +18,20 @@ public:
     virtual void update() override;
     virtual void sDoAction(const Action action) override;
     virtual void sRender() override;
-    
-    void sPhysics();
 
 private:
     const float mRadius = 5;
     sf::CircleShape mLightSource;
     std::vector<sf::ConvexShape> mShapes;
 
+    float maxBeamSize;
+    std::vector<sf::VertexArray> mBeams;
     const sf::Color mBeamColor = sf::Color::Green;
-    sf::Vector2f mBeamOrigin;
-    sf::VertexArray mBeam;
+    std::vector<sf::Vector2f> mIntersections;
+    
+    void sBeamCast();
+    void sPhysics();
+
+    void castBeam(const float angle);
 };
 
