@@ -98,9 +98,11 @@ void SceneVision::sBeamCast()
     {
         for (size_t i = 0; i < shape.getPointCount(); i++)
         {
-            auto& beam = mBeams.emplace_back(sf::PrimitiveType::Lines, 2);
-            beam[0] = sf::Vertex{ sourcePos, mBeamColor };
-            beam[1] = sf::Vertex{ shape.getPoint(i), mBeamColor };
+            const sf::Vector2f vecToVertex{ shape.getPoint(i) - sourcePos };
+            constexpr float delta = numbers::pi / 10000;
+            const auto angle = atan2(vecToVertex.y, vecToVertex.x);
+            castBeam(angle - delta);
+            castBeam(angle + delta);
         }
     }
 }
@@ -108,7 +110,6 @@ void SceneVision::sBeamCast()
 void SceneVision::sPhysics()
 {
     mIntersections.clear();
-    vector<sf::VertexArray> unblockedBeams;
 
     for (size_t beamIdx = 0; beamIdx < mBeams.size(); beamIdx++)
     {
@@ -138,10 +139,8 @@ void SceneVision::sPhysics()
             return (pow(sourcePos.x - i1.x, 2) + pow(sourcePos.y - i1.y, 2)) < (pow(sourcePos.x - i2.x, 2) + pow(sourcePos.y - i2.y, 2));
         });
 
-        if (intersections.size() == 1) unblockedBeams.push_back(std::move(mBeams[beamIdx]));
+        if (!intersections.empty()) mBeams[beamIdx][1] = sf::Vertex{ intersections[0], mBeamColor };
     }
-
-    mBeams = unblockedBeams;
 }
 
 void SceneVision::castBeam(const float angle)
