@@ -3,6 +3,9 @@
 #include "Scene.h"
 
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/ConvexShape.hpp>
+
+#include <vector>
 
 class SceneVision : public Scene
 {
@@ -18,5 +21,6 @@ public:
 private:
     const float mRadius = 5;
     sf::CircleShape mLightSource;
+    std::vector<sf::ConvexShape> mShapes;
 };
 

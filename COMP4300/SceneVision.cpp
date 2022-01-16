@@ -3,6 +3,13 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
+namespace fs = std::filesystem;
+using namespace std;
+
 SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }
 {
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
@@ -15,6 +22,35 @@ void SceneVision::initialize()
     mLightSource.setFillColor({ 255, 255, 255 });
     mLightSource.setRadius(mRadius);
     mLightSource.setOrigin(mRadius / 2, mRadius / 2);
+
+    const fs::path configFile{ "./config/config_vision.txt" };
+    if (!fs::exists(configFile))
+    {
+        cerr << "Configuration file " << configFile.string() << " does not exit." << endl;
+        exit(-1);
+    }
+
+    std::ifstream configuration{ configFile };
+    if (!configuration.is_open())
+    {
+        cerr << "Failed to open configuration file." << endl;
+        exit(-1);
+    }
+
+    int pointCount;
+    while (!configuration.eof())
+    {
+        configuration >> pointCount;
+        vector<float> pointCoords(pointCount * 2);
+        for (auto& coord : pointCoords) configuration >> coord;
+
+        auto& newShape = mShapes.emplace_back(pointCount);
+        for (size_t i = 0; i < pointCount; i++)
+        {
+            newShape.setPoint(i, { pointCoords[i * 2], pointCoords[i * 2 + 1] });
+        }
+        newShape.setFillColor(sf::Color::Red);
+    }
 }
 
 void SceneVision::update()
@@ -37,5 +73,6 @@ void SceneVision::sDoAction(const Action action)
 
 void SceneVision::sRender()
 {
+    for (const auto& shape : mShapes) mEngine.drawToWindow(shape);
     mEngine.drawToWindow(mLightSource);
 }
