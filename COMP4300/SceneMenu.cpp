@@ -38,6 +38,11 @@ void SceneMenu::initialize()
         this->mEngine.changeScene(SceneId::Animation);
     };
     addItem("ANIMATION PLAYGROUND", goToAnimation);
+
+    auto goToVision = [this]() {
+        this->mEngine.changeScene(SceneId::Vision);
+    };
+    addItem("VISION", goToVision);
 }
 
 void SceneMenu::update()

@@ -13,7 +13,8 @@ enum class SceneId
 {
     Menu,
     Play,
-    Animation
+    Animation,
+    Vision
 };
 
 class Scene
