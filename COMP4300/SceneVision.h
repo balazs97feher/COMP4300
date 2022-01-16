@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/ConvexShape.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
 #include <vector>
 
@@ -22,5 +23,6 @@ private:
     const float mRadius = 5;
     sf::CircleShape mLightSource;
     std::vector<sf::ConvexShape> mShapes;
+    sf::VertexArray mBeam;
 };
 

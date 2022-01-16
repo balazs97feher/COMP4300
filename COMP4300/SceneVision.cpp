@@ -10,7 +10,7 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }
+SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }, mBeam{sf::PrimitiveType::Lines, 2}
 {
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
 
@@ -19,9 +19,11 @@ SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }
 
 void SceneVision::initialize()
 {
-    mLightSource.setFillColor({ 255, 255, 255 });
+    mLightSource.setFillColor(sf::Color::Green);
     mLightSource.setRadius(mRadius);
     mLightSource.setOrigin(mRadius / 2, mRadius / 2);
+
+    mBeam[0] = sf::Vertex{ { mEngine.windowSize().x / 2.0f, mEngine.windowSize().y / 2.0f }, sf::Color::Green };
 
     const fs::path configFile{ "./config/config_vision.txt" };
     if (!fs::exists(configFile))
@@ -57,6 +59,7 @@ void SceneVision::update()
 {
     const auto mousePos = mEngine.mousePos();
     mLightSource.setPosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+    mBeam[1] = sf::Vertex{ { static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)}, sf::Color::Green };
 }
 
 void SceneVision::sDoAction(const Action action)
@@ -75,4 +78,5 @@ void SceneVision::sRender()
 {
     for (const auto& shape : mShapes) mEngine.drawToWindow(shape);
     mEngine.drawToWindow(mLightSource);
+    mEngine.drawToWindow(mBeam);
 }
