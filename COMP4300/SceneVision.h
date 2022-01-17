@@ -32,6 +32,9 @@ private:
     void sBeamCast();
     void sPhysics();
 
+    void castBeamsToAllVertices();
+    void filterBlockedBeams();
+    void castBeam(const sf::Vector2f& start, const sf::Vector2f& end);
     void castBeam(const float angle);
 };
 
