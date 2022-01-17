@@ -26,14 +26,17 @@ private:
 
     float maxBeamSize;
     std::vector<sf::VertexArray> mBeams;
-    const sf::Color mBeamColor = sf::Color::Green;
+    const sf::Color mBeamColor = sf::Color::White;
     std::vector<sf::Vector2f> mIntersections;
     
     void sBeamCast();
-    void sPhysics();
 
     void castBeamsToAllVertices();
     void filterBlockedBeams();
+    void castBeamPairsAroundVertices();
+    void blockBeams();
+    void sortBeamsRadially();
+
     void castBeam(const sf::Vector2f& start, const sf::Vector2f& end);
     void castBeam(const float angle);
 };
