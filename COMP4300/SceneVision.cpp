@@ -140,24 +140,7 @@ void SceneVision::filterBlockedBeams()
 
     for (size_t beamIdx = 0; beamIdx < mBeams.size(); beamIdx++)
     {
-        vector<sf::Vector2f> intersections;
-
-        for (const auto& shape : mShapes)
-        {
-            for (size_t i = 0; i < shape.getPointCount() - 1; i++)
-            {
-                if (const auto intersect = Physics::lineSegmentsIntersect(mBeams[beamIdx][0].position, mBeams[beamIdx][1].position,
-                    shape.getPoint(i), shape.getPoint(i + 1)))
-                {
-                    intersections.push_back(intersect.value());
-                }
-            }
-            if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(mBeams[beamIdx][0].position, mBeams[beamIdx][1].position,
-                shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
-            {
-                intersections.push_back(loopAroundIntersect.value());
-            }
-        }
+        auto intersections = beamIntersectsShapes(mBeams[beamIdx]);
 
         intersections.erase(unique(intersections.begin(), intersections.end()), intersections.end());
 
@@ -186,24 +169,7 @@ void SceneVision::blockBeams()
 {
     for (size_t beamIdx = 0; beamIdx < mBeams.size(); beamIdx++)
     {
-        vector<sf::Vector2f> intersections;
-
-        for (const auto& shape : mShapes)
-        {
-            for (size_t i = 0; i < shape.getPointCount() - 1; i++)
-            {
-                if (const auto intersect = Physics::lineSegmentsIntersect(mBeams[beamIdx][0].position, mBeams[beamIdx][1].position,
-                    shape.getPoint(i), shape.getPoint(i + 1)))
-                {
-                    intersections.push_back(intersect.value());
-                }
-            }
-            if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(mBeams[beamIdx][0].position, mBeams[beamIdx][1].position,
-                shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
-            {
-                intersections.push_back(loopAroundIntersect.value());
-            }
-        }
+        auto intersections = beamIntersectsShapes(mBeams[beamIdx]);
 
         intersections.erase(unique(intersections.begin(), intersections.end()), intersections.end());
 
@@ -223,6 +189,30 @@ void SceneVision::sortBeamsRadially()
         const auto beamVec2 = b2[1].position - b2[0].position;
         return atan2(beamVec1.y, beamVec1.x) < atan2(beamVec2.y, beamVec2.x);
     });
+}
+
+std::vector<sf::Vector2f> SceneVision::beamIntersectsShapes(const sf::VertexArray& beam)
+{
+    vector<sf::Vector2f> intersections;
+
+    for (const auto& shape : mShapes)
+    {
+        for (size_t i = 0; i < shape.getPointCount() - 1; i++)
+        {
+            if (const auto intersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+                shape.getPoint(i), shape.getPoint(i + 1)))
+            {
+                intersections.push_back(intersect.value());
+            }
+        }
+        if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+            shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
+        {
+            intersections.push_back(loopAroundIntersect.value());
+        }
+    }
+
+    return intersections;
 }
 
 void SceneVision::castBeam(const sf::Vector2f& start, const sf::Vector2f& end)

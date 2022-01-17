@@ -36,6 +36,7 @@ private:
     void castBeamPairsAroundVertices();
     void blockBeams();
     void sortBeamsRadially();
+    std::vector<sf::Vector2f> beamIntersectsShapes(const sf::VertexArray& beam);
 
     void castBeam(const sf::Vector2f& start, const sf::Vector2f& end);
     void castBeam(const float angle);
