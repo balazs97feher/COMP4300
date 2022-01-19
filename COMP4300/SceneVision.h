@@ -24,21 +24,21 @@ private:
     sf::CircleShape mLightSource;
     std::vector<sf::ConvexShape> mShapes;
 
-    float maxBeamSize;
-    std::vector<sf::VertexArray> mBeams;
-    const sf::Color mBeamColor = sf::Color::White;
+    float maxRaySize;
+    std::vector<sf::VertexArray> mRays;
+    const sf::Color mRayColor = sf::Color::White;
     std::vector<sf::Vector2f> mIntersections;
     
-    void sBeamCast();
+    void sRayCast();
 
-    void castBeamsToAllVertices();
-    void filterBlockedBeams();
-    void castBeamPairsAroundVertices();
-    void blockBeams();
-    void sortBeamsRadially();
-    std::vector<sf::Vector2f> beamIntersectsShapes(const sf::VertexArray& beam);
+    void castRaysToAllVertices();
+    void filterBlockedRays();
+    void castRayPairsAroundVertices();
+    void blockRays();
+    void sortRaysRadially();
+    std::vector<sf::Vector2f> rayIntersectsShapes(const sf::VertexArray& ray);
 
-    void castBeam(const sf::Vector2f& start, const sf::Vector2f& end);
-    void castBeam(const float angle);
+    void castRay(const sf::Vector2f& start, const sf::Vector2f& end);
+    void castRay(const float angle);
 };
 

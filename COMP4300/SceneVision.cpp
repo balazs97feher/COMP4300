@@ -26,7 +26,7 @@ void SceneVision::initialize()
     mLightSource.setRadius(mRadius);
     mLightSource.setOrigin(mRadius / 2, mRadius / 2);
 
-    maxBeamSize = sqrt(pow(mEngine.windowSize().x, 2) + pow(mEngine.windowSize().y, 2));
+    maxRaySize = sqrt(pow(mEngine.windowSize().x, 2) + pow(mEngine.windowSize().y, 2));
 
     const fs::path configFile{ "./config/config_vision.txt" };
     if (!fs::exists(configFile))
@@ -71,7 +71,7 @@ void SceneVision::update()
     const auto mousePos = mEngine.mousePos();
     mLightSource.setPosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
-    sBeamCast();
+    sRayCast();
 }
 
 void SceneVision::sDoAction(const Action action)
@@ -91,85 +91,85 @@ void SceneVision::sRender()
     for (const auto& shape : mShapes) mEngine.drawToWindow(shape);
 
     sf::ConvexShape lightTriangle{ 3 };
-    lightTriangle.setFillColor(mBeamColor);
+    lightTriangle.setFillColor(mRayColor);
     lightTriangle.setPoint(0, mLightSource.getPosition());
-    for (size_t beamIdx = 0; beamIdx < mBeams.size() - 1; beamIdx++)
+    for (size_t beamIdx = 0; beamIdx < mRays.size() - 1; beamIdx++)
     {
-        lightTriangle.setPoint(1, mBeams[beamIdx][1].position);
-        lightTriangle.setPoint(2, mBeams[beamIdx + 1][1].position);
+        lightTriangle.setPoint(1, mRays[beamIdx][1].position);
+        lightTriangle.setPoint(2, mRays[beamIdx + 1][1].position);
         mEngine.drawToWindow(lightTriangle);
     }
 
-    lightTriangle.setPoint(1, mBeams[mBeams.size() - 1][1].position);
-    lightTriangle.setPoint(2, mBeams[0][1].position);
+    lightTriangle.setPoint(1, mRays[mRays.size() - 1][1].position);
+    lightTriangle.setPoint(2, mRays[0][1].position);
     mEngine.drawToWindow(lightTriangle);
 
     mEngine.drawToWindow(mLightSource);
 }
 
-void SceneVision::sBeamCast()
+void SceneVision::sRayCast()
 {
-    mBeams.clear();
+    mRays.clear();
 
-    castBeamsToAllVertices();
-    filterBlockedBeams();
-    castBeamPairsAroundVertices();
-    blockBeams();
-    sortBeamsRadially();
+    castRaysToAllVertices();
+    filterBlockedRays();
+    castRayPairsAroundVertices();
+    blockRays();
+    sortRaysRadially();
 }
 
-void SceneVision::castBeamsToAllVertices()
+void SceneVision::castRaysToAllVertices()
 {
     const auto sourcePos = mLightSource.getPosition();
 
     for (const auto& shape : mShapes)
     {
-        for (size_t i = 0; i < shape.getPointCount(); i++) castBeam(sourcePos, shape.getPoint(i));
+        for (size_t i = 0; i < shape.getPointCount(); i++) castRay(sourcePos, shape.getPoint(i));
 
         const sf::Vector2f windowSize{ static_cast<float>(mEngine.windowSize().x), static_cast<float>(mEngine.windowSize().y) };
-        castBeam(sourcePos, { 0, 0 });
-        castBeam(sourcePos, { 0, windowSize.x });
-        castBeam(sourcePos, { 0, windowSize.y });
-        castBeam(sourcePos, { windowSize.x, windowSize.y });
+        castRay(sourcePos, { 0, 0 });
+        castRay(sourcePos, { 0, windowSize.x });
+        castRay(sourcePos, { 0, windowSize.y });
+        castRay(sourcePos, { windowSize.x, windowSize.y });
     }
 }
 
-void SceneVision::filterBlockedBeams()
+void SceneVision::filterBlockedRays()
 {
     vector<sf::VertexArray> unblockedBeams;
 
-    for (size_t beamIdx = 0; beamIdx < mBeams.size(); beamIdx++)
+    for (size_t beamIdx = 0; beamIdx < mRays.size(); beamIdx++)
     {
-        auto intersections = beamIntersectsShapes(mBeams[beamIdx]);
+        auto intersections = rayIntersectsShapes(mRays[beamIdx]);
 
         intersections.erase(unique(intersections.begin(), intersections.end()), intersections.end());
 
-        if (intersections.size() == 1) unblockedBeams.push_back(move(mBeams[beamIdx]));
+        if (intersections.size() == 1) unblockedBeams.push_back(move(mRays[beamIdx]));
     }
 
-    mBeams = unblockedBeams;
+    mRays = unblockedBeams;
 }
 
-void SceneVision::castBeamPairsAroundVertices()
+void SceneVision::castRayPairsAroundVertices()
 {
-    const auto beamsToVisibleVertices{ move(mBeams) };
-    mBeams.clear();
+    const auto beamsToVisibleVertices{ move(mRays) };
+    mRays.clear();
 
     constexpr float delta = numbers::pi / 10000;
     for (const auto& beam : beamsToVisibleVertices)
     {
         const auto beamVec = beam[1].position - beam[0].position;
         const auto angle = atan2(beamVec.y, beamVec.x);
-        castBeam(angle - delta);
-        castBeam(angle + delta);
+        castRay(angle - delta);
+        castRay(angle + delta);
     }
 }
 
-void SceneVision::blockBeams()
+void SceneVision::blockRays()
 {
-    for (size_t beamIdx = 0; beamIdx < mBeams.size(); beamIdx++)
+    for (size_t beamIdx = 0; beamIdx < mRays.size(); beamIdx++)
     {
-        auto intersections = beamIntersectsShapes(mBeams[beamIdx]);
+        auto intersections = rayIntersectsShapes(mRays[beamIdx]);
 
         intersections.erase(unique(intersections.begin(), intersections.end()), intersections.end());
 
@@ -178,20 +178,20 @@ void SceneVision::blockBeams()
             return (pow(sourcePos.x - i1.x, 2) + pow(sourcePos.y - i1.y, 2)) < (pow(sourcePos.x - i2.x, 2) + pow(sourcePos.y - i2.y, 2));
         });
 
-        if (!intersections.empty()) mBeams[beamIdx][1] = sf::Vertex{ intersections[0], mBeamColor };
+        if (!intersections.empty()) mRays[beamIdx][1] = sf::Vertex{ intersections[0], mRayColor };
     }
 }
 
-void SceneVision::sortBeamsRadially()
+void SceneVision::sortRaysRadially()
 {
-    sort(mBeams.begin(), mBeams.end(), [](const sf::VertexArray& b1, const sf::VertexArray& b2) {
+    sort(mRays.begin(), mRays.end(), [](const sf::VertexArray& b1, const sf::VertexArray& b2) {
         const auto beamVec1 = b1[1].position - b1[0].position;
         const auto beamVec2 = b2[1].position - b2[0].position;
         return atan2(beamVec1.y, beamVec1.x) < atan2(beamVec2.y, beamVec2.x);
     });
 }
 
-std::vector<sf::Vector2f> SceneVision::beamIntersectsShapes(const sf::VertexArray& beam)
+std::vector<sf::Vector2f> SceneVision::rayIntersectsShapes(const sf::VertexArray& beam)
 {
     vector<sf::Vector2f> intersections;
 
@@ -215,16 +215,16 @@ std::vector<sf::Vector2f> SceneVision::beamIntersectsShapes(const sf::VertexArra
     return intersections;
 }
 
-void SceneVision::castBeam(const sf::Vector2f& start, const sf::Vector2f& end)
+void SceneVision::castRay(const sf::Vector2f& start, const sf::Vector2f& end)
 {
-    auto& beam = mBeams.emplace_back(sf::PrimitiveType::Lines, 2);
+    auto& beam = mRays.emplace_back(sf::PrimitiveType::Lines, 2);
 
-    beam[0] = sf::Vertex{ start, mBeamColor };
-    beam[1] = sf::Vertex{ end, mBeamColor };
+    beam[0] = sf::Vertex{ start, mRayColor };
+    beam[1] = sf::Vertex{ end, mRayColor };
 }
 
-void SceneVision::castBeam(const float angle)
+void SceneVision::castRay(const float angle)
 {
     const auto sourcePos = mLightSource.getPosition();
-    castBeam(sourcePos, { sourcePos.x + maxBeamSize * cos(angle), sourcePos.y + maxBeamSize * sin(angle) });
+    castRay(sourcePos, { sourcePos.x + maxRaySize * cos(angle), sourcePos.y + maxRaySize * sin(angle) });
 }
