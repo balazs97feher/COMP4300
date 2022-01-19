@@ -13,7 +13,7 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-ScenePlay::ScenePlay(GameEngine& engine) : Scene{engine}, mDrawBB{false}
+ScenePlay::ScenePlay(GameEngine& engine) : Scene{ engine }, mDrawBB{ false }
 {
     registerAction(sf::Keyboard::W, ActionType::MoveUp);
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
@@ -116,32 +116,32 @@ void ScenePlay::sDoAction(const Action action)
     auto newVelocity = mPlayer->getComponent<CTransform>().velocity;
     switch (action.getType())
     {
-        case ActionType::Quit:
-            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
-            return;
-        case ActionType::ToggleBBDraw:
-            if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
-            return;
-        case ActionType::MoveUp:
-            if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
-            else newVelocity.y =  (newVelocity.y == 0) ? 0 : min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
-            break;
-        case ActionType::MoveLeft:
-            if (action.getEventType() == InputEventType::Pressed) newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
-            else newVelocity.x = (newVelocity.x == 0) ? 0 : min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
-            break;
-        case ActionType::MoveDown:
-            if (action.getEventType() == InputEventType::Pressed) newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
-            else newVelocity.y = (newVelocity.y == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
-            break;
-        case ActionType::MoveRight:
-            if (action.getEventType() == InputEventType::Pressed) newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
-            else newVelocity.x = (newVelocity.x == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
-            break;
-        case ActionType::Shoot:
-            spawnBullet(mPlayer, mEngine.mousePos());
-        default:
-            break;
+    case ActionType::Quit:
+        if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
+        return;
+    case ActionType::ToggleBBDraw:
+        if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
+        return;
+    case ActionType::MoveUp:
+        if (action.getEventType() == InputEventType::Pressed) newVelocity.y = max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
+        else newVelocity.y = (newVelocity.y == 0) ? 0 : min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
+        break;
+    case ActionType::MoveLeft:
+        if (action.getEventType() == InputEventType::Pressed) newVelocity.x = max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
+        else newVelocity.x = (newVelocity.x == 0) ? 0 : min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
+        break;
+    case ActionType::MoveDown:
+        if (action.getEventType() == InputEventType::Pressed) newVelocity.y = min(mPlayerCfg.S, newVelocity.y + mPlayerCfg.S);
+        else newVelocity.y = (newVelocity.y == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.y - mPlayerCfg.S);
+        break;
+    case ActionType::MoveRight:
+        if (action.getEventType() == InputEventType::Pressed) newVelocity.x = min(mPlayerCfg.S, newVelocity.x + mPlayerCfg.S);
+        else newVelocity.x = (newVelocity.x == 0) ? 0 : max(-mPlayerCfg.S, newVelocity.x - mPlayerCfg.S);
+        break;
+    case ActionType::Shoot:
+        spawnBullet(mPlayer, mEngine.mousePos());
+    default:
+        break;
     }
 
     mPlayer->getComponent<CTransform>().velocity = newVelocity;
@@ -229,7 +229,8 @@ void ScenePlay::sCollision()
         for (auto& other : mEntityManager.getEntities())
         {
             if (((one->tag() == EntityTag::Enemy) || (one->tag() == EntityTag::SmallEnemy)) && (other->tag() == EntityTag::Bullet)
-                && collide(one, other))
+                && mPhysics.boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
+                    other->getComponent<CTransform>().pos, other->getComponent<CBoundingBox>().halfSize))
             {
                 mScore += one->getComponent<CScore>().score;
                 one->destroy();
@@ -237,7 +238,8 @@ void ScenePlay::sCollision()
                 if (one->tag() == EntityTag::Enemy) spawnSmallEnemies(one);
             }
 
-            if ((one->tag() == EntityTag::Player) && (other->tag() == EntityTag::Enemy) && collide(one, other))
+            if ((one->tag() == EntityTag::Player) && (other->tag() == EntityTag::Enemy) && mPhysics.boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
+                other->getComponent<CTransform>().pos, other->getComponent<CBoundingBox>().halfSize))
             {
                 one->destroy();
                 other->destroy();
