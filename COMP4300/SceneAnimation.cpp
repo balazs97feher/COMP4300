@@ -4,8 +4,10 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
-SceneAnimation::SceneAnimation(GameEngine& engine) : Scene{engine}, mAssetManager{ "./config/" }
+SceneAnimation::SceneAnimation(goldenhand::GameEngine& engine) : Scene{engine}, mAssetManager{ "./config/" }
 {
+    using namespace goldenhand;
+
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
@@ -34,12 +36,14 @@ void SceneAnimation::update()
     }
 }
 
-void SceneAnimation::sDoAction(const Action action)
+void SceneAnimation::sDoAction(const goldenhand::Action action)
 {
+    using namespace goldenhand;
+
     switch (action.getType())
     {
         case ActionType::Quit:
-            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
+            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(goldenhand::SceneId::Menu);
             return;
         case ActionType::MoveLeft:
             if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ -5, 0 };
@@ -91,7 +95,7 @@ void SceneAnimation::sAnimation()
 
 void SceneAnimation::spawnPlayer()
 {
-    mPlayer = mEntityManager.addEntity(EntityTag::Player);
+    mPlayer = mEntityManager.addEntity(AnimationEntityTag::Player);
 
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);

@@ -6,16 +6,20 @@
 
 #include <string>
 
-class Component
+namespace goldenhand
 {
-public:
-    Component() : has{ false } {}
-    ~Component() = default;
+    class Component
+    {
+    public:
+        Component() : has{ false } {}
+        ~Component() = default;
 
-    bool has;
-};
+        bool has;
+    };
+} // namespace goldenhand
 
-class CTransform : public Component
+
+class CTransform : public goldenhand::Component
 {
 public:
     sf::Vector2f pos; // indicates the center of the entity
@@ -28,7 +32,7 @@ public:
         : pos{ p }, prevPos{ p }, velocity{ v }, angle{ a } {}
 };
 
-class CAnimation : public Component
+class CAnimation : public goldenhand::Component
 {
 public:
     std::string animation;
@@ -37,7 +41,7 @@ public:
     CAnimation(const std::string& a) : animation{ a } {}
 };
 
-class CShape : public Component
+class CShape : public goldenhand::Component
 {
 public:
     sf::CircleShape circle;
@@ -53,7 +57,7 @@ public:
     }
 };
 
-class CBoundingBox : public Component
+class CBoundingBox : public goldenhand::Component
 {
 public:
     sf::Vector2f size;
@@ -70,7 +74,7 @@ public:
     }
 };
 
-class CScore : public Component
+class CScore : public goldenhand::Component
 {
 public:
     int score;
@@ -79,7 +83,7 @@ public:
     CScore(const int s) : score(s) {}
 };
 
-class CLifeSpan : public Component
+class CLifeSpan : public goldenhand::Component
 {
 public:
     int total;

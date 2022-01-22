@@ -8,15 +8,15 @@
 #include <functional>
 #include <vector>
 
-class SceneMenu : public Scene
+class SceneMenu : public goldenhand::Scene
 {
 public:
-    SceneMenu(GameEngine& engine);
+    SceneMenu(goldenhand::GameEngine& engine);
 
     virtual void initialize() override;
 
     virtual void update() override;
-    virtual void sDoAction(const Action action) override;
+    virtual void sDoAction(const goldenhand::Action action) override;
     virtual void sRender() override;
 
 private:
@@ -41,4 +41,3 @@ private:
 
     void addItem(const std::string& text, std::function<void(void)> action);
 };
-
