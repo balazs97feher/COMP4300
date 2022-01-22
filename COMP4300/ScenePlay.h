@@ -14,11 +14,10 @@ struct PlayerConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; }
 struct EnemyConfig { uint32_t SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
 struct BulletConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
 
-typedef std::tuple<CTransform, CShape, CBoundingBox, CScore, CLifeSpan, CAnimation> ComponentTuple;
+typedef std::tuple<CTransform, CShape, CBoundingBox, CScore, CLifeSpan> ComponentTuple;
 
 enum class ShooterEntityTag
 {
-    Default,
     Player,
     Enemy,
     SmallEnemy,

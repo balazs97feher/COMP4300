@@ -121,9 +121,9 @@ void ScenePlay::sDoAction(const goldenhand::Action action)
     auto newVelocity = mPlayer->getComponent<CTransform>().velocity;
     switch (action.getType())
     {
-    //case ActionType::Quit:
-    //    if (action.getEventType() == InputEventType::Released) mEngine.changeScene(goldenhand::SceneId::Menu);
-    //    return;
+    case ActionType::Quit:
+        if (action.getEventType() == InputEventType::Released) mEngine.changeScene(goldenhand::SceneId::Menu);
+        return;
     case ActionType::ToggleBBDraw:
         if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
         return;
