@@ -32,7 +32,7 @@ namespace goldenhand
 
         std::shared_ptr<Entity> addEntity(const EntityTag tag)
         {
-            auto newEntity = shared_ptr<Entity>(new Entity(tag, mTotalEntities++));
+            auto newEntity = std::shared_ptr<Entity>(new Entity(tag, mTotalEntities++));
             mToAdd.push_back(newEntity);
 
             return newEntity;
