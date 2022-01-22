@@ -1,34 +1,30 @@
 #pragma
 
-#include "Components.h"
-
 #include <memory>
 #include <string>
-#include <tuple>
-
-typedef std::tuple<CTransform, CShape, CBoundingBox, CScore, CLifeSpan, CAnimation> ComponentTuple;
 
 namespace goldenhand
 {
-    class EntityManager;
-    
-    enum class EntityTag
-    {
-        Default,
-        Player,
-        Enemy,
-        SmallEnemy,
-        Bullet,
-    };
-
+    template<typename EntityTag, typename ComponentTuple>
     class Entity
     {
-        friend class EntityManager;
+        template<typename EntityTag, typename ComponentTuple> friend class EntityManager;
 
     public:
-        const EntityTag tag() const;
-        bool isAlive() const;
-        void destroy();
+        const EntityTag tag() const
+        {
+            return mTag;
+        }
+
+        bool isAlive() const
+        {
+            return mAlive;
+        }
+
+        void destroy()
+        {
+            mAlive = false;
+        }
 
         template<typename T>
         T& getComponent()
@@ -58,7 +54,7 @@ namespace goldenhand
         }
 
     private:
-        Entity(const EntityTag tag, const size_t id);
+        Entity(const EntityTag tag, const size_t id) : mTag(tag), mId(id), mAlive(true) {}
 
         const EntityTag mTag;
         const size_t mId;

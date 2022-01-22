@@ -1,15 +1,29 @@
 #pragma once
 
+#include "Components.h"
+#include "EntityManager.h"
 #include "Scene.h"
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
 
 #include <random>
+#include <tuple>
 
 struct PlayerConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V; float S; };
 struct EnemyConfig { uint32_t SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI; float SMIN, SMAX; };
 struct BulletConfig { uint32_t SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L; float S; };
+
+typedef std::tuple<CTransform, CShape, CBoundingBox, CScore, CLifeSpan, CAnimation> ComponentTuple;
+
+enum class ShooterEntityTag
+{
+    Default,
+    Player,
+    Enemy,
+    SmallEnemy,
+    Bullet,
+};
 
 class ScenePlay : public goldenhand::Scene
 {
@@ -41,16 +55,19 @@ private:
     std::unique_ptr<std::uniform_real_distribution<>> nextEnemySpeed;
     std::unique_ptr<std::uniform_real_distribution<>> nextAngle;
 
-    std::shared_ptr<goldenhand::Entity> mPlayer;
+    typedef goldenhand::EntityManager<ShooterEntityTag, ComponentTuple> EntityManager;
+    typedef EntityManager::Entity Entity;
+    EntityManager mEntityManager;
+    std::shared_ptr<Entity> mPlayer;
 
     void sMovement();
     void sLifespan();
     void sEnemySpawner();
     void sCollision();
 
-    bool collide(const std::shared_ptr<goldenhand::Entity>& one, const std::shared_ptr<goldenhand::Entity>& other) const;
+    bool collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const;
     void spawnPlayer();
     void spawnEnemy();
-    void spawnSmallEnemies(const std::shared_ptr<goldenhand::Entity>& enemy);
-    void spawnBullet(const std::shared_ptr<goldenhand::Entity>& entity, const sf::Vector2i& mousePos);
+    void spawnSmallEnemies(const std::shared_ptr<Entity>& enemy);
+    void spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vector2i& mousePos);
 };

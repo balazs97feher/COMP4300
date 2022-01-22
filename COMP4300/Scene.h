@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Action.h"
-#include "EntityManager.h"
 
 #include <unordered_map>
 
@@ -35,11 +34,9 @@ namespace goldenhand
 
     protected:
         GameEngine& mEngine;
-        EntityManager mEntityManager;
         int mCurrentFrame;
         bool mPaused;
         bool mHasEnded;
         ActionMap mKbdActionMap;
-
     };
 } // namespace goldenhand

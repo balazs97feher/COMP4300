@@ -218,7 +218,7 @@ void ScenePlay::sCollision()
 
     for (auto& one : mEntityManager.getEntities())
     {
-        if (one->tag() == goldenhand::EntityTag::Enemy)
+        if (one->tag() == ShooterEntityTag::Enemy)
         {
             auto& oneTransform = one->getComponent<CTransform>();
             if ((oneTransform.pos.x <= mEnemyCfg.SR) || (oneTransform.pos.x + mEnemyCfg.SR >= mEngine.windowSize().x))
@@ -233,17 +233,17 @@ void ScenePlay::sCollision()
 
         for (auto& other : mEntityManager.getEntities())
         {
-            if (((one->tag() == goldenhand::EntityTag::Enemy) || (one->tag() == goldenhand::EntityTag::SmallEnemy)) && (other->tag() == goldenhand::EntityTag::Bullet)
+            if (((one->tag() == ShooterEntityTag::Enemy) || (one->tag() == ShooterEntityTag::SmallEnemy)) && (other->tag() == ShooterEntityTag::Bullet)
                 && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
                     other->getComponent<CTransform>().pos, other->getComponent<CBoundingBox>().halfSize))
             {
                 mScore += one->getComponent<CScore>().score;
                 one->destroy();
                 other->destroy();
-                if (one->tag() == goldenhand::EntityTag::Enemy) spawnSmallEnemies(one);
+                if (one->tag() == ShooterEntityTag::Enemy) spawnSmallEnemies(one);
             }
 
-            if ((one->tag() == goldenhand::EntityTag::Player) && (other->tag() == goldenhand::EntityTag::Enemy) && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
+            if ((one->tag() == ShooterEntityTag::Player) && (other->tag() == ShooterEntityTag::Enemy) && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
                 other->getComponent<CTransform>().pos, other->getComponent<CBoundingBox>().halfSize))
             {
                 one->destroy();
@@ -254,7 +254,7 @@ void ScenePlay::sCollision()
     }
 }
 
-bool ScenePlay::collide(const std::shared_ptr<goldenhand::Entity>& one, const std::shared_ptr<goldenhand::Entity>& other) const
+bool ScenePlay::collide(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other) const
 {
     const auto distVec = one->getComponent<CTransform>().pos - other->getComponent<CTransform>().pos;
     const auto dx = abs(distVec.x);
@@ -268,7 +268,7 @@ bool ScenePlay::collide(const std::shared_ptr<goldenhand::Entity>& one, const st
 
 void ScenePlay::spawnPlayer()
 {
-    mPlayer = mEntityManager.addEntity(goldenhand::EntityTag::Player);
+    mPlayer = mEntityManager.addEntity(ShooterEntityTag::Player);
 
     mPlayer->addComponent<CTransform>(sf::Vector2f(mEngine.windowSize().x / 2 - mPlayerCfg.SR, mEngine.windowSize().y / 2 - mPlayerCfg.SR),
         sf::Vector2f{ 0, 0 }, 0.0f);
@@ -282,7 +282,7 @@ void ScenePlay::spawnPlayer()
 
 void ScenePlay::spawnEnemy()
 {
-    auto enemy = mEntityManager.addEntity(goldenhand::EntityTag::Enemy);
+    auto enemy = mEntityManager.addEntity(ShooterEntityTag::Enemy);
 
     const auto posX = (*nextEnemyPosX)(rng);
     const auto posY = (*nextEnemyPosY)(rng);
@@ -302,14 +302,14 @@ void ScenePlay::spawnEnemy()
     enemy->addComponent<CScore>(vCount * 100);
 }
 
-void ScenePlay::spawnSmallEnemies(const std::shared_ptr<goldenhand::Entity>& enemy)
+void ScenePlay::spawnSmallEnemies(const std::shared_ptr<Entity>& enemy)
 {
     const auto pointCount = enemy->getComponent<CShape>().circle.getPointCount();
     const float speed = sqrt(pow(enemy->getComponent<CTransform>().velocity.y, 2.0f) + pow(enemy->getComponent<CTransform>().velocity.y, 2.0f));
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        const auto smallEnemy = mEntityManager.addEntity(goldenhand::EntityTag::SmallEnemy);
+        const auto smallEnemy = mEntityManager.addEntity(ShooterEntityTag::SmallEnemy);
 
         const float angle = i * (2 * numbers::pi) / pointCount;
         const auto velocity = sf::Vector2f{ sin(angle), cos(angle) } *speed;
@@ -326,12 +326,12 @@ void ScenePlay::spawnSmallEnemies(const std::shared_ptr<goldenhand::Entity>& ene
     }
 }
 
-void ScenePlay::spawnBullet(const std::shared_ptr<goldenhand::Entity>& entity, const sf::Vector2i& mousePos)
+void ScenePlay::spawnBullet(const std::shared_ptr<Entity>& entity, const sf::Vector2i& mousePos)
 {
     const auto dirVec = sf::Vector2f(mousePos.x, mousePos.y) - entity->getComponent<CTransform>().pos;
     const auto bulletVel = dirVec * (mBulletCfg.S / sqrtf(pow(dirVec.x, 2) + pow(dirVec.y, 2)));
 
-    auto bullet = mEntityManager.addEntity(goldenhand::EntityTag::Bullet);
+    auto bullet = mEntityManager.addEntity(ShooterEntityTag::Bullet);
 
     bullet->addComponent<CTransform>(entity->getComponent<CTransform>().pos, bulletVel, 0.0f);
 
