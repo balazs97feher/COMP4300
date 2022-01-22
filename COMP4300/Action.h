@@ -9,6 +9,8 @@ namespace goldenhand
         Released
     };
 
+
+    // todo: template Action on ActionType
     enum class ActionType
     {
         Default,
