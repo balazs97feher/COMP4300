@@ -13,9 +13,9 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-SceneVision::SceneVision(GameEngine& engine) : Scene{ engine }
+SceneVision::SceneVision(goldenhand::GameEngine& engine) : Scene{ engine }
 {
-    registerAction(sf::Keyboard::Escape, ActionType::Quit);
+    registerAction(sf::Keyboard::Escape, goldenhand::ActionType::Quit);
 
     initialize();
 }
@@ -74,12 +74,12 @@ void SceneVision::update()
     sRayCast();
 }
 
-void SceneVision::sDoAction(const Action action)
+void SceneVision::sDoAction(const goldenhand::Action action)
 {
     switch (action.getType())
     {
-        case ActionType::Quit:
-            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(SceneId::Menu);
+        case goldenhand::ActionType::Quit:
+            if (action.getEventType() == goldenhand::InputEventType::Released) mEngine.changeScene(goldenhand::SceneId::Menu);
             return;
         default:
             break;
@@ -199,13 +199,13 @@ std::vector<sf::Vector2f> SceneVision::rayIntersectsShapes(const sf::VertexArray
     {
         for (size_t i = 0; i < shape.getPointCount() - 1; i++)
         {
-            if (const auto intersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+            if (const auto intersect = goldenhand::Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
                 shape.getPoint(i), shape.getPoint(i + 1)))
             {
                 intersections.push_back(intersect.value());
             }
         }
-        if (const auto loopAroundIntersect = Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
+        if (const auto loopAroundIntersect = goldenhand::Physics::lineSegmentsIntersect(beam[0].position, beam[1].position,
             shape.getPoint(shape.getPointCount() - 1), shape.getPoint(0)))
         {
             intersections.push_back(loopAroundIntersect.value());

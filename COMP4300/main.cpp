@@ -2,7 +2,7 @@
 
 int main()
 {
-    GameEngine game;
+    goldenhand::GameEngine game;
     game.run();
 
     return 0;

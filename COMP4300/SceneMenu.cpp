@@ -7,8 +7,10 @@
 
 using namespace std;
 
-SceneMenu::SceneMenu(GameEngine& engine) : Scene{engine}, mInactiveColor{255, 0, 0}, mSelectedColor{0, 255, 0}, mSelectedIdx{0}
+SceneMenu::SceneMenu(goldenhand::GameEngine& engine) : Scene{engine}, mInactiveColor{255, 0, 0}, mSelectedColor{0, 255, 0}, mSelectedIdx{0}
 {
+    using namespace goldenhand;
+
     registerAction(sf::Keyboard::Up, ActionType::MoveUp);
     registerAction(sf::Keyboard::Down, ActionType::MoveDown);
     registerAction(sf::Keyboard::Enter, ActionType::Select);
@@ -25,22 +27,22 @@ void SceneMenu::initialize()
     }
 
     auto continueGame = [this]() {
-        this->mEngine.changeScene(SceneId::Play);
+        this->mEngine.changeScene(goldenhand::SceneId::Play);
     };
     addItem("CONTINUE", continueGame);
 
     auto restartGame = [this]() {
-        this->mEngine.createScene(SceneId::Play);
+        this->mEngine.createScene(goldenhand::SceneId::Play);
     };
     addItem("RESTART", restartGame);
 
     auto goToAnimation = [this]() {
-        this->mEngine.changeScene(SceneId::Animation);
+        this->mEngine.changeScene(goldenhand::SceneId::Animation);
     };
     addItem("ANIMATION PLAYGROUND", goToAnimation);
 
     auto goToVision = [this]() {
-        this->mEngine.changeScene(SceneId::Vision);
+        this->mEngine.changeScene(goldenhand::SceneId::Vision);
     };
     addItem("VISION", goToVision);
 }
@@ -53,8 +55,10 @@ void SceneMenu::update()
     mCurrentFrame++;
 }
 
-void SceneMenu::sDoAction(const Action action)
+void SceneMenu::sDoAction(const goldenhand::Action action)
 {
+    using namespace goldenhand;
+
     if (action.getEventType() != InputEventType::Released) return;
 
     switch (action.getType())

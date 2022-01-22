@@ -2,22 +2,25 @@
 
 using namespace std;
 
-Entity::Entity(const EntityTag tag, const size_t id)
-    : mTag(tag), mId(id), mAlive(true)
+namespace goldenhand
 {
-}
+    Entity::Entity(const EntityTag tag, const size_t id)
+        : mTag(tag), mId(id), mAlive(true)
+    {
+    }
 
-const EntityTag Entity::tag() const
-{
-    return mTag;
-}
+    const EntityTag Entity::tag() const
+    {
+        return mTag;
+    }
 
-bool Entity::isAlive() const
-{
-    return mAlive;
-}
+    bool Entity::isAlive() const
+    {
+        return mAlive;
+    }
 
-void Entity::destroy()
-{
-    mAlive = false;
-}
+    void Entity::destroy()
+    {
+        mAlive = false;
+    }
+} // namespace goldenhand

@@ -9,25 +9,27 @@
 #include <string>
 #include <vector>
 
-typedef std::vector<std::shared_ptr<Entity>> EntityVector;
-typedef std::map<EntityTag, EntityVector> EntityMap;
-
-class EntityManager
+namespace goldenhand
 {
-public:
-    EntityManager();
+    typedef std::vector<std::shared_ptr<Entity>> EntityVector;
+    typedef std::map<EntityTag, EntityVector> EntityMap;
 
-    const EntityVector& getEntities();
-    const EntityVector& getEntities(const EntityTag tag);
+    class EntityManager
+    {
+    public:
+        EntityManager();
 
-    std::shared_ptr<Entity> addEntity(const EntityTag tag);
-    void update();
+        const EntityVector& getEntities();
+        const EntityVector& getEntities(const EntityTag tag);
 
-private:
-    EntityVector mEntities;
-    EntityMap mEntityMap;
-    size_t mTotalEntities;
+        std::shared_ptr<Entity> addEntity(const EntityTag tag);
+        void update();
+
+    private:
+        EntityVector mEntities;
+        EntityMap mEntityMap;
+        size_t mTotalEntities;
     
-    EntityVector mToAdd;
-};
-
+        EntityVector mToAdd;
+    };
+} // namespace goldenhand

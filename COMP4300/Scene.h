@@ -5,39 +5,41 @@
 
 #include <unordered_map>
 
-class GameEngine;
-
-typedef std::unordered_map<int, ActionType> ActionMap;
-
-enum class SceneId
+namespace goldenhand
 {
-    Menu,
-    Play,
-    Animation,
-    Vision
-};
+    class GameEngine;
+    
+    typedef std::unordered_map<int, ActionType> ActionMap;
+    
+    enum class SceneId
+    {
+        Menu,
+        Play,
+        Animation,
+        Vision
+    };
 
-class Scene
-{
-public:
-    Scene(GameEngine& engine);
+    class Scene
+    {
+    public:
+        Scene(GameEngine& engine);
 
-    virtual void initialize() = 0;
+        virtual void initialize() = 0;
 
-    virtual void update() = 0;
-    virtual void sDoAction(const Action action) = 0;
-    virtual void sRender() = 0;
+        virtual void update() = 0;
+        virtual void sDoAction(const Action action) = 0;
+        virtual void sRender() = 0;
 
-    const ActionMap& getKbdActionMap() const;
-    void registerAction(const int code, const ActionType action);
+        const ActionMap& getKbdActionMap() const;
+        void registerAction(const int code, const ActionType action);
 
-protected:
-    GameEngine& mEngine;
-    EntityManager mEntityManager;
-    int mCurrentFrame;
-    bool mPaused;
-    bool mHasEnded;
-    ActionMap mKbdActionMap;
+    protected:
+        GameEngine& mEngine;
+        EntityManager mEntityManager;
+        int mCurrentFrame;
+        bool mPaused;
+        bool mHasEnded;
+        ActionMap mKbdActionMap;
 
-};
-
+    };
+} // namespace goldenhand

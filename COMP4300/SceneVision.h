@@ -8,15 +8,15 @@
 
 #include <vector>
 
-class SceneVision : public Scene
+class SceneVision : public goldenhand::Scene
 {
 public:
-    SceneVision(GameEngine& engine);
+    SceneVision(goldenhand::GameEngine& engine);
 
     virtual void initialize() override;
 
     virtual void update() override;
-    virtual void sDoAction(const Action action) override;
+    virtual void sDoAction(const goldenhand::Action action) override;
     virtual void sRender() override;
 
 private:
@@ -41,4 +41,3 @@ private:
     void castRay(const sf::Vector2f& start, const sf::Vector2f& end);
     void castRay(const float angle);
 };
-
