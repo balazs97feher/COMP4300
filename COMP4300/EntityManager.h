@@ -11,6 +11,7 @@
 
 namespace goldenhand
 {
+    // todo: use concepts
     template<typename EntityTag, typename ComponentTuple>
     class EntityManager
     {
