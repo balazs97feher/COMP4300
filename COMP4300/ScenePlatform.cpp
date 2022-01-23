@@ -46,7 +46,11 @@ void ScenePlatform::initialize()
     {
         string name;
         float x, y;
-        if (configType == "Background")
+        if (configType == "Player")
+        {
+            configuration >> mPlayerConfig.speed;
+        }
+        else if (configType == "Background")
         {
             configuration >> name;
             auto background = mEntityManager.addEntity(EntityTag::Decoration);
@@ -91,11 +95,11 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
         return;
     case ActionType::MoveLeft:
-        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ -3, 0 };
+        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ -mPlayerConfig.speed, 0 };
         else mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ 0, 0 };
         break;
     case ActionType::MoveRight:
-        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ 3, 0 };
+        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ mPlayerConfig.speed, 0 };
         else mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ 0, 0 };
         break;
     default:

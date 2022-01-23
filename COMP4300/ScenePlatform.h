@@ -18,6 +18,8 @@ public:
         Tile
     };
 
+    struct PlayerConfig { float speed; };
+
     ScenePlatform(goldenhand::GameEngine& engine);
 
     virtual void initialize() override;
@@ -33,6 +35,7 @@ private:
     typedef EntityManager::Entity Entity;
     EntityManager mEntityManager;
 
+    PlayerConfig mPlayerConfig;
     std::shared_ptr<Entity> mPlayer;
 
     void sMovement();
