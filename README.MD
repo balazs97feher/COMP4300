@@ -55,6 +55,14 @@ should be reserved for things like clouds, bushes, etc.
 - [ ] Tiles will be given a CBoundingBox equal to the size of the animation.
 - [ ] Tiles have different behavior depending on which Animation they are given. (Brick tiles or question tiles)
 
+### Settings File:
+**Window W H FL FS T**
+  - W - Window Width as integer
+  - H - Window Height as integer
+  - FL - Frame Limit as integer
+  - FS - Full Screen Mode (0 or 1)
+  - T - Window Title as string
+
 ### Assets Configuration:
 There are four different line types in the Assets file, each of which correspond to a different type of Asset. They are as follows:
 - Texture Asset Specification: **Texture N P F**

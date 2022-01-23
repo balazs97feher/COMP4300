@@ -13,11 +13,13 @@ namespace goldenhand
     public:
         GameEngine();
 
+        void initialize(const std::string& settingsFile);
+
         void run();
         void quit();
 
-        void changeScene(const std::string id);
-        void createScene(const std::string id);
+        void changeScene(const std::string& id);
+        void createScene(const std::string& id);
 
         sf::Vector2u windowSize() const;
         void drawToWindow(const sf::Drawable& drawable);

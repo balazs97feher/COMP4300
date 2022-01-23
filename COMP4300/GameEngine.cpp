@@ -5,15 +5,54 @@
 
 #include <SFML/Window/Event.hpp>
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
+namespace fs = std::filesystem;
+using namespace std;
+
 namespace goldenhand
 {
-    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{ Constants::Scene::menu }, mRunning{true}
+    GameEngine::GameEngine() : mCurrentScene{ Constants::Scene::menu }, mRunning{true}
     {
-        mSceneMap[Constants::Scene::menu] = std::make_unique<SceneMenu>(*this);
-        mSceneMap[Constants::Scene::level1] = std::make_unique<SceneAnimation>(*this);
+    }
 
-        mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "GoldenHand");
-        mRenderWindow.setFramerateLimit(60);
+    void GameEngine::initialize(const std::string& settingsFile)
+    {
+        const fs::path configFile{ settingsFile };
+        if (!fs::exists(configFile))
+        {
+            cerr << "Settings file " << configFile.string() << " does not exit." << endl;
+            exit(-1);
+        }
+
+        ifstream configuration{ configFile };
+        if (!configuration.is_open())
+        {
+            cerr << "Failed to open settings file." << endl;
+            exit(-1);
+        }
+
+        string setting;
+        while (!configuration.eof())
+        {
+            configuration >> setting;
+            if (setting == "Window")
+            {
+                int wWidth, wHeight, frameLimit, fullScreenMode;
+                string title;
+                configuration >> wWidth >> wHeight >> frameLimit >> fullScreenMode >> title;
+
+                const uint32_t wStyle = (fullScreenMode == 1) ? (sf::Style::Fullscreen | sf::Style::Default) : sf::Style::Default;
+                mRenderWindow.create(sf::VideoMode(wWidth, wHeight), title, wStyle);
+                mRenderWindow.setFramerateLimit(frameLimit);
+                mWindowSize = mRenderWindow.getSize();
+            }
+        }
+
+        mSceneMap[Constants::Scene::menu] = make_unique<SceneMenu>(*this);
+        mSceneMap[Constants::Scene::level1] = make_unique<SceneAnimation>(*this);
     }
 
     void GameEngine::run()
@@ -31,14 +70,14 @@ namespace goldenhand
         mRunning = false;
     }
 
-    void GameEngine::changeScene(const std::string id)
+    void GameEngine::changeScene(const std::string& id)
     {
         mCurrentScene = id;
     }
 
-    void GameEngine::createScene(const std::string id)
+    void GameEngine::createScene(const std::string& id)
     {
-        if (id == Constants::Scene::level1) mSceneMap[id] = std::make_unique<SceneAnimation>(*this);
+        if (id == Constants::Scene::level1) mSceneMap[id] = make_unique<SceneAnimation>(*this);
 
         changeScene(id);
     }
