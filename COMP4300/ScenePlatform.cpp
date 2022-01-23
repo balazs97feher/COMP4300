@@ -11,12 +11,13 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine) : Scene{ engine }, mAssetManager{ "./config/" }
+ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine) : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f })
 {
     using namespace goldenhand;
 
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
+    registerAction(sf::Keyboard::W, ActionType::MoveUp);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
 
     initialize();
@@ -63,6 +64,7 @@ void ScenePlatform::initialize()
             auto tile = mEntityManager.addEntity(EntityTag::Tile);
             tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
             tile->addComponent<CAnimation>(name);
+            tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
         }
 
         configuration >> configType;
@@ -78,6 +80,7 @@ void ScenePlatform::update()
         mEntityManager.update();
 
         sMovement();
+        sPhysics();
         sAnimation();
         sRender();
 
@@ -89,18 +92,23 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
 {
     using namespace goldenhand;
 
+    auto& velocity = mPlayer->getComponent<CTransform>().velocity;
+
     switch (action.getType())
     {
     case ActionType::Quit:
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
         return;
     case ActionType::MoveLeft:
-        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ -mPlayerConfig.speed, 0 };
-        else mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ 0, 0 };
+        if (action.getEventType() == InputEventType::Pressed) velocity = { -mPlayerConfig.speed, velocity.y };
+        else velocity = sf::Vector2f{ 0.f, velocity.y };
         break;
     case ActionType::MoveRight:
-        if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ mPlayerConfig.speed, 0 };
-        else mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ 0, 0 };
+        if (action.getEventType() == InputEventType::Pressed) velocity = { mPlayerConfig.speed, velocity.y };
+        else velocity = sf::Vector2f{ 0.f, velocity.y };
+        break;
+    case ActionType::MoveUp:
+        if (action.getEventType() == InputEventType::Released) velocity.y = - 10;
         break;
     default:
         break;
@@ -123,6 +131,8 @@ void ScenePlatform::sRender()
 
 void ScenePlatform::sMovement()
 {
+    mPlayer->getComponent<CTransform>().velocity += mPhysics.gravity();
+
     mPlayer->getComponent<CTransform>().prevPos = mPlayer->getComponent<CTransform>().pos;
     mPlayer->getComponent<CTransform>().pos += mPlayer->getComponent<CTransform>().velocity;
 
@@ -133,6 +143,24 @@ void ScenePlatform::sMovement()
     else if (mPlayer->getComponent<CTransform>().pos.x < mPlayer->getComponent<CTransform>().prevPos.x)
     {
         mPlayer->getComponent<CTransform>().angle = -1;
+    }
+}
+
+void ScenePlatform::sPhysics()
+{
+    for (auto& one : mEntityManager.getEntities())
+    {
+        if (one->tag() == EntityTag::Tile)
+        {
+            if (const auto overlap = goldenhand::Physics::boxesOverlap(mPlayer->getComponent<CTransform>().pos, mPlayer->getComponent<CBoundingBox>().halfSize,
+                one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize))
+            {
+                auto& transform = mPlayer->getComponent<CTransform>();
+                transform.pos.y -= overlap->height;
+                transform.velocity = { transform.velocity.x, 0.f};
+                break;
+            }
+        }
     }
 }
 
@@ -163,4 +191,5 @@ void ScenePlatform::spawnPlayer()
 
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
+    mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
 }

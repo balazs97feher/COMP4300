@@ -3,8 +3,8 @@
 #include "AssetManager.h"
 #include "Components.h"
 #include "EntityManager.h"
+#include "Physics.h"
 #include "Scene.h"
-
 
 class ScenePlatform : public goldenhand::Scene
 {
@@ -38,7 +38,10 @@ private:
     PlayerConfig mPlayerConfig;
     std::shared_ptr<Entity> mPlayer;
 
+    goldenhand::Physics mPhysics;
+
     void sMovement();
+    void sPhysics();
     void sAnimation();
     void spawnPlayer();
 };

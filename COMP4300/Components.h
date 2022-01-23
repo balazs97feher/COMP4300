@@ -72,6 +72,7 @@ public:
         rect.setOutlineColor(sf::Color{ 255, 255, 255 });
         rect.setOutlineThickness(1);
     }
+    CBoundingBox(const sf::Vector2u& s) : CBoundingBox{ sf::Vector2f{ static_cast<float>(s.x), static_cast<float>(s.y) } } {}
 };
 
 class CScore : public goldenhand::Component

@@ -23,6 +23,8 @@ namespace goldenhand
 
         static float crossProduct(const sf::Vector2f & one, const sf::Vector2f & other);
 
+        sf::Vector2f gravity() const;
+
     private:
         sf::Vector2f mGravity;
     };

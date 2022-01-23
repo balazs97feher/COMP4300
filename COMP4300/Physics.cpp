@@ -46,4 +46,9 @@ namespace goldenhand
     {
         return one.x * other.y - other.x * one.y;
     }
+
+    sf::Vector2f Physics::gravity() const
+    {
+        return mGravity;
+    }
 } // namespace goldenhand
