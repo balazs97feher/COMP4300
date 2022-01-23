@@ -26,25 +26,10 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    auto continueGame = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Play);
-    };
-    addItem("CONTINUE", continueGame);
-
-    auto restartGame = [this]() {
-        this->mEngine.createScene(goldenhand::SceneId::Play);
-    };
-    addItem("RESTART", restartGame);
-
     auto goToAnimation = [this]() {
         this->mEngine.changeScene(goldenhand::SceneId::Animation);
     };
     addItem("ANIMATION PLAYGROUND", goToAnimation);
-
-    auto goToVision = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Vision);
-    };
-    addItem("VISION", goToVision);
 }
 
 void SceneMenu::update()

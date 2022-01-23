@@ -1,21 +1,17 @@
 #include "GameEngine.h"
 #include "SceneAnimation.h"
 #include "SceneMenu.h"
-#include "ScenePlay.h"
-#include "SceneVision.h"
 
 #include <SFML/Window/Event.hpp>
 
 namespace goldenhand
 {
-    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Play}, mRunning{true}
+    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Animation}, mRunning{true}
     {
-        mSceneMap[SceneId::Play] = std::make_unique<ScenePlay>(*this);
         mSceneMap[SceneId::Menu] = std::make_unique<SceneMenu>(*this);
         mSceneMap[SceneId::Animation] = std::make_unique<SceneAnimation>(*this);
-        mSceneMap[SceneId::Vision] = std::make_unique<SceneVision>(*this);
 
-        mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "Shooter");
+        mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "GoldenHand");
         mRenderWindow.setFramerateLimit(60);
     }
 
@@ -43,8 +39,8 @@ namespace goldenhand
     {
         switch (id)
         {
-            case SceneId::Play:
-                mSceneMap[id] = std::make_unique<ScenePlay>(*this);
+            case SceneId::Animation:
+                mSceneMap[id] = std::make_unique<SceneAnimation>(*this);
             default:
                 break;
         }

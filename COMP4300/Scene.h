@@ -14,9 +14,7 @@ namespace goldenhand
     enum class SceneId
     {
         Menu,
-        Play,
-        Animation,
-        Vision
+        Animation
     };
 
     class Scene
