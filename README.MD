@@ -111,3 +111,6 @@ All (GX, GY) positions given in the level specification file are given in "grid'
 - [ ] Pressing the 'C' key toggles drawing bounding boxes of entities.
 - [ ] Pressing the 'G' key toggles drawing of the grid.
 - [ ] The 'ESC' key should go 'back' to the Main Menu, or quit if on the Main Menu.
+
+### Asset Sources:
+- [MegaMan](https://www.spriters-resource.com/fullview/157067/)
