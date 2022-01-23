@@ -167,7 +167,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneAnimation.cpp" />
     <ClCompile Include="SceneMenu.cpp" />
     <ClCompile Include="ScenePlatform.cpp" />
   </ItemGroup>
@@ -182,7 +181,6 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneAnimation.h" />
     <ClInclude Include="SceneMenu.h" />
     <ClInclude Include="ScenePlatform.h" />
   </ItemGroup>

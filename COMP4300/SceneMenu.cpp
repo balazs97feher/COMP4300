@@ -27,11 +27,6 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    auto goToAnimation = [this]() {
-        this->mEngine.changeScene(Constants::Scene::level1);
-    };
-    addItem("ANIMATION PLAYGROUND", goToAnimation);
-
     auto goToPlatform = [this]() {
         this->mEngine.changeScene(Constants::Scene::platform);
     };

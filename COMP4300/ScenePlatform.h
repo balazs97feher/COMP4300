@@ -33,5 +33,9 @@ private:
     typedef EntityManager::Entity Entity;
     EntityManager mEntityManager;
 
+    std::shared_ptr<Entity> mPlayer;
+
+    void sMovement();
     void sAnimation();
+    void spawnPlayer();
 };

@@ -1,6 +1,5 @@
 #include "Constants.h"
 #include "GameEngine.h"
-#include "SceneAnimation.h"
 #include "SceneMenu.h"
 #include "ScenePlatform.h"
 
@@ -53,7 +52,6 @@ namespace goldenhand
         }
 
         mSceneMap[Constants::Scene::menu] = make_unique<SceneMenu>(*this);
-        mSceneMap[Constants::Scene::level1] = make_unique<SceneAnimation>(*this);
         mSceneMap[Constants::Scene::platform] = make_unique<ScenePlatform>(*this);
     }
 
@@ -79,7 +77,7 @@ namespace goldenhand
 
     void GameEngine::createScene(const std::string& id)
     {
-        if (id == Constants::Scene::level1) mSceneMap[id] = make_unique<SceneAnimation>(*this);
+        if (id == Constants::Scene::platform) mSceneMap[id] = make_unique<ScenePlatform>(*this);
 
         changeScene(id);
     }
