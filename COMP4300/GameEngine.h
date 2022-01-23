@@ -16,8 +16,8 @@ namespace goldenhand
         void run();
         void quit();
 
-        void changeScene(const SceneId id);
-        void createScene(const SceneId id);
+        void changeScene(const std::string id);
+        void createScene(const std::string id);
 
         sf::Vector2u windowSize() const;
         void drawToWindow(const sf::Drawable& drawable);
@@ -28,8 +28,8 @@ namespace goldenhand
         sf::RenderWindow mRenderWindow;
         sf::Vector2i mMousePos;
 
-        SceneId mCurrentScene;
-        std::unordered_map<SceneId, std::unique_ptr<Scene>> mSceneMap;
+        std::string mCurrentScene;
+        std::unordered_map<std::string, std::unique_ptr<Scene>> mSceneMap;
         Scene* currentScene();
         bool mRunning;
 

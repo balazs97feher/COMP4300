@@ -1,3 +1,4 @@
+#include "Constants.h"
 #include "SceneMenu.h"
 #include "GameEngine.h"
 
@@ -27,7 +28,7 @@ void SceneMenu::initialize()
     }
 
     auto goToAnimation = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Animation);
+        this->mEngine.changeScene(Constants::Scene::level1);
     };
     addItem("ANIMATION PLAYGROUND", goToAnimation);
 }

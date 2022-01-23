@@ -22,4 +22,9 @@ namespace Constants
     {
         constexpr inline const char* ayar = "ayar";
     }
+    namespace Scene
+    {
+        constexpr inline const char* menu = "menu";
+        constexpr inline const char* level1 = "level1";
+    }
 }

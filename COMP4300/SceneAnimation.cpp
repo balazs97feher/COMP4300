@@ -43,7 +43,7 @@ void SceneAnimation::sDoAction(const goldenhand::Action action)
     switch (action.getType())
     {
         case ActionType::Quit:
-            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(goldenhand::SceneId::Menu);
+            if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
             return;
         case ActionType::MoveLeft:
             if (action.getEventType() == InputEventType::Pressed) mPlayer->getComponent<CTransform>().velocity = sf::Vector2f{ -5, 0 };

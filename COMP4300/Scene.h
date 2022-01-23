@@ -9,13 +9,6 @@ namespace goldenhand
     class GameEngine;
     
     typedef std::unordered_map<int, ActionType> ActionMap;
-    
-    // todo: unique id for scenes without having to change Scene base class
-    enum class SceneId
-    {
-        Menu,
-        Animation
-    };
 
     class Scene
     {

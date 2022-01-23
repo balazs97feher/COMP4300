@@ -1,3 +1,4 @@
+#include "Constants.h"
 #include "GameEngine.h"
 #include "SceneAnimation.h"
 #include "SceneMenu.h"
@@ -6,10 +7,10 @@
 
 namespace goldenhand
 {
-    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Animation}, mRunning{true}
+    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{ Constants::Scene::menu }, mRunning{true}
     {
-        mSceneMap[SceneId::Menu] = std::make_unique<SceneMenu>(*this);
-        mSceneMap[SceneId::Animation] = std::make_unique<SceneAnimation>(*this);
+        mSceneMap[Constants::Scene::menu] = std::make_unique<SceneMenu>(*this);
+        mSceneMap[Constants::Scene::level1] = std::make_unique<SceneAnimation>(*this);
 
         mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "GoldenHand");
         mRenderWindow.setFramerateLimit(60);
@@ -30,20 +31,14 @@ namespace goldenhand
         mRunning = false;
     }
 
-    void GameEngine::changeScene(const SceneId id)
+    void GameEngine::changeScene(const std::string id)
     {
         mCurrentScene = id;
     }
 
-    void GameEngine::createScene(const SceneId id)
+    void GameEngine::createScene(const std::string id)
     {
-        switch (id)
-        {
-            case SceneId::Animation:
-                mSceneMap[id] = std::make_unique<SceneAnimation>(*this);
-            default:
-                break;
-        }
+        if (id == Constants::Scene::level1) mSceneMap[id] = std::make_unique<SceneAnimation>(*this);
 
         changeScene(id);
     }
