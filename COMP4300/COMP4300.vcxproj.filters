@@ -83,5 +83,8 @@
     <ClInclude Include="ScenePlatform.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ConfigReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

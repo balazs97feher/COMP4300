@@ -1,3 +1,4 @@
+#include "ConfigReader.h"
 #include "Constants.h"
 #include "GameEngine.h"
 #include "ScenePlatform.h"
@@ -27,19 +28,7 @@ void ScenePlatform::initialize()
 {
     mAssetManager.loadAssets();
 
-    const fs::path configFile{ "./config/level1.txt"};
-    if (!fs::exists(configFile))
-    {
-        cerr << "Config file " << configFile.string() << " does not exit." << endl;
-        exit(-1);
-    }
-
-    ifstream configuration{ configFile };
-    if (!configuration.is_open())
-    {
-        cerr << "Failed to open config file." << endl;
-        exit(-1);
-    }
+    goldenhand::ConfigReader configuration("./config/level1.txt");
 
     string configType;
     configuration >> configType;

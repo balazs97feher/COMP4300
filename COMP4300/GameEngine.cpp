@@ -1,3 +1,4 @@
+#include "ConfigReader.h"
 #include "Constants.h"
 #include "GameEngine.h"
 #include "SceneMenu.h"
@@ -20,19 +21,7 @@ namespace goldenhand
 
     void GameEngine::initialize(const std::string& settingsFile)
     {
-        const fs::path configFile{ settingsFile };
-        if (!fs::exists(configFile))
-        {
-            cerr << "Settings file " << configFile.string() << " does not exit." << endl;
-            exit(-1);
-        }
-
-        ifstream configuration{ configFile };
-        if (!configuration.is_open())
-        {
-            cerr << "Failed to open settings file." << endl;
-            exit(-1);
-        }
+        ConfigReader configuration{ settingsFile };
 
         string setting;
         while (!configuration.eof())
