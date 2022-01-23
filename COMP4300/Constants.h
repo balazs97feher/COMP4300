@@ -6,6 +6,7 @@ namespace Constants
     {
         constexpr inline const char* megaman = "megaman";
         constexpr inline const char* tiles = "tiles";
+        constexpr inline const char* sky = "sky";
     }
     namespace Animation
     {
@@ -26,5 +27,6 @@ namespace Constants
     {
         constexpr inline const char* menu = "menu";
         constexpr inline const char* level1 = "level1";
+        constexpr inline const char* platform = "platform";
     }
 }

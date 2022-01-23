@@ -1,8 +1,10 @@
 Texture megaman textures/megaman.png 12
 Texture tiles textures/tiles.png 2
+Texture sky textures/sky.png 1
 Animation megaman_standing megaman 0 1 0
 Animation megaman_running megaman 2 10 4
 Animation dirt_tile tiles 1 1 0
 Animation grass_tile tiles 0 1 0
+Animation sky sky 0 1 0
 Sound jump sounds/jump.wav
 Font ayar fonts/ayar.ttf

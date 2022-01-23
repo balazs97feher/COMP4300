@@ -2,6 +2,7 @@
 #include "GameEngine.h"
 #include "SceneAnimation.h"
 #include "SceneMenu.h"
+#include "ScenePlatform.h"
 
 #include <SFML/Window/Event.hpp>
 
@@ -53,6 +54,7 @@ namespace goldenhand
 
         mSceneMap[Constants::Scene::menu] = make_unique<SceneMenu>(*this);
         mSceneMap[Constants::Scene::level1] = make_unique<SceneAnimation>(*this);
+        mSceneMap[Constants::Scene::platform] = make_unique<ScenePlatform>(*this);
     }
 
     void GameEngine::run()

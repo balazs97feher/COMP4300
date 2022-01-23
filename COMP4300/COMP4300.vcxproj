@@ -169,6 +169,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneAnimation.cpp" />
     <ClCompile Include="SceneMenu.cpp" />
+    <ClCompile Include="ScenePlatform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneAnimation.h" />
     <ClInclude Include="SceneMenu.h" />
+    <ClInclude Include="ScenePlatform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

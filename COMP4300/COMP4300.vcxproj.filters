@@ -45,6 +45,9 @@
     <ClCompile Include="SceneAnimation.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="ScenePlatform.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.h">
@@ -81,6 +84,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="SceneMenu.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenePlatform.h">
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
