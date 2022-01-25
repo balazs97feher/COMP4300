@@ -148,9 +148,30 @@ void ScenePlatform::sPhysics()
                 one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize))
             {
                 auto& transform = mPlayer->getComponent<CTransform>();
-                transform.pos.y -= overlap->height;
-                transform.velocity = { transform.velocity.x, 0.f};
-                break;
+
+                const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, mPlayer->getComponent<CBoundingBox>().halfSize,
+                    one->getComponent<CTransform>().prevPos, one->getComponent<CBoundingBox>().halfSize);
+
+                if ((transform.prevPos.x < transform.pos.x) && (dimensionalOverlap.y > 0))
+                {
+                    transform.pos.x -= overlap->width;
+                    transform.velocity.x = 0.f;
+                }
+                else if ((transform.prevPos.x > transform.pos.x) && (dimensionalOverlap.y > 0))
+                {
+                    transform.pos.x += overlap->width;
+                    transform.velocity.x = 0.f;
+                }
+                else if ((transform.prevPos.y < transform.pos.y) && (dimensionalOverlap.x > 0))
+                {
+                    transform.pos.y -= overlap->height;
+                    transform.velocity.y = 0.f;
+                }
+                else if ((transform.prevPos.y > transform.pos.y) && (dimensionalOverlap.x > 0))
+                {
+                    transform.pos.y += overlap->height;
+                    transform.velocity.y = 0.f;
+                }
             }
         }
     }
@@ -169,7 +190,7 @@ void ScenePlatform::sAnimation()
     if (mPlayer->getComponent<CTransform>().velocity.y != 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_jumping;
     else if (mPlayer->getComponent<CTransform>().velocity.x == 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_standing;
     else mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_running;
-
+    
     auto& animation = mAssetManager.getAnimation(mPlayer->getComponent<CAnimation>().animation);
 
     if (mPlayer->getComponent<CTransform>().angle == 1) animation.getSprite().setScale(1.f, 1.f);

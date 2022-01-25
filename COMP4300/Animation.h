@@ -23,7 +23,7 @@ namespace goldenhand
 
         void update();
         /*
-        * returns true when all the animation frames have been played. Note that it returns false when the animation is created 
+        * Returns true when all the animation frames have been played. Note that it returns false when the animation is created 
         */
         bool hasEnded() const;
         sf::Sprite& getSprite();
