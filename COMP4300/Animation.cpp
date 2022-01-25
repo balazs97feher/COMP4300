@@ -6,7 +6,7 @@ namespace goldenhand
 {
     Animation::Animation(const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed)
         : mSprite{ sheet.texture }, mSize{ sheet.texture.getSize().x / sheet.frameCount, sheet.texture.getSize().y },
-        mStartFrame{ startFrame }, mFrameCount{ frameCount }, mSpeed{ speed }, mCurrentFrame{ 0 }
+        mStartFrame{ startFrame }, mFrameCount{ frameCount }, mSpeed{ speed }, mCurrentFrame{ 0 }, mFrameCounter{ 0 }, mLoop{ true }
     {
         assert(frameCount > 0);
 
@@ -14,16 +14,30 @@ namespace goldenhand
         mSprite.setOrigin(mSize.x / 2.0f, mSize.y / 2.0f);
     }
 
+    void Animation::reset()
+    {
+        mCurrentFrame = 0;
+        mFrameCounter = 0;
+    }
+
+    void Animation::setLoop(const bool playInLoop)
+    {
+        mLoop = playInLoop;
+    }
+
     void Animation::update()
     {
-        mSprite.setTextureRect(sf::IntRect(mSize.x * (mStartFrame + (mSpeed == 0 ? 0 : mCurrentFrame / mSpeed) % mFrameCount), 0u, mSize.x, mSize.y));
+        if (!mLoop && hasEnded()) return;
 
-        mCurrentFrame++;
+        mCurrentFrame = (mSpeed == 0 ? 0 : mFrameCounter / mSpeed) % mFrameCount;
+        mSprite.setTextureRect(sf::IntRect(mSize.x * (mStartFrame + mCurrentFrame), 0u, mSize.x, mSize.y));
+
+        mFrameCounter++;
     }
 
     bool Animation::hasEnded() const
     {
-        return mCurrentFrame == 0;
+        return mCurrentFrame == mFrameCount - 1;
     }
 
     sf::Sprite& Animation::getSprite()
