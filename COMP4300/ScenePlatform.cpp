@@ -46,6 +46,9 @@ void ScenePlatform::initialize()
             auto background = mEntityManager.addEntity(EntityTag::Decoration);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
             background->addComponent<CAnimation>(name);
+            auto& animation = mAssetManager.getAnimation(name);
+            animation.getSprite().setScale(static_cast<float>(mEngine.windowSize().x) / animation.getSize().x,
+                static_cast<float>(mEngine.windowSize().y) / animation.getSize().y);
         }
         else if (configType == "Tile")
         {
@@ -97,7 +100,7 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         else velocity = sf::Vector2f{ 0.f, velocity.y };
         break;
     case ActionType::MoveUp:
-        if (action.getEventType() == InputEventType::Released) velocity.y = - 10;
+        if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = - 10;
         break;
     default:
         break;
@@ -163,7 +166,8 @@ void ScenePlatform::sAnimation()
         if (animation.has) mAssetManager.getAnimation(animation.animation).update();
     }
 
-    if (mPlayer->getComponent<CTransform>().velocity.x == 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_standing;
+    if (mPlayer->getComponent<CTransform>().velocity.y != 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_jumping;
+    else if (mPlayer->getComponent<CTransform>().velocity.x == 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_standing;
     else mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_running;
 
     auto& animation = mAssetManager.getAnimation(mPlayer->getComponent<CAnimation>().animation);
