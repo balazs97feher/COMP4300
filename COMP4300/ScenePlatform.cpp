@@ -38,7 +38,7 @@ void ScenePlatform::initialize()
         float x, y;
         if (configType == "Player")
         {
-            configuration >> mPlayerConfig.speed;
+            configuration >> mPlayerConfig.runSpeed >> mPlayerConfig.jumpSpeed;
         }
         else if (configType == "Background")
         {
@@ -92,15 +92,15 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
         return;
     case ActionType::MoveLeft:
-        if (action.getEventType() == InputEventType::Pressed) velocity = { -mPlayerConfig.speed, velocity.y };
+        if (action.getEventType() == InputEventType::Pressed) velocity = { -mPlayerConfig.runSpeed, velocity.y };
         else velocity = sf::Vector2f{ 0.f, velocity.y };
         break;
     case ActionType::MoveRight:
-        if (action.getEventType() == InputEventType::Pressed) velocity = { mPlayerConfig.speed, velocity.y };
+        if (action.getEventType() == InputEventType::Pressed) velocity = { mPlayerConfig.runSpeed, velocity.y };
         else velocity = sf::Vector2f{ 0.f, velocity.y };
         break;
     case ActionType::MoveUp:
-        if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = - 10;
+        if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
         break;
     default:
         break;

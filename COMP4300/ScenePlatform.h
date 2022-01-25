@@ -18,7 +18,7 @@ public:
         Tile
     };
 
-    struct PlayerConfig { float speed; };
+    struct PlayerConfig { float runSpeed, jumpSpeed; };
 
     ScenePlatform(goldenhand::GameEngine& engine);
 
