@@ -12,15 +12,21 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine) : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f })
+ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
+    : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }
 {
     using namespace goldenhand;
+
+    mBB.setFillColor(sf::Color{ 255, 255, 255, 0 });
+    mBB.setOutlineColor(sf::Color{ 255, 255, 255 });
+    mBB.setOutlineThickness(1);
 
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::W, ActionType::MoveUp);
     registerAction(sf::Keyboard::M, ActionType::Select);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
+    registerAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
 
     initialize();
 }
@@ -92,7 +98,10 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     {
     case ActionType::Quit:
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
-        return;
+        break;
+    case ActionType::ToggleBBDraw:
+        if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
+        break;
     case ActionType::MoveLeft:
         if (action.getEventType() == InputEventType::Pressed) velocity = { -mPlayerConfig.runSpeed, velocity.y };
         else velocity = sf::Vector2f{ 0.f, velocity.y };
@@ -125,12 +134,18 @@ void ScenePlatform::sRender()
 {
     for (const auto& entity : mEntityManager.getEntities())
     {
-        auto& animation = entity->getComponent<CAnimation>();
-        if (animation.has)
+        if (entity->hasComponent<CAnimation>())
         {
             auto& sprite = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSprite();
             sprite.setPosition(entity->getComponent<CTransform>().pos);
             mEngine.drawToWindow(sprite);
+        }
+        if (mDrawBB && entity->hasComponent<CBoundingBox>())
+        {
+            mBB.setSize(entity->getComponent<CBoundingBox>().size);
+            mBB.setOrigin(entity->getComponent<CBoundingBox>().halfSize);
+            mBB.setPosition(entity->getComponent<CTransform>().pos);
+            mEngine.drawToWindow(mBB);
         }
     }
 }
@@ -171,7 +186,8 @@ void ScenePlatform::sPhysics()
                 const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, mPlayer->getComponent<CBoundingBox>().halfSize,
                     one->getComponent<CTransform>().prevPos, one->getComponent<CBoundingBox>().halfSize);
 
-                if ((transform.prevPos.x < transform.pos.x) && (dimensionalOverlap.y > 0))
+                // TODO: refine collision resolution
+                if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
                 {
                     transform.pos.x -= overlap->width;
                     transform.velocity.x = 0.f;
@@ -181,7 +197,7 @@ void ScenePlatform::sPhysics()
                     transform.pos.x += overlap->width;
                     transform.velocity.x = 0.f;
                 }
-                else if ((transform.prevPos.y < transform.pos.y) && (dimensionalOverlap.x > 0))
+                else if ((transform.prevPos.y <= transform.pos.y) && (dimensionalOverlap.x > 0))
                 {
                     transform.pos.y -= overlap->height;
                     transform.velocity.y = 0.f;

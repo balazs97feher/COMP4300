@@ -39,6 +39,8 @@ private:
     std::shared_ptr<Entity> mPlayer;
 
     goldenhand::Physics mPhysics;
+    bool mDrawBB;
+    sf::RectangleShape mBB;
 
     void sMovement();
     void sPhysics();
