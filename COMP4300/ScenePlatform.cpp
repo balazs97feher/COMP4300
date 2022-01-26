@@ -19,6 +19,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine) : Scene{ engine }, 
     registerAction(sf::Keyboard::A, ActionType::MoveLeft);
     registerAction(sf::Keyboard::D, ActionType::MoveRight);
     registerAction(sf::Keyboard::W, ActionType::MoveUp);
+    registerAction(sf::Keyboard::M, ActionType::Select);
     registerAction(sf::Keyboard::Escape, ActionType::Quit);
 
     initialize();
@@ -57,6 +58,7 @@ void ScenePlatform::initialize()
             tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
             tile->addComponent<CAnimation>(name);
             tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
+            tile->addComponent<CDraggable>();
         }
 
         configuration >> configType;
@@ -102,6 +104,18 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::MoveUp:
         if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
         break;
+    case ActionType::Select:
+        if (action.getEventType() == InputEventType::Pressed && !mDraggedEntity)
+        {
+            mDraggedEntity = findSelectedEntity(mEngine.mousePos());
+            if (mDraggedEntity) mDraggedEntity->getComponent<CDraggable>().dragging = true;
+        }
+        else if (action.getEventType() == InputEventType::Released && mDraggedEntity)
+        {
+            mDraggedEntity->getComponent<CDraggable>().dragging = false;
+            mDraggedEntity.reset();
+        }
+        break;
     default:
         break;
     }
@@ -125,8 +139,7 @@ void ScenePlatform::sMovement()
 {
     mPlayer->getComponent<CTransform>().velocity += mPhysics.gravity();
 
-    mPlayer->getComponent<CTransform>().prevPos = mPlayer->getComponent<CTransform>().pos;
-    mPlayer->getComponent<CTransform>().pos += mPlayer->getComponent<CTransform>().velocity;
+    mPlayer->getComponent<CTransform>().setPos(mPlayer->getComponent<CTransform>().pos + mPlayer->getComponent<CTransform>().velocity);
 
     if (mPlayer->getComponent<CTransform>().pos.x > mPlayer->getComponent<CTransform>().prevPos.x)
     {
@@ -135,6 +148,12 @@ void ScenePlatform::sMovement()
     else if (mPlayer->getComponent<CTransform>().pos.x < mPlayer->getComponent<CTransform>().prevPos.x)
     {
         mPlayer->getComponent<CTransform>().angle = -1;
+    }
+
+    if (mDraggedEntity)
+    {
+        mDraggedEntity->getComponent<CTransform>().setPos(sf::Vector2f{ static_cast<float>(mEngine.mousePos().x),
+            static_cast<float>(mEngine.mousePos().y) });
     }
 }
 
@@ -207,3 +226,22 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
 }
+
+std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2i spot)
+{
+    for (const auto entity : mEntityManager.getEntities())
+    {
+        if (entity->hasComponent<CAnimation>() && entity->hasComponent<CDraggable>())
+        {
+            const auto size = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSize();
+            const auto position = entity->getComponent<CTransform>().pos;
+            if (goldenhand::Physics::isWithinRectangle(sf::Vector2f(spot.x, spot.y), position, sf::Vector2f(size.x, size.y)))
+            {
+                return entity;
+            }
+        }
+    }
+
+    return nullptr;
+}
+

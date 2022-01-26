@@ -30,6 +30,12 @@ public:
     CTransform() = default;
     CTransform(const sf::Vector2f& p, const sf::Vector2f& v, const float a)
         : pos{ p }, prevPos{ p }, velocity{ v }, angle{ a } {}
+
+    void setPos(const sf::Vector2f newPos)
+    {
+        prevPos = pos;
+        pos = newPos;
+    }
 };
 
 class CAnimation : public goldenhand::Component
@@ -92,4 +98,12 @@ public:
 
     CLifeSpan() = default;
     CLifeSpan(const int t) : remaining{ t }, total{ t } {}
+};
+
+class CDraggable : public goldenhand::Component
+{
+public:
+    bool dragging;
+
+    CDraggable() : dragging{ false } {}
 };

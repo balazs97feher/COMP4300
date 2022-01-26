@@ -32,6 +32,19 @@ namespace goldenhand
 
         static float crossProduct(const sf::Vector2f & one, const sf::Vector2f & other);
 
+        template<typename T>
+        static bool isWithinBounds(const T value, const T lowerBound, const T upperBound)
+        {
+            return value >= lowerBound && value <= upperBound;
+        }
+
+        template<typename T>
+        static bool isWithinRectangle(const sf::Vector2<T> point, const sf::Vector2<T> centerPos, const sf::Vector2<T> rectSize)
+        {
+            return isWithinBounds(point.x, centerPos.x - rectSize.x / 2, centerPos.x + rectSize.x / 2) &&
+                isWithinBounds(point.y, centerPos.y - rectSize.y / 2, centerPos.y + rectSize.y / 2);
+        }
+
         sf::Vector2f gravity() const;
 
     private:

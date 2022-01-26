@@ -9,7 +9,7 @@
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable> ComponentTuple;
 
     enum class EntityTag
     {
@@ -44,4 +44,7 @@ private:
     void sPhysics();
     void sAnimation();
     void spawnPlayer();
+
+    std::shared_ptr<Entity> mDraggedEntity;
+    std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2i spot);
 };
