@@ -12,9 +12,9 @@ SceneMenu::SceneMenu(goldenhand::GameEngine& engine) : Scene{engine}, mInactiveC
 {
     using namespace goldenhand;
 
-    registerAction(sf::Keyboard::Up, ActionType::MoveUp);
-    registerAction(sf::Keyboard::Down, ActionType::MoveDown);
-    registerAction(sf::Keyboard::Enter, ActionType::Select);
+    registerKbdAction(sf::Keyboard::Up, ActionType::MoveUp);
+    registerKbdAction(sf::Keyboard::Down, ActionType::MoveDown);
+    registerKbdAction(sf::Keyboard::Enter, ActionType::Select);
 
     initialize();
 }

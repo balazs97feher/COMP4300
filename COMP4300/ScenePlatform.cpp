@@ -3,6 +3,7 @@
 #include "GameEngine.h"
 #include "ScenePlatform.h"
 
+#include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 #include <filesystem>
@@ -21,12 +22,13 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     mBB.setOutlineColor(sf::Color{ 255, 255, 255 });
     mBB.setOutlineThickness(1);
 
-    registerAction(sf::Keyboard::A, ActionType::MoveLeft);
-    registerAction(sf::Keyboard::D, ActionType::MoveRight);
-    registerAction(sf::Keyboard::W, ActionType::MoveUp);
-    registerAction(sf::Keyboard::M, ActionType::Select);
-    registerAction(sf::Keyboard::Escape, ActionType::Quit);
-    registerAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
+    registerKbdAction(sf::Keyboard::A, ActionType::MoveLeft);
+    registerKbdAction(sf::Keyboard::D, ActionType::MoveRight);
+    registerKbdAction(sf::Keyboard::W, ActionType::MoveUp);
+    registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
+    registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
+
+    registerMouseAction(sf::Mouse::Button::Left, ActionType::Select);
 
     initialize();
 }

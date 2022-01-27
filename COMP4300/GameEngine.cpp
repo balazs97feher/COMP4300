@@ -112,7 +112,14 @@ namespace goldenhand
                     currentScene()->sDoAction(Action(actionType, (event.type == sf::Event::KeyPressed) ? InputEventType::Pressed : InputEventType::Released));
                 }
             }
-
+            else if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
+            {
+                if (currentScene()->getMouseActionMap().contains(event.mouseButton.button))
+                {
+                    const auto actionType = currentScene()->getMouseActionMap().at(event.mouseButton.button);
+                    currentScene()->sDoAction(Action(actionType, (event.type == sf::Event::MouseButtonPressed) ? InputEventType::Pressed : InputEventType::Released));
+                }
+            }
             else  if (event.type == sf::Event::MouseMoved)
             {
                 mMousePos = { event.mouseMove.x, event.mouseMove.y };
