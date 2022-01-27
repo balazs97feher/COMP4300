@@ -21,7 +21,8 @@ namespace goldenhand
         MoveRight,
         Quit,
         Select,
-        ToggleBBDraw
+        ToggleBBDraw,
+        Clone
     };
 
     class Action

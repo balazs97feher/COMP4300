@@ -39,6 +39,13 @@ namespace goldenhand
             return newEntity;
         }
 
+        std::shared_ptr<Entity> cloneEntity(const std::shared_ptr<Entity>& original)
+        {
+            auto clone = addEntity(original->tag());
+            cloneComponents(original->mComponents, clone->mComponents);
+            return clone;
+        }
+
         void update()
         {
             erase_if(mEntities, [](const auto& e) {return !e->isAlive(); });
@@ -63,5 +70,19 @@ namespace goldenhand
         size_t mTotalEntities;
     
         EntityVector mToAdd;
+
+        template<size_t I = 0, typename ...Components>
+        void cloneComponents(std::tuple<Components...>& original, std::tuple<Components...>& clone)
+        {
+            if constexpr (I == sizeof...(Components))
+            {
+                return;
+            }
+            else
+            {
+                std::get<I>(clone) = std::get<I>(original);
+                cloneComponents<I + 1>(original, clone);
+            }
+        }
     };
 } // namespace goldenhand

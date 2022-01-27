@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 using namespace std;
 
 ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
-    : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }
+    : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }, mCloneSelected{ false }
 {
     using namespace goldenhand;
 
@@ -27,6 +27,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     registerKbdAction(sf::Keyboard::W, ActionType::MoveUp);
     registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
     registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
+    registerKbdAction(sf::Keyboard::C, ActionType::Clone);
 
     registerMouseAction(sf::Mouse::Button::Left, ActionType::Select);
 
@@ -115,11 +116,19 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::MoveUp:
         if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
         break;
+    case ActionType::Clone:
+        if (action.getEventType() == InputEventType::Pressed) mCloneSelected = true;
+        else mCloneSelected = false;
+        break;
     case ActionType::Select:
         if (action.getEventType() == InputEventType::Pressed && !mDraggedEntity)
         {
-            mDraggedEntity = findSelectedEntity(mEngine.mousePos());
-            if (mDraggedEntity) mDraggedEntity->getComponent<CDraggable>().dragging = true;
+            auto selectedEntity = findSelectedEntity(mEngine.mousePos());
+            if (selectedEntity)
+            {
+                mDraggedEntity = mCloneSelected ? mEntityManager.cloneEntity(selectedEntity) : selectedEntity;
+                mDraggedEntity->getComponent<CDraggable>().dragging = true;
+            }
         }
         else if (action.getEventType() == InputEventType::Released && mDraggedEntity)
         {

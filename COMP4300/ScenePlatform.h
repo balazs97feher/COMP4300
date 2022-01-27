@@ -47,6 +47,7 @@ private:
     void sAnimation();
     void spawnPlayer();
 
+    bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;
     std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2i spot);
 };
