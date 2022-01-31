@@ -10,7 +10,6 @@
 #include <fstream>
 #include <iostream>
 
-namespace fs = std::filesystem;
 using namespace std;
 
 ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
@@ -28,6 +27,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
     registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
     registerKbdAction(sf::Keyboard::C, ActionType::Clone);
+    registerKbdAction(sf::Keyboard::L, ActionType::Save);
 
     registerMouseAction(sf::Mouse::Button::Left, ActionType::Select);
 
@@ -38,7 +38,7 @@ void ScenePlatform::initialize()
 {
     mAssetManager.loadAssets();
 
-    goldenhand::ConfigReader configuration("./config/level1.txt");
+    goldenhand::ConfigReader configuration(mLevel);
 
     string configType;
     configuration >> configType;
@@ -101,6 +101,9 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     {
     case ActionType::Quit:
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
+        break;
+    case ActionType::Save:
+        if (action.getEventType() == InputEventType::Released) saveLevel();
         break;
     case ActionType::ToggleBBDraw:
         if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
@@ -252,6 +255,27 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
+}
+
+void ScenePlatform::saveLevel()
+{
+    filesystem::path level{ mLevel };
+    if (filesystem::exists(level))
+    {
+        filesystem::remove(level);
+    }
+
+    auto fileStream = std::ofstream{ mLevel, ios_base::out };
+
+    for (const auto& decor : mEntityManager.getEntities(EntityTag::Decoration))
+    {
+        fileStream << "Background " << decor->getComponent<CAnimation>().animation << std::endl;
+    }
+    for (const auto& tile : mEntityManager.getEntities(EntityTag::Tile))
+    {
+        fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
+    }
+    fileStream << "Player " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed;
 }
 
 std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2i spot)

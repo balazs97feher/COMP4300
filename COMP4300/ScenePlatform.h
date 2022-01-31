@@ -47,6 +47,9 @@ private:
     void sAnimation();
     void spawnPlayer();
 
+    const char* mLevel = "./config/level1.txt";
+    void saveLevel();
+
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;
     std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2i spot);

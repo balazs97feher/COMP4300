@@ -28,7 +28,7 @@ namespace goldenhand
         }
         const EntityVector& getEntities(const EntityTag tag)
         {
-            return mEntities[tag];
+            return mEntityMap[tag];
         }
 
         std::shared_ptr<Entity> addEntity(const EntityTag tag)
