@@ -3,56 +3,56 @@
 The game must have the following features:
 
 ### Assets:
-- [ ] Entities in the game will be rendered using various Textures and Animations, which we will be calling Asssets (along with Fonts).
-- [ ] Assets are loaded once at the beginning of the program and stored in the Assets class, which is stored by the GameEngine class.
-- [ ] All assets are defined in assets.txt, with the syntax defined below.
+- [x] Entities in the game will be rendered using various Textures and Animations, which we will be calling Asssets (along with Fonts).
+- [x] Assets are loaded once at the beginning of the program and stored in the Assets class, which is stored by the GameEngine class.
+- [x] All assets are defined in assets.txt, with the syntax defined below.
 
 Note: All entity positions denote the center of their rectengular sprite and bounding box (if it has one).
 
 ### Player:
-- [ ] The player entity in the game is represented by Megaman, which has several different Animations: Stand, Run and Air. The state of the player is to be determined and assigned the appropriate Animation.
+- [x] The player entity in the game is represented by Megaman, which has several different Animations. The state of the player is to be determined and assigned the appropriate Animation.
 - [ ] The player moves with the following controls:
   - Jump: 'W' key
   - Left: 'A' key
   - Right: 'D' key
   - Shoot: Space key
 - [ ] The player can move left and right, shoot any time, including in the air.
-- [ ] The player can only jump, if it is currently standing on a tile.
+- [x] The player can only jump, if it is currently standing on a tile.
 - [ ] If the jump key is held, the player should not continuously jump, but instead it should only jump once per button press.
 - [ ] If the player lets go of the jump key mid-jump, it should start falling back down immediately.
-- [ ] If the player moves left/right, the player's sprite will face in that
+- [x] If the player moves left/right, the player's sprite will face in that
 direction until the other direction has been pressed.
 - [ ] Bullets shot by the player travel in the direction the player is facing.
 - [ ] The player collides with 'Tile' entities in the level (see level syntax) and
 cannot move through them. The player lands on a Tile entity and stands in place
 if it falls on it from above.
-- [ ] The player does not collide with 'Dec' (decoration) entities in the level.
+- [x] The player does not collide with decoration entities in the level.
 - [ ] If the player falls below the bottom of the screen, they respawn at the start.
 - [ ] The player should have a Gravity component which constantly accelerates it downward on the screen until it collides with a tile.
 - [ ] The player has a maximum speed specified in the Level file (see below) which
 it should not exceed in either x or y direction.
 - [ ] The player will be given a CBoundingBox of a size specified in the level file.
-- [ ] The player's sprite and bounding box are centered on the player's position.
+- [x] The player's sprite and bounding box are centered on the player's position.
 
 ### Animations:
 See below for Animation asset specification.
-- [ ] Animations are implemented by storing multiple frames inside a texture.
-- [ ] The Animation class handles frame advancement based on animation speed. Animation:: update() is to be implemented to properly progress animations.
-- [ ] Animation::hasEnded() returns true if an animation has finished its last frame, false otherwise.
-- [ ] Animations can be repeating (loop forever) or non-repeating (play once).
+- [x] Animations are implemented by storing multiple frames inside a texture.
+- [x] The Animation class handles frame advancement based on animation speed.
+- [x] Animation::hasEnded() returns true if an animation has finished its last frame, false otherwise.
+- [x] Animations can be repeating (loop forever) or non-repeating (play once).
 - [ ] Any entity with a non-repeating animation should be destroyed once its
 Animation's hasEnded() returns true (has finished one cycle).
 
 ### Decoration Entities:
-- [ ] Decoration entities ('Dec' in a level file) are simply drawn to the screen,
+- [x] Decoration entities are simply drawn to the screen,
 and do not interact with any other entities in the game in any way.
-- [ ] Decorations can be given any Animation in the game, but intuitively they
+- [x] Decorations can be given any Animation in the game, but intuitively they
 should be reserved for things like clouds, bushes, etc.
 
 ### Tiles:
-- [ ] Tiles are Entities that define the level geometry and interact with players.
-- [ ] Tiles can be given any Animation that is defined in the Assets file.
-- [ ] Tiles will be given a CBoundingBox equal to the size of the animation.
+- [x] Tiles are Entities that define the level geometry and interact with players.
+- [x] Tiles can be given any Animation that is defined in the Assets file.
+- [x] Tiles will be given a CBoundingBox equal to the size of the animation.
 - [ ] Tiles have different behavior depending on which Animation they are given. (Brick tiles or question tiles)
 
 ### Settings File:
@@ -116,8 +116,7 @@ All (GX, GY) positions given in the level specification file are given in "grid'
 ### Miscellaneous:
 - [ ] Pressing the 'P' key pauses the game.
 - [ ] Pressing the 'T' key toggles drawing textures.
-- [ ] Pressing the 'C' key toggles drawing bounding boxes of entities.
-- [ ] Pressing the 'G' key toggles drawing of the grid.
+- [x] Pressing the 'B' key toggles drawing bounding boxes of entities.
 - [ ] The 'ESC' key should go 'back' to the Main Menu, or quit if on the Main Menu.
 
 ### Asset Sources:
