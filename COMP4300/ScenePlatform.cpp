@@ -53,7 +53,7 @@ void ScenePlatform::initialize()
         else if (configType == "Background")
         {
             configuration >> name;
-            auto background = mEntityManager.addEntity(EntityTag::Decoration);
+            auto background = mEntityManager.addEntity(EntityTag::Background);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
             background->addComponent<CAnimation>(name);
             auto& animation = mAssetManager.getAnimation(name);
@@ -82,6 +82,7 @@ void ScenePlatform::update()
     {
         mEntityManager.update();
 
+        sView();
         sMovement();
         sPhysics();
         sAnimation();
@@ -161,6 +162,20 @@ void ScenePlatform::sRender()
             mBB.setPosition(entity->getComponent<CTransform>().pos);
             mEngine.drawToWindow(mBB);
         }
+    }
+}
+
+void ScenePlatform::sView()
+{
+    const auto wSize = mEngine.windowSize();
+
+    if (mPlayer->getComponent<CTransform>().pos.x < )
+
+    mEngine.setView(sf::View(sf::Vector2f{ wSize.x / 1.f, wSize.y / 2.f }, sf::Vector2f(wSize.x, wSize.y)));
+
+    for (auto& background : mEntityManager.getEntities(EntityTag::Background))
+    {
+        background->getComponent<CTransform>().setPos(mEngine.mapPixelToCoords(sf::Vector2i(wSize.x / 2, wSize.y / 2)));
     }
 }
 
@@ -267,7 +282,7 @@ void ScenePlatform::saveLevel()
 
     auto fileStream = std::ofstream{ mLevel, ios_base::out };
 
-    for (const auto& decor : mEntityManager.getEntities(EntityTag::Decoration))
+    for (const auto& decor : mEntityManager.getEntities(EntityTag::Background))
     {
         fileStream << "Background " << decor->getComponent<CAnimation>().animation << std::endl;
     }
@@ -278,7 +293,7 @@ void ScenePlatform::saveLevel()
     fileStream << "Player " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed;
 }
 
-std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2i spot)
+std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2f spot)
 {
     for (const auto entity : mEntityManager.getEntities())
     {

@@ -14,7 +14,7 @@ public:
     enum class EntityTag
     {
         Player,
-        Decoration,
+        Background,
         Tile
     };
 
@@ -42,6 +42,7 @@ private:
     bool mDrawBB;
     sf::RectangleShape mBB;
 
+    void sView();
     void sMovement();
     void sPhysics();
     void sAnimation();
@@ -52,5 +53,5 @@ private:
 
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;
-    std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2i spot);
+    std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2f spot);
 };

@@ -71,6 +71,21 @@ namespace goldenhand
         changeScene(id);
     }
 
+    void GameEngine::setView(const sf::View& view)
+    {
+        mRenderWindow.setView(view);
+    }
+
+    sf::Vector2f GameEngine::mapPixelToCoords(const sf::Vector2i& point) const
+    {
+        return mRenderWindow.mapPixelToCoords(point);
+    }
+
+    sf::Vector2i GameEngine::mapCoordsToPixel(const sf::Vector2f& point) const
+    {
+        return mRenderWindow.mapCoordsToPixel(point);
+    }
+
     sf::Vector2u GameEngine::windowSize() const
     {
         return mWindowSize;
@@ -81,7 +96,7 @@ namespace goldenhand
         mRenderWindow.draw(drawable);
     }
 
-    sf::Vector2i GameEngine::mousePos() const
+    sf::Vector2f GameEngine::mousePos() const
     {
         return mMousePos;
     }
@@ -122,7 +137,7 @@ namespace goldenhand
             }
             else  if (event.type == sf::Event::MouseMoved)
             {
-                mMousePos = { event.mouseMove.x, event.mouseMove.y };
+                mMousePos = mRenderWindow.mapPixelToCoords({ event.mouseMove.x, event.mouseMove.y });
             }
         }
     }
