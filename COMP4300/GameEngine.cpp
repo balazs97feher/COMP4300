@@ -71,6 +71,11 @@ namespace goldenhand
         changeScene(id);
     }
 
+    const sf::View& GameEngine::getView() const
+    {
+        return mRenderWindow.getView();
+    }
+
     void GameEngine::setView(const sf::View& view)
     {
         mRenderWindow.setView(view);

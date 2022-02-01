@@ -48,7 +48,8 @@ void ScenePlatform::initialize()
         float x, y;
         if (configType == "Player")
         {
-            configuration >> mPlayerConfig.runSpeed >> mPlayerConfig.jumpSpeed;
+            configuration >> mPlayerConfig.startPosX >> mPlayerConfig.startPosY >> mPlayerConfig.runSpeed
+                >> mPlayerConfig.jumpSpeed >> mPlayerConfig.trapViewRatio;
         }
         else if (configType == "Background")
         {
@@ -167,11 +168,22 @@ void ScenePlatform::sRender()
 
 void ScenePlatform::sView()
 {
-    const auto wSize = mEngine.windowSize();
+    const sf::Vector2f wSize{ static_cast<float>(mEngine.windowSize().x), static_cast<float>(mEngine.windowSize().y) };
+    const auto& view = mEngine.getView();
+    const auto& playerPos = mPlayer->getComponent<CTransform>().pos;
 
-    if (mPlayer->getComponent<CTransform>().pos.x < )
-
-    mEngine.setView(sf::View(sf::Vector2f{ wSize.x / 1.f, wSize.y / 2.f }, sf::Vector2f(wSize.x, wSize.y)));
+    if (playerPos.x < ((wSize.x - wSize.x * mPlayerConfig.trapViewRatio) / 2.f))
+    {
+        return;
+    }
+    else if (playerPos.x < (view.getCenter().x - wSize.x * mPlayerConfig.trapViewRatio / 2.f))
+    {
+        mEngine.setView(sf::View{ {playerPos.x + (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
+    }
+    else if(playerPos.x > (view.getCenter().x + wSize.x * mPlayerConfig.trapViewRatio / 2.f))
+    {
+        mEngine.setView(sf::View{ {playerPos.x - (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
+    }
 
     for (auto& background : mEntityManager.getEntities(EntityTag::Background))
     {
@@ -290,7 +302,9 @@ void ScenePlatform::saveLevel()
     {
         fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
     }
-    fileStream << "Player " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed;
+    const auto playerPos = mPlayer->getComponent<CTransform>().pos;
+    fileStream << "Player " << playerPos.x << " " << playerPos.y << " " << mPlayerConfig.runSpeed
+        << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.trapViewRatio;
 }
 
 std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2f spot)

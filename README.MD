@@ -102,16 +102,15 @@ All (GX, GY) positions given in the level specification file are given in "grid'
   - Animation Name N as string (Animation asset name for this tile)
   - X Position X float
   - Y Position Y float
-- Player Specification: **Player GX GY CW CH SX SY SM GY B**
+- Player Specification: **Player GX GY SX SY SM GY B TVR**
   - Grid X Pos GX float
   - Grid Y Pos GY float
-  - BoundingBox width CW float
-  - BoundingBox height CH float
   - Left/Right Speed SX float
   - Jump Speed SY float
   - Max Speed SM float
   - Gravity GY float
   - Bullet Animation B as string (Animation asset to use for bullets)
+  - Trap View Ratio TVR float (the ratio of the horizontal trap view length and the window width)
 
 ### Miscellaneous:
 - [ ] Pressing the 'P' key pauses the game.

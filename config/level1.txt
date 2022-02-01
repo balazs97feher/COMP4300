@@ -1,4 +1,4 @@
-Player 3 10
+Player 100 200 3 10 0.33
 Background sky
 Tile grass_tile 25  800
 Tile grass_tile 75  800
