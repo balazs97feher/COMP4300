@@ -24,6 +24,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     registerKbdAction(sf::Keyboard::A, ActionType::MoveLeft);
     registerKbdAction(sf::Keyboard::D, ActionType::MoveRight);
     registerKbdAction(sf::Keyboard::W, ActionType::MoveUp);
+    registerKbdAction(sf::Keyboard::Space, ActionType::Shoot);
     registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
     registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
     registerKbdAction(sf::Keyboard::C, ActionType::Clone);
@@ -50,6 +51,10 @@ void ScenePlatform::initialize()
         {
             configuration >> mPlayerConfig.startPosX >> mPlayerConfig.startPosY >> mPlayerConfig.runSpeed
                 >> mPlayerConfig.jumpSpeed >> mPlayerConfig.trapViewRatio;
+        }
+        else if (configType == "Bullet")
+        {
+            configuration >> mBulletConfig.speed >> mBulletConfig.rotation >> mBulletConfig.lifespan;
         }
         else if (configType == "Background")
         {
@@ -83,6 +88,7 @@ void ScenePlatform::update()
     {
         mEntityManager.update();
 
+        sLifeSpan();
         sView();
         sMovement();
         sPhysics();
@@ -117,6 +123,12 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::MoveRight:
         if (action.getEventType() == InputEventType::Pressed) velocity = { mPlayerConfig.runSpeed, velocity.y };
         else velocity = sf::Vector2f{ 0.f, velocity.y };
+        break;
+    case ActionType::Shoot:
+        if (action.getEventType() == InputEventType::Released)
+        {
+            shootBlade();
+        }
         break;
     case ActionType::MoveUp:
         if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
@@ -154,6 +166,12 @@ void ScenePlatform::sRender()
         {
             auto& sprite = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSprite();
             sprite.setPosition(entity->getComponent<CTransform>().pos);
+
+            if (entity->tag() == EntityTag::Blade)
+            {
+                sprite.setRotation(entity->getComponent<CTransform>().angle);
+            }
+
             mEngine.drawToWindow(sprite);
         }
         if (mDrawBB && entity->hasComponent<CBoundingBox>())
@@ -210,6 +228,18 @@ void ScenePlatform::sMovement()
     {
         mDraggedEntity->getComponent<CTransform>().setPos(sf::Vector2f{ static_cast<float>(mEngine.mousePos().x),
             static_cast<float>(mEngine.mousePos().y) });
+    }
+
+    for (auto entity : mEntityManager.getEntities())
+    {
+        if (entity->tag() == EntityTag::Player) continue;
+
+        entity->getComponent<CTransform>().setPos(entity->getComponent<CTransform>().pos + entity->getComponent<CTransform>().velocity);
+
+        if (entity->tag() == EntityTag::Blade)
+        {
+            entity->getComponent<CTransform>().angle += 50;
+        }
     }
 }
 
@@ -275,6 +305,21 @@ void ScenePlatform::sAnimation()
     animation.update();
 }
 
+void ScenePlatform::sLifeSpan()
+{
+    for (auto& entity : mEntityManager.getEntities())
+    {
+        if (entity->hasComponent<CLifeSpan>())
+        {
+            entity->getComponent<CLifeSpan>().remaining--;
+            if (entity->getComponent<CLifeSpan>().remaining == 0)
+            {
+                entity->destroy();
+            }
+        }
+    }
+}
+
 void ScenePlatform::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
@@ -282,6 +327,18 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
+}
+
+void ScenePlatform::shootBlade()
+{
+    auto blade = mEntityManager.addEntity(EntityTag::Blade);
+
+    const int direction = mPlayer->getComponent<CTransform>().angle;
+
+    blade->addComponent<CTransform>(mPlayer->getComponent<CTransform>().pos, sf::Vector2f{ direction * mBulletConfig.speed, .0f }, .0f);
+    blade->addComponent<CAnimation>(Constants::Animation::blade);
+    blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
+    blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);
 }
 
 void ScenePlatform::saveLevel()

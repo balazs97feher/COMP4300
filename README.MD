@@ -11,7 +11,7 @@ Note: All entity positions denote the center of their rectengular sprite and bou
 
 ### Player:
 - [x] The player entity in the game is represented by Megaman, which has several different Animations. The state of the player is to be determined and assigned the appropriate Animation.
-- [ ] The player moves with the following controls:
+- [x] The player moves with the following controls:
   - Jump: 'W' key
   - Left: 'A' key
   - Right: 'D' key
@@ -22,8 +22,8 @@ Note: All entity positions denote the center of their rectengular sprite and bou
 - [ ] If the player lets go of the jump key mid-jump, it should start falling back down immediately.
 - [x] If the player moves left/right, the player's sprite will face in that
 direction until the other direction has been pressed.
-- [ ] Bullets shot by the player travel in the direction the player is facing.
-- [ ] The player collides with 'Tile' entities in the level (see level syntax) and
+- [x] Bullets shot by the player travel in the direction the player is facing.
+- [x] The player collides with 'Tile' entities in the level (see level syntax) and
 cannot move through them. The player lands on a Tile entity and stands in place
 if it falls on it from above.
 - [x] The player does not collide with decoration entities in the level.
@@ -31,7 +31,6 @@ if it falls on it from above.
 - [ ] The player should have a Gravity component which constantly accelerates it downward on the screen until it collides with a tile.
 - [ ] The player has a maximum speed specified in the Level file (see below) which
 it should not exceed in either x or y direction.
-- [ ] The player will be given a CBoundingBox of a size specified in the level file.
 - [x] The player's sprite and bounding box are centered on the player's position.
 
 ### Animations:
@@ -102,15 +101,17 @@ All (GX, GY) positions given in the level specification file are given in "grid'
   - Animation Name N as string (Animation asset name for this tile)
   - X Position X float
   - Y Position Y float
-- Player Specification: **Player GX GY SX SY SM GY B TVR**
+- Player Specification: **Player GX GY SX SY SM TVR**
   - Grid X Pos GX float
   - Grid Y Pos GY float
   - Left/Right Speed SX float
   - Jump Speed SY float
   - Max Speed SM float
-  - Gravity GY float
-  - Bullet Animation B as string (Animation asset to use for bullets)
   - Trap View Ratio TVR float (the ratio of the horizontal trap view length and the window width)
+- Bullet Specification: **Bullet S R LS**
+  - Speed S float
+  - Rotation R float (radian per frame)
+  - Lifespan LS float (frames)
 
 ### Miscellaneous:
 - [ ] Pressing the 'P' key pauses the game.

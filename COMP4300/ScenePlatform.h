@@ -9,16 +9,18 @@
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan> ComponentTuple;
 
     enum class EntityTag
     {
         Player,
         Background,
-        Tile
+        Tile,
+        Blade
     };
 
-    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, trapViewRatio; };
+    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, bulletSpeed, trapViewRatio; };
+    struct BulletConfig { float speed, rotation, lifespan; };
 
     ScenePlatform(goldenhand::GameEngine& engine);
 
@@ -36,6 +38,7 @@ private:
     EntityManager mEntityManager;
 
     PlayerConfig mPlayerConfig;
+    BulletConfig mBulletConfig;
     std::shared_ptr<Entity> mPlayer;
 
     goldenhand::Physics mPhysics;
@@ -46,7 +49,9 @@ private:
     void sMovement();
     void sPhysics();
     void sAnimation();
+    void sLifeSpan();
     void spawnPlayer();
+    void shootBlade();
 
     const char* mLevel = "./config/level1.txt";
     void saveLevel();
