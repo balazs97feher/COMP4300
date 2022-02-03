@@ -15,6 +15,7 @@ SceneMenu::SceneMenu(goldenhand::GameEngine& engine) : Scene{engine}, mInactiveC
     registerKbdAction(sf::Keyboard::Up, ActionType::MoveUp);
     registerKbdAction(sf::Keyboard::Down, ActionType::MoveDown);
     registerKbdAction(sf::Keyboard::Enter, ActionType::Select);
+    registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
 
     initialize();
 }
@@ -35,10 +36,13 @@ void SceneMenu::initialize()
 
 void SceneMenu::update()
 {
-    for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
-    mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
+    if (!mHasEnded)
+    {
+        for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
+        mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
 
-    mCurrentFrame++;
+        mCurrentFrame++;
+    }
 }
 
 void SceneMenu::sDoAction(const goldenhand::Action action)
@@ -57,6 +61,10 @@ void SceneMenu::sDoAction(const goldenhand::Action action)
             break;
         case ActionType::Select:
             mItems[mSelectedIdx].execute();
+            break;
+        case ActionType::Quit:
+            mHasEnded = true;
+            mEngine.quit();
             break;
         default:
             break;

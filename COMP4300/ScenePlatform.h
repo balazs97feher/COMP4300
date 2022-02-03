@@ -43,6 +43,7 @@ private:
 
     goldenhand::Physics mPhysics;
     bool mDrawBB;
+    bool mTextureDraw;
     sf::RectangleShape mBB;
 
     void sView();

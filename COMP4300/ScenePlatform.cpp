@@ -13,7 +13,7 @@
 using namespace std;
 
 ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
-    : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }, mCloneSelected{ false }
+    : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }, mTextureDraw{ true }, mCloneSelected{ false }
 {
     using namespace goldenhand;
 
@@ -27,6 +27,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     registerKbdAction(sf::Keyboard::Space, ActionType::Shoot);
     registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
     registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
+    registerKbdAction(sf::Keyboard::T, ActionType::ToggleTextureDraw);
     registerKbdAction(sf::Keyboard::C, ActionType::Clone);
     registerKbdAction(sf::Keyboard::L, ActionType::Save);
 
@@ -116,6 +117,9 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::ToggleBBDraw:
         if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
         break;
+    case ActionType::ToggleTextureDraw:
+        if (action.getEventType() == InputEventType::Released) mTextureDraw = !mTextureDraw;
+        break;
     case ActionType::MoveLeft:
         if (action.getEventType() == InputEventType::Pressed) velocity = { -mPlayerConfig.runSpeed, velocity.y };
         else velocity = sf::Vector2f{ 0.f, velocity.y };
@@ -162,7 +166,7 @@ void ScenePlatform::sRender()
 {
     for (const auto& entity : mEntityManager.getEntities())
     {
-        if (entity->hasComponent<CAnimation>())
+        if (mTextureDraw && entity->hasComponent<CAnimation>())
         {
             auto& sprite = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSprite();
             sprite.setPosition(entity->getComponent<CTransform>().pos);

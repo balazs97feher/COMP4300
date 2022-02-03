@@ -22,6 +22,7 @@ namespace goldenhand
         Quit,
         Select,
         ToggleBBDraw,
+        ToggleTextureDraw,
         Clone,
         Save
     };

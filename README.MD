@@ -43,10 +43,8 @@ See below for Animation asset specification.
 Animation's hasEnded() returns true (has finished one cycle).
 
 ### Decoration Entities:
-- [x] Decoration entities are simply drawn to the screen,
-and do not interact with any other entities in the game in any way.
-- [x] Decorations can be given any Animation in the game, but intuitively they
-should be reserved for things like clouds, bushes, etc.
+- [x] Decoration entities are simply drawn to the screen, and do not interact with any other entities in the game in any way.
+- [x] Decorations can be given any Animation in the game, but intuitively they should be reserved for things like clouds, bushes, etc.
 
 ### Tiles:
 - [x] Tiles are Entities that define the level geometry and interact with players.
@@ -114,10 +112,9 @@ All (GX, GY) positions given in the level specification file are given in "grid'
   - Lifespan LS float (frames)
 
 ### Miscellaneous:
-- [ ] Pressing the 'P' key pauses the game.
-- [ ] Pressing the 'T' key toggles drawing textures.
+- [x] Pressing the 'T' key toggles drawing textures.
 - [x] Pressing the 'B' key toggles drawing bounding boxes of entities.
-- [ ] The 'ESC' key should go 'back' to the Main Menu, or quit if on the Main Menu.
+- [x] The 'ESC' key should go 'back' to the Main Menu, or quit if on the Main Menu.
 
 ### Asset Sources:
 - [MegaMan](https://www.spriters-resource.com/fullview/157067/)
