@@ -194,17 +194,16 @@ void ScenePlatform::sView()
     const auto& view = mEngine.getView();
     const auto& playerPos = mPlayer->getComponent<CTransform>().pos;
 
-    if (playerPos.x < ((wSize.x - wSize.x * mPlayerConfig.trapViewRatio) / 2.f))
+    if (playerPos.x > ((wSize.x - wSize.x * mPlayerConfig.trapViewRatio) / 2.f))
     {
-        return;
-    }
-    else if (playerPos.x < (view.getCenter().x - wSize.x * mPlayerConfig.trapViewRatio / 2.f))
-    {
-        mEngine.setView(sf::View{ {playerPos.x + (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
-    }
-    else if(playerPos.x > (view.getCenter().x + wSize.x * mPlayerConfig.trapViewRatio / 2.f))
-    {
-        mEngine.setView(sf::View{ {playerPos.x - (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
+        if (playerPos.x < (view.getCenter().x - wSize.x * mPlayerConfig.trapViewRatio / 2.f))
+        {
+            mEngine.setView(sf::View{ {playerPos.x + (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
+        }
+        else if(playerPos.x > (view.getCenter().x + wSize.x * mPlayerConfig.trapViewRatio / 2.f))
+        {
+            mEngine.setView(sf::View{ {playerPos.x - (wSize.x * mPlayerConfig.trapViewRatio / 2.f), wSize.y / 2}, wSize });
+        }
     }
 
     for (auto& background : mEntityManager.getEntities(EntityTag::Background))
@@ -321,6 +320,15 @@ void ScenePlatform::sLifeSpan()
                 entity->destroy();
             }
         }
+    }
+
+    // respawn player when falls down
+    if (mPlayer->getComponent<CTransform>().pos.y > mEngine.windowSize().y)
+    {
+        mPlayer->destroy();
+        spawnPlayer();
+        const sf::Vector2f wSize(mEngine.windowSize().x, mEngine.windowSize().y);
+        mEngine.setView(sf::View{ {wSize.x / 2, wSize.y / 2}, wSize });
     }
 }
 
