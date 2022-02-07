@@ -236,7 +236,8 @@ void ScenePlatform::sMovement()
     for (auto entity : mEntityManager.getEntities())
     {
         if (entity->tag() == EntityTag::Player) continue;
-
+        if (entity->hasComponent<CDraggable>() && entity->getComponent<CDraggable>().dragging) continue;
+        
         entity->getComponent<CTransform>().setPos(entity->getComponent<CTransform>().pos + entity->getComponent<CTransform>().velocity);
 
         if (entity->tag() == EntityTag::Blade)
