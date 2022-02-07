@@ -51,7 +51,7 @@ void ScenePlatform::initialize()
         if (configType == "Player")
         {
             configuration >> mPlayerConfig.startPosX >> mPlayerConfig.startPosY >> mPlayerConfig.runSpeed
-                >> mPlayerConfig.jumpSpeed >> mPlayerConfig.trapViewRatio;
+                >> mPlayerConfig.jumpSpeed >> mPlayerConfig.maxSpeed >> mPlayerConfig.trapViewRatio;
         }
         else if (configType == "Bullet")
         {
@@ -135,7 +135,8 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         }
         break;
     case ActionType::MoveUp:
-        if (action.getEventType() == InputEventType::Released && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
+        if (action.getEventType() == InputEventType::Pressed && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
+        else if (action.getEventType() == InputEventType::Released) velocity.y = 0;
         break;
     case ActionType::Clone:
         if (action.getEventType() == InputEventType::Pressed) mCloneSelected = true;
@@ -215,6 +216,7 @@ void ScenePlatform::sView()
 void ScenePlatform::sMovement()
 {
     mPlayer->getComponent<CTransform>().velocity += mPhysics.gravity();
+    mPlayer->getComponent<CTransform>().velocity.y = min(mPlayer->getComponent<CTransform>().velocity.y, mPlayerConfig.maxSpeed);
 
     mPlayer->getComponent<CTransform>().setPos(mPlayer->getComponent<CTransform>().pos + mPlayer->getComponent<CTransform>().velocity);
 

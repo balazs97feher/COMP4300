@@ -1,4 +1,4 @@
-Player 100 200 3 10 0.2
+Player 100 200 3 10 15 0.2
 Bullet 15 50 90
 Background sky
 Tile grass_tile 25  800

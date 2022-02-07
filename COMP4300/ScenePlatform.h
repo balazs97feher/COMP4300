@@ -19,7 +19,7 @@ public:
         Blade
     };
 
-    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, bulletSpeed, trapViewRatio; };
+    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, bulletSpeed, trapViewRatio; };
     struct BulletConfig { float speed, rotation, lifespan; };
 
     ScenePlatform(goldenhand::GameEngine& engine);

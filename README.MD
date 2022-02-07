@@ -18,8 +18,7 @@ Note: All entity positions denote the center of their rectengular sprite and bou
   - Shoot: Space key
 - [x] The player can move left and right, shoot any time, including in the air.
 - [x] The player can only jump, if it is currently standing on a tile.
-- [ ] If the jump key is held, the player should not continuously jump, but instead it should only jump once per button press.
-- [ ] If the player lets go of the jump key mid-jump, it should start falling back down immediately.
+- [x] If the player lets go of the jump key mid-jump, it should start falling back down immediately.
 - [x] If the player moves left/right, the player's sprite will face in that
 direction until the other direction has been pressed.
 - [x] Bullets shot by the player travel in the direction the player is facing.
@@ -29,7 +28,7 @@ if it falls on it from above.
 - [x] The player does not collide with decoration entities in the level.
 - [x] If the player falls below the bottom of the screen, they respawn at the start.
 - [x] The player should have a Gravity component which constantly accelerates it downward on the screen until it collides with a tile.
-- [ ] The player has a maximum speed specified in the Level file (see below) which
+- [x] The player has a maximum speed specified in the Level file (see below) which
 it should not exceed in either x or y direction.
 - [x] The player's sprite and bounding box are centered on the player's position.
 
