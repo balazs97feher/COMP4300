@@ -81,6 +81,7 @@ void ScenePlatform::initialize()
     }
 
     spawnPlayer();
+    spawnRobot();
 }
 
 void ScenePlatform::update()
@@ -256,15 +257,19 @@ void ScenePlatform::sPhysics()
 {
     for (auto& one : mEntityManager.getEntities())
     {
-        if (one->tag() == EntityTag::Tile)
-        {
-            if (const auto overlap = goldenhand::Physics::boxesOverlap(mPlayer->getComponent<CTransform>().pos, mPlayer->getComponent<CBoundingBox>().halfSize,
-                one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize))
-            {
-                auto& transform = mPlayer->getComponent<CTransform>();
+        if (!one->hasComponent<CBoundingBox>()) continue;
 
-                const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, mPlayer->getComponent<CBoundingBox>().halfSize,
-                    one->getComponent<CTransform>().prevPos, one->getComponent<CBoundingBox>().halfSize);
+        for (auto& tile : mEntityManager.getEntities(EntityTag::Tile))
+        {            
+            if (one->tag() == EntityTag::Tile) continue;
+
+            if (const auto overlap = goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
+                tile->getComponent<CTransform>().pos, tile->getComponent<CBoundingBox>().halfSize))
+            {
+                auto& transform = one->getComponent<CTransform>();
+
+                const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, one->getComponent<CBoundingBox>().halfSize,
+                    tile->getComponent<CTransform>().prevPos, tile->getComponent<CBoundingBox>().halfSize);
 
                 // TODO: refine collision resolution
                 if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
@@ -346,6 +351,16 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
+}
+
+void ScenePlatform::spawnRobot()
+{
+    auto robot = mEntityManager.addEntity(EntityTag::Robot);
+
+    robot->addComponent<CTransform>(sf::Vector2f{ 500, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
+    robot->addComponent<CAnimation>(Constants::Animation::robot_running);
+    robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
+    robot->addComponent<CGravity>();
 }
 
 void ScenePlatform::shootBlade()

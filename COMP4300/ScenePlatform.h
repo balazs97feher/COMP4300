@@ -16,7 +16,8 @@ public:
         Player,
         Background,
         Tile,
-        Blade
+        Blade,
+        Robot
     };
 
     struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
@@ -52,6 +53,7 @@ private:
     void sAnimation();
     void sLifeSpan();
     void spawnPlayer();
+    void spawnRobot();
     void shootBlade();
 
     const char* mLevel = "./config/level1.txt";

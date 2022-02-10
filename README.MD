@@ -117,3 +117,4 @@ All (GX, GY) positions given in the level specification file are given in "grid'
 
 ### Asset Sources:
 - [MegaMan](https://www.spriters-resource.com/fullview/157067/)
+- [Robot](https://www.gameart2d.com/the-robot---free-sprites.html)
