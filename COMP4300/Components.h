@@ -112,3 +112,5 @@ public:
 
     CDraggable() : dragging{ false } {}
 };
+
+class CGravity : public goldenhand::Component {};

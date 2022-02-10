@@ -215,20 +215,6 @@ void ScenePlatform::sView()
 
 void ScenePlatform::sMovement()
 {
-    mPlayer->getComponent<CTransform>().velocity += mPhysics.gravity();
-    mPlayer->getComponent<CTransform>().velocity.y = min(mPlayer->getComponent<CTransform>().velocity.y, mPlayerConfig.maxSpeed);
-
-    mPlayer->getComponent<CTransform>().setPos(mPlayer->getComponent<CTransform>().pos + mPlayer->getComponent<CTransform>().velocity);
-
-    if (mPlayer->getComponent<CTransform>().pos.x > mPlayer->getComponent<CTransform>().prevPos.x)
-    {
-        mPlayer->getComponent<CTransform>().angle = 1;
-    }
-    else if (mPlayer->getComponent<CTransform>().pos.x < mPlayer->getComponent<CTransform>().prevPos.x)
-    {
-        mPlayer->getComponent<CTransform>().angle = -1;
-    }
-
     if (mDraggedEntity)
     {
         mDraggedEntity->getComponent<CTransform>().setPos(sf::Vector2f{ static_cast<float>(mEngine.mousePos().x),
@@ -237,12 +223,29 @@ void ScenePlatform::sMovement()
 
     for (auto entity : mEntityManager.getEntities())
     {
-        if (entity->tag() == EntityTag::Player) continue;
         if (entity->hasComponent<CDraggable>() && entity->getComponent<CDraggable>().dragging) continue;
-        
-        entity->getComponent<CTransform>().setPos(entity->getComponent<CTransform>().pos + entity->getComponent<CTransform>().velocity);
+        if (entity->tag() == EntityTag::Tile) continue;
 
-        if (entity->tag() == EntityTag::Blade)
+        if (entity->hasComponent<CGravity>())
+        {
+            entity->getComponent<CTransform>().velocity += mPhysics.gravity();
+            entity->getComponent<CTransform>().velocity.y = min(entity->getComponent<CTransform>().velocity.y, mPlayerConfig.maxSpeed);
+        }
+
+        entity->getComponent<CTransform>().setPos(entity->getComponent<CTransform>().pos + entity->getComponent<CTransform>().velocity);
+        
+        if (entity->tag() != EntityTag::Blade)
+        {
+            if (entity->getComponent<CTransform>().pos.x > entity->getComponent<CTransform>().prevPos.x)
+            {
+                entity->getComponent<CTransform>().angle = 1;
+            }
+            else if (entity->getComponent<CTransform>().pos.x < entity->getComponent<CTransform>().prevPos.x)
+            {
+                entity->getComponent<CTransform>().angle = -1;
+            }
+        }
+        else
         {
             entity->getComponent<CTransform>().angle += 50;
         }
@@ -342,6 +345,7 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
+    mPlayer->addComponent<CGravity>();
 }
 
 void ScenePlatform::shootBlade()
@@ -376,7 +380,7 @@ void ScenePlatform::saveLevel()
     }
     const auto playerPos = mPlayer->getComponent<CTransform>().pos;
     fileStream << "Player " << playerPos.x << " " << playerPos.y << " " << mPlayerConfig.runSpeed
-        << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.trapViewRatio;
+        << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed << " " << mPlayerConfig.trapViewRatio;
 }
 
 std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2f spot)

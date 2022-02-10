@@ -9,7 +9,7 @@
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity> ComponentTuple;
 
     enum class EntityTag
     {
@@ -19,7 +19,7 @@ public:
         Blade
     };
 
-    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, bulletSpeed, trapViewRatio; };
+    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
     struct BulletConfig { float speed, rotation, lifespan; };
 
     ScenePlatform(goldenhand::GameEngine& engine);
