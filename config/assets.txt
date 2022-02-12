@@ -11,6 +11,6 @@ Animation dirt_tile tiles 1 1 0
 Animation grass_tile tiles 0 1 0
 Animation sky sky 0 1 0
 Animation blade blade 0 1 0
-Animation robot_running robot 0 8 4
+Animation robot_running robot 0 8 5
 Sound jump sounds/jump.wav
 Font ayar fonts/ayar.ttf
