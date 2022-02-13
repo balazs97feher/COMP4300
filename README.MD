@@ -78,7 +78,7 @@ There are four different line types in the Assets file, each of which correspond
   - e.g. **Sound jump sounds/jump.wav**
 - Font Asset Specification: **Font N P**
   - Font Name N as string
-  - Font File Path Ð  as string
+  - Font File Path â as string
   - e.g. **Font ayar fonts/ayar.ttf**
 
 Note, that texture sheets must have a horizontal layout, where each frame has the same dimensions.
