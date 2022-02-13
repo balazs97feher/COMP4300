@@ -37,7 +37,7 @@ namespace goldenhand
 
     bool Animation::hasEnded() const
     {
-        return mCurrentFrame == mFrameCount - 1;
+        return !mLoop && (mCurrentFrame == mFrameCount - 1);
     }
 
     sf::Sprite& Animation::getSprite()

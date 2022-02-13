@@ -259,6 +259,7 @@ void ScenePlatform::sPhysics()
     {
         if (!one->hasComponent<CBoundingBox>()) continue;
 
+        // check collision with tiles
         for (auto& tile : mEntityManager.getEntities(EntityTag::Tile))
         {            
             if (one->tag() == EntityTag::Tile) continue;
@@ -314,6 +315,19 @@ void ScenePlatform::sPhysics()
                 }
             }
         }
+
+        // check collision between player and robots
+        for (auto& robot : mEntityManager.getEntities(EntityTag::Robot))
+        {
+            if (one->tag() == EntityTag::Robot || one->tag() == EntityTag::Tile) continue;
+
+            if (one->tag() == EntityTag::Blade && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
+                one->getComponent<CBoundingBox>().halfSize, robot->getComponent<CTransform>().pos, robot->getComponent<CBoundingBox>().halfSize))
+            {
+                one->destroy();
+                destroyRobot(robot);
+            }
+        }
     }
 }
 
@@ -328,11 +342,17 @@ void ScenePlatform::sAnimation()
         if (entity->hasComponent<CAnimation>())
         {
             auto& animation = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
-        
-            if (entity->getComponent<CTransform>().angle == 1) animation.getSprite().setScale(1.f, 1.f);
-            else if (entity->getComponent<CTransform>().angle == -1) animation.getSprite().setScale(-1.f, 1.f);
+            if (animation.hasEnded())
+            {
+                entity->destroy();
+            }
+            else
+            {
+                if (entity->getComponent<CTransform>().angle == 1) animation.getSprite().setScale(1.f, 1.f);
+                else if (entity->getComponent<CTransform>().angle == -1) animation.getSprite().setScale(-1.f, 1.f);
             
-            animation.update();
+                animation.update();
+            }
         }
     }
 }
@@ -379,6 +399,13 @@ void ScenePlatform::spawnRobot()
     robot->addComponent<CAnimation>(Constants::Animation::robot_running);
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
+}
+
+void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
+{
+    robot->getComponent<CTransform>().velocity = {};
+    const auto anim = robot->getComponent<CAnimation>().animation = Constants::Animation::robot_dying;
+    mAssetManager.getAnimation(anim).setLoop(false);
 }
 
 void ScenePlatform::shootBlade()

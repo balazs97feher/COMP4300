@@ -54,6 +54,7 @@ private:
     void sLifeSpan();
     void spawnPlayer();
     void spawnRobot();
+    void destroyRobot(std::shared_ptr<Entity> robot);
     void shootBlade();
 
     const char* mLevel = "./config/level1.txt";

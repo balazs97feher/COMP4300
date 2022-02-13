@@ -38,7 +38,7 @@ See below for Animation asset specification.
 - [x] The Animation class handles frame advancement based on animation speed.
 - [x] Animation::hasEnded() returns true if an animation has finished its last frame, false otherwise.
 - [x] Animations can be repeating (loop forever) or non-repeating (play once).
-- [ ] Any entity with a non-repeating animation should be destroyed once its
+- [x] Any entity with a non-repeating animation should be destroyed once its
 Animation's hasEnded() returns true (has finished one cycle).
 
 ### Decoration Entities:
@@ -49,7 +49,6 @@ Animation's hasEnded() returns true (has finished one cycle).
 - [x] Tiles are Entities that define the level geometry and interact with players.
 - [x] Tiles can be given any Animation that is defined in the Assets file.
 - [x] Tiles will be given a CBoundingBox equal to the size of the animation.
-- [ ] Tiles have different behavior depending on which Animation they are given. (Brick tiles or question tiles)
 
 ### Settings File:
 **Window W H FL FS T**

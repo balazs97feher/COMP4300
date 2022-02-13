@@ -8,6 +8,7 @@ namespace Constants
         constexpr inline const char* megaman_running = "megaman_running";
         constexpr inline const char* megaman_jumping = "megaman_jumping";
         constexpr inline const char* robot_running = "robot_running";
+        constexpr inline const char* robot_dying = "robot_dying";
         constexpr inline const char* blade = "blade";
         constexpr inline const char* dirt_tile = "dirt_tile";
         constexpr inline const char* grass_tile = "grass_tile";
