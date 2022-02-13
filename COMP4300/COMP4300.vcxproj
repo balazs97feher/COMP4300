@@ -167,26 +167,23 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneAnimation.cpp" />
     <ClCompile Include="SceneMenu.cpp" />
-    <ClCompile Include="ScenePlay.cpp" />
-    <ClCompile Include="SceneVision.cpp" />
+    <ClCompile Include="ScenePlatform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Components.h" />
+    <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneAnimation.h" />
     <ClInclude Include="SceneMenu.h" />
-    <ClInclude Include="ScenePlay.h" />
-    <ClInclude Include="SceneVision.h" />
+    <ClInclude Include="ScenePlatform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

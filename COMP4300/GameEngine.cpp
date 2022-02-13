@@ -1,22 +1,47 @@
+#include "ConfigReader.h"
+#include "Constants.h"
 #include "GameEngine.h"
-#include "SceneAnimation.h"
 #include "SceneMenu.h"
-#include "ScenePlay.h"
-#include "SceneVision.h"
+#include "ScenePlatform.h"
 
 #include <SFML/Window/Event.hpp>
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
+namespace fs = std::filesystem;
+using namespace std;
+
 namespace goldenhand
 {
-    GameEngine::GameEngine() : mWindowSize{1280, 1024}, mCurrentScene{SceneId::Play}, mRunning{true}
+    GameEngine::GameEngine() : mCurrentScene{ Constants::Scene::menu }, mRunning{true}
     {
-        mSceneMap[SceneId::Play] = std::make_unique<ScenePlay>(*this);
-        mSceneMap[SceneId::Menu] = std::make_unique<SceneMenu>(*this);
-        mSceneMap[SceneId::Animation] = std::make_unique<SceneAnimation>(*this);
-        mSceneMap[SceneId::Vision] = std::make_unique<SceneVision>(*this);
+    }
 
-        mRenderWindow.create(sf::VideoMode(mWindowSize.x, mWindowSize.y), "Shooter");
-        mRenderWindow.setFramerateLimit(60);
+    void GameEngine::initialize(const std::string& settingsFile)
+    {
+        ConfigReader configuration{ settingsFile };
+
+        string setting;
+        while (!configuration.eof())
+        {
+            configuration >> setting;
+            if (setting == "Window")
+            {
+                int wWidth, wHeight, frameLimit, fullScreenMode;
+                string title;
+                configuration >> wWidth >> wHeight >> frameLimit >> fullScreenMode >> title;
+
+                const uint32_t wStyle = (fullScreenMode == 1) ? (sf::Style::Fullscreen | sf::Style::Default) : sf::Style::Default;
+                mRenderWindow.create(sf::VideoMode(wWidth, wHeight), title, wStyle);
+                mRenderWindow.setFramerateLimit(frameLimit);
+                mWindowSize = mRenderWindow.getSize();
+            }
+        }
+
+        mSceneMap[Constants::Scene::menu] = make_unique<SceneMenu>(*this);
+        mSceneMap[Constants::Scene::platform] = make_unique<ScenePlatform>(*this);
     }
 
     void GameEngine::run()
@@ -34,22 +59,36 @@ namespace goldenhand
         mRunning = false;
     }
 
-    void GameEngine::changeScene(const SceneId id)
+    void GameEngine::changeScene(const std::string& id)
     {
         mCurrentScene = id;
     }
 
-    void GameEngine::createScene(const SceneId id)
+    void GameEngine::createScene(const std::string& id)
     {
-        switch (id)
-        {
-            case SceneId::Play:
-                mSceneMap[id] = std::make_unique<ScenePlay>(*this);
-            default:
-                break;
-        }
+        if (id == Constants::Scene::platform) mSceneMap[id] = make_unique<ScenePlatform>(*this);
 
         changeScene(id);
+    }
+
+    const sf::View& GameEngine::getView() const
+    {
+        return mRenderWindow.getView();
+    }
+
+    void GameEngine::setView(const sf::View& view)
+    {
+        mRenderWindow.setView(view);
+    }
+
+    sf::Vector2f GameEngine::mapPixelToCoords(const sf::Vector2i& point) const
+    {
+        return mRenderWindow.mapPixelToCoords(point);
+    }
+
+    sf::Vector2i GameEngine::mapCoordsToPixel(const sf::Vector2f& point) const
+    {
+        return mRenderWindow.mapCoordsToPixel(point);
     }
 
     sf::Vector2u GameEngine::windowSize() const
@@ -62,7 +101,7 @@ namespace goldenhand
         mRenderWindow.draw(drawable);
     }
 
-    sf::Vector2i GameEngine::mousePos() const
+    sf::Vector2f GameEngine::mousePos() const
     {
         return mMousePos;
     }
@@ -93,10 +132,17 @@ namespace goldenhand
                     currentScene()->sDoAction(Action(actionType, (event.type == sf::Event::KeyPressed) ? InputEventType::Pressed : InputEventType::Released));
                 }
             }
-
+            else if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
+            {
+                if (currentScene()->getMouseActionMap().contains(event.mouseButton.button))
+                {
+                    const auto actionType = currentScene()->getMouseActionMap().at(event.mouseButton.button);
+                    currentScene()->sDoAction(Action(actionType, (event.type == sf::Event::MouseButtonPressed) ? InputEventType::Pressed : InputEventType::Released));
+                }
+            }
             else  if (event.type == sf::Event::MouseMoved)
             {
-                mMousePos = { event.mouseMove.x, event.mouseMove.y };
+                mMousePos = mRenderWindow.mapPixelToCoords({ event.mouseMove.x, event.mouseMove.y });
             }
         }
     }

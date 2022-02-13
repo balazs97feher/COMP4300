@@ -9,7 +9,17 @@ const goldenhand::ActionMap& goldenhand::Scene::getKbdActionMap() const
     return mKbdActionMap;
 }
 
-void goldenhand::Scene::registerAction(const int code, const ActionType action)
+const goldenhand::ActionMap& goldenhand::Scene::getMouseActionMap() const
+{
+    return mMouseActionMap;
+}
+
+void goldenhand::Scene::registerKbdAction(const int code, const ActionType action)
 {
     mKbdActionMap[code] = action;
+}
+
+void goldenhand::Scene::registerMouseAction(const int code, const ActionType action)
+{
+    mMouseActionMap[code] = action;
 }

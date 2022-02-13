@@ -1,3 +1,4 @@
+#include "Constants.h"
 #include "SceneMenu.h"
 #include "GameEngine.h"
 
@@ -11,9 +12,10 @@ SceneMenu::SceneMenu(goldenhand::GameEngine& engine) : Scene{engine}, mInactiveC
 {
     using namespace goldenhand;
 
-    registerAction(sf::Keyboard::Up, ActionType::MoveUp);
-    registerAction(sf::Keyboard::Down, ActionType::MoveDown);
-    registerAction(sf::Keyboard::Enter, ActionType::Select);
+    registerKbdAction(sf::Keyboard::Up, ActionType::MoveUp);
+    registerKbdAction(sf::Keyboard::Down, ActionType::MoveDown);
+    registerKbdAction(sf::Keyboard::Enter, ActionType::Select);
+    registerKbdAction(sf::Keyboard::Escape, ActionType::Quit);
 
     initialize();
 }
@@ -26,33 +28,21 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    auto continueGame = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Play);
+    auto goToPlatform = [this]() {
+        this->mEngine.changeScene(Constants::Scene::platform);
     };
-    addItem("CONTINUE", continueGame);
-
-    auto restartGame = [this]() {
-        this->mEngine.createScene(goldenhand::SceneId::Play);
-    };
-    addItem("RESTART", restartGame);
-
-    auto goToAnimation = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Animation);
-    };
-    addItem("ANIMATION PLAYGROUND", goToAnimation);
-
-    auto goToVision = [this]() {
-        this->mEngine.changeScene(goldenhand::SceneId::Vision);
-    };
-    addItem("VISION", goToVision);
+    addItem("PLATFORM", goToPlatform);
 }
 
 void SceneMenu::update()
 {
-    for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
-    mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
+    if (!mHasEnded)
+    {
+        for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
+        mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
 
-    mCurrentFrame++;
+        mCurrentFrame++;
+    }
 }
 
 void SceneMenu::sDoAction(const goldenhand::Action action)
@@ -71,6 +61,10 @@ void SceneMenu::sDoAction(const goldenhand::Action action)
             break;
         case ActionType::Select:
             mItems[mSelectedIdx].execute();
+            break;
+        case ActionType::Quit:
+            mHasEnded = true;
+            mEngine.quit();
             break;
         default:
             break;

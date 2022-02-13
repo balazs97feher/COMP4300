@@ -30,6 +30,24 @@ public:
     CTransform() = default;
     CTransform(const sf::Vector2f& p, const sf::Vector2f& v, const float a)
         : pos{ p }, prevPos{ p }, velocity{ v }, angle{ a } {}
+
+    void setPos(const sf::Vector2f newPos)
+    {
+        prevPos = pos;
+        pos = newPos;
+    }
+
+    void setPosX(const float newX)
+    {
+        prevPos.x = pos.x;
+        pos.x = newX;
+    }
+
+    void setPosY(const float newY)
+    {
+        prevPos.y = pos.y;
+        pos.y = newY;
+    }
 };
 
 class CAnimation : public goldenhand::Component
@@ -62,16 +80,10 @@ class CBoundingBox : public goldenhand::Component
 public:
     sf::Vector2f size;
     sf::Vector2f halfSize;
-    sf::RectangleShape rect;
 
     CBoundingBox() = default;
-    CBoundingBox(const sf::Vector2f& s) : size{ s }, halfSize{ s.x / 2, s.y / 2 }, rect{ size }
-    {
-        rect.setOrigin(halfSize);
-        rect.setFillColor(sf::Color{ 255, 255, 255, 0 });
-        rect.setOutlineColor(sf::Color{ 255, 255, 255 });
-        rect.setOutlineThickness(1);
-    }
+    CBoundingBox(const sf::Vector2f& s) : size{ s }, halfSize{ s.x / 2, s.y / 2 } {}
+    CBoundingBox(const sf::Vector2u& s) : CBoundingBox{ sf::Vector2f{ static_cast<float>(s.x), static_cast<float>(s.y) } } {}
 };
 
 class CScore : public goldenhand::Component
@@ -92,3 +104,13 @@ public:
     CLifeSpan() = default;
     CLifeSpan(const int t) : remaining{ t }, total{ t } {}
 };
+
+class CDraggable : public goldenhand::Component
+{
+public:
+    bool dragging;
+
+    CDraggable() : dragging{ false } {}
+};
+
+class CGravity : public goldenhand::Component {};

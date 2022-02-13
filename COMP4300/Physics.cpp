@@ -26,6 +26,15 @@ namespace goldenhand
         return nullopt;
     }
 
+    sf::Vector2f Physics::boxesDimensionalOverlap(const sf::Vector2f& oneCenterPos, const sf::Vector2f& oneHalfSize, const sf::Vector2f& otherCenterPos, const sf::Vector2f& otherHalfSize)
+    {
+        const auto distVec = oneCenterPos - otherCenterPos;
+        const auto dx = abs(distVec.x);
+        const auto dy = abs(distVec.y);
+
+        return { oneHalfSize.x + otherHalfSize.y - dx, oneHalfSize.y + otherHalfSize.y - dy };
+    }
+
     std::optional<sf::Vector2f> Physics::lineSegmentsIntersect(const sf::Vector2f& startL1, const sf::Vector2f& endL1,
         const sf::Vector2f& startL2, const sf::Vector2f& endL2)
     {
@@ -45,5 +54,10 @@ namespace goldenhand
     float Physics::crossProduct(const sf::Vector2f& one, const sf::Vector2f& other)
     {
         return one.x * other.y - other.x * one.y;
+    }
+
+    sf::Vector2f Physics::gravity() const
+    {
+        return mGravity;
     }
 } // namespace goldenhand

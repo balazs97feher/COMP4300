@@ -9,15 +9,6 @@ namespace goldenhand
     class GameEngine;
     
     typedef std::unordered_map<int, ActionType> ActionMap;
-    
-    // todo: unique id for scenes without having to change Scene base class
-    enum class SceneId
-    {
-        Menu,
-        Play,
-        Animation,
-        Vision
-    };
 
     class Scene
     {
@@ -31,7 +22,9 @@ namespace goldenhand
         virtual void sRender() = 0;
 
         const ActionMap& getKbdActionMap() const;
-        void registerAction(const int code, const ActionType action);
+        const ActionMap& getMouseActionMap() const;
+        void registerKbdAction(const int code, const ActionType action);
+        void registerMouseAction(const int code, const ActionType action);
 
     protected:
         GameEngine& mEngine;
@@ -39,5 +32,6 @@ namespace goldenhand
         bool mPaused;
         bool mHasEnded;
         ActionMap mKbdActionMap;
+        ActionMap mMouseActionMap;
     };
 } // namespace goldenhand

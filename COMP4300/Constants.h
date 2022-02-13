@@ -2,15 +2,14 @@
 
 namespace Constants
 {
-    namespace Texture
-    {
-        constexpr inline const char* megaman = "megaman";
-        constexpr inline const char* tiles = "tiles";
-    }
     namespace Animation
     {
         constexpr inline const char* megaman_standing = "megaman_standing";
         constexpr inline const char* megaman_running = "megaman_running";
+        constexpr inline const char* megaman_jumping = "megaman_jumping";
+        constexpr inline const char* robot_running = "robot_running";
+        constexpr inline const char* robot_dying = "robot_dying";
+        constexpr inline const char* blade = "blade";
         constexpr inline const char* dirt_tile = "dirt_tile";
         constexpr inline const char* grass_tile = "grass_tile";
     }
@@ -21,5 +20,10 @@ namespace Constants
     namespace Font
     {
         constexpr inline const char* ayar = "ayar";
+    }
+    namespace Scene
+    {
+        constexpr inline const char* menu = "menu";
+        constexpr inline const char* platform = "platform";
     }
 }

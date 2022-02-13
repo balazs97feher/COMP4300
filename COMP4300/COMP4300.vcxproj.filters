@@ -36,19 +36,13 @@
     <ClCompile Include="Physics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SceneVision.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="ScenePlay.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="SceneMenu.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="SceneAnimation.cpp">
+    <ClCompile Include="ScenePlatform.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,17 +77,14 @@
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="SceneAnimation.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="SceneMenu.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="ScenePlay.h">
+    <ClInclude Include="ScenePlatform.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="SceneVision.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="ConfigReader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

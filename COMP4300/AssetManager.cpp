@@ -1,9 +1,9 @@
 #include "AssetManager.h"
+#include "ConfigReader.h"
 
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "AssetManager.h"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -16,15 +16,7 @@ namespace goldenhand
 
     void AssetManager::loadAssets()
     {
-        const fs::path assetFile{ mPathToAssets + "assets.txt"};
-        if (!fs::exists(assetFile))
-        {
-            cerr << "Asset file " << assetFile.string() << " does not exist." << endl;
-            exit(-1);
-        }
-
-        std::ifstream assets{ assetFile };
-        if (!assets.is_open()) exit(-1);
+        ConfigReader assets{ mPathToAssets + "assets.txt" };
 
         string assetType, assetName, assetPath, textureName;
         int startFrame, frameCount, speed;
