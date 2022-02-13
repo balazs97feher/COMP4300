@@ -1,62 +1,10 @@
-## Program Specification
+## COMP4300
+Building a custom 2D game engine following the public lectures of *Introduction to Game Programming (C++)* [course](https://www.youtube.com/watch?v=LpEdZbUdDe4&list=PL_xRyXins848jkwC9Coy7B4N5XTOnQZzz) of the Memorial University of Newfoundland, using [SFML](https://www.sfml-dev.org/index.php).
 
-The game must have the following features:
+Assignments:
+- [assignment 02](https://github.com/balazs97feher/COMP4300/tree/assignment-02)
+- [assignment 03](https://github.com/balazs97feher/COMP4300/tree/assignment-03)
 
-### Assets:
-- [x] Entities in the game will be rendered using various Textures and Animations, which we will be calling Asssets (along with Fonts).
-- [x] Assets are loaded once at the beginning of the program and stored in the Assets class, which is stored by the GameEngine class.
-- [x] All assets are defined in assets.txt, with the syntax defined below.
-
-Note: All entity positions denote the center of their rectengular sprite and bounding box (if it has one).
-
-### Player:
-- [x] The player entity in the game is represented by Megaman, which has several different Animations. The state of the player is to be determined and assigned the appropriate Animation.
-- [x] The player moves with the following controls:
-  - Jump: 'W' key
-  - Left: 'A' key
-  - Right: 'D' key
-  - Shoot: Space key
-- [x] The player can move left and right, shoot any time, including in the air.
-- [x] The player can only jump, if it is currently standing on a tile.
-- [x] If the player lets go of the jump key mid-jump, it should start falling back down immediately.
-- [x] If the player moves left/right, the player's sprite will face in that
-direction until the other direction has been pressed.
-- [x] Bullets shot by the player travel in the direction the player is facing.
-- [x] The player collides with 'Tile' entities in the level (see level syntax) and
-cannot move through them. The player lands on a Tile entity and stands in place
-if it falls on it from above.
-- [x] The player does not collide with decoration entities in the level.
-- [x] If the player falls below the bottom of the screen, they respawn at the start.
-- [x] The player should have a Gravity component which constantly accelerates it downward on the screen until it collides with a tile.
-- [x] The player has a maximum speed specified in the Level file (see below) which
-it should not exceed in either x or y direction.
-- [x] The player's sprite and bounding box are centered on the player's position.
-
-### Animations:
-See below for Animation asset specification.
-- [x] Animations are implemented by storing multiple frames inside a texture.
-- [x] The Animation class handles frame advancement based on animation speed.
-- [x] Animation::hasEnded() returns true if an animation has finished its last frame, false otherwise.
-- [x] Animations can be repeating (loop forever) or non-repeating (play once).
-- [x] Any entity with a non-repeating animation should be destroyed once its
-Animation's hasEnded() returns true (has finished one cycle).
-
-### Decoration Entities:
-- [x] Decoration entities are simply drawn to the screen, and do not interact with any other entities in the game in any way.
-- [x] Decorations can be given any Animation in the game, but intuitively they should be reserved for things like clouds, bushes, etc.
-
-### Tiles:
-- [x] Tiles are Entities that define the level geometry and interact with players.
-- [x] Tiles can be given any Animation that is defined in the Assets file.
-- [x] Tiles will be given a CBoundingBox equal to the size of the animation.
-
-### Settings File:
-**Window W H FL FS T**
-  - W - Window Width as integer
-  - H - Window Height as integer
-  - FL - Frame Limit as integer
-  - FS - Full Screen Mode (0 or 1)
-  - T - Window Title as string
 
 ### Assets Configuration:
 There are four different line types in the Assets file, each of which correspond to a different type of Asset. They are as follows:
@@ -82,38 +30,3 @@ There are four different line types in the Assets file, each of which correspond
   - e.g. **Font ayar fonts/ayar.ttf**
 
 Note, that texture sheets must have a horizontal layout, where each frame has the same dimensions.
-
-### Level Configuration
-Game levels will be specified by a Level file, which will contain a list of entity specifications, one per line. It will also contain a single line which specifies properties of the player in that level. In this way, you can define an entire level in the data file, rather than in programming code. The syntax of the lines of the Level file are as follows.
-
-IMPORTANT NOTE:
-All (GX, GY) positions given in the level specification file are given in "grid' coordinates. The 'grid' cells are of size 64 by 64 pixels, and the entity should be positioned such that the bottom left corner of its texture is aligned with the bottom left corner of the given grid coordinate. The grid starts at (0,0) in the bottom-left of the screen, and can be seen by pressing the 'G' key while the game is running.
-
-- Tile Entity Specification: **Tile N GX GY**
-  - Animation Name N as string (Animation asset name for this tile)
-  - Grid X Pos GX float
-  - Grid Y Pos GY float
-- Decoration Entity Specification: **Dec NX Y**
-  - Animation Name N as string (Animation asset name for this tile)
-  - X Position X float
-  - Y Position Y float
-- Player Specification: **Player GX GY SX SY SM TVR**
-  - Grid X Pos GX float
-  - Grid Y Pos GY float
-  - Left/Right Speed SX float
-  - Jump Speed SY float
-  - Max Speed SM float
-  - Trap View Ratio TVR float (the ratio of the horizontal trap view length and the window width)
-- Bullet Specification: **Bullet S R LS**
-  - Speed S float
-  - Rotation R float (radian per frame)
-  - Lifespan LS float (frames)
-
-### Miscellaneous:
-- [x] Pressing the 'T' key toggles drawing textures.
-- [x] Pressing the 'B' key toggles drawing bounding boxes of entities.
-- [x] The 'ESC' key should go 'back' to the Main Menu, or quit if on the Main Menu.
-
-### Asset Sources:
-- [MegaMan](https://www.spriters-resource.com/fullview/157067/)
-- [Robot](https://www.gameart2d.com/the-robot---free-sprites.html)
