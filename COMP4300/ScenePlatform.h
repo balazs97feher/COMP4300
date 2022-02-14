@@ -9,7 +9,7 @@
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown> ComponentTuple;
 
     enum class EntityTag
     {
@@ -52,10 +52,20 @@ private:
     void sPhysics();
     void sAnimation();
     void sLifeSpan();
+    void sRobotAttack();
+
     void spawnPlayer();
+    /*
+    * Spawns a blade from the position of the shooter into the direction defined by the dir vector
+    */
+    void shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir);
+    
     void spawnRobot();
     void destroyRobot(std::shared_ptr<Entity> robot);
-    void shootBlade();
+    /*
+    * Returns a direction vector from the robot to the player, if the player is visible
+    */
+    std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
 
     const char* mLevel = "./config/level1.txt";
     void saveLevel();

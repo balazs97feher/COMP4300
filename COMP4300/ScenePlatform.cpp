@@ -93,6 +93,7 @@ void ScenePlatform::update()
         sLifeSpan();
         sView();
         sMovement();
+        sRobotAttack();
         sPhysics();
         sAnimation();
         sRender();
@@ -132,7 +133,7 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::Shoot:
         if (action.getEventType() == InputEventType::Released)
         {
-            shootBlade();
+            shootBlade(mPlayer, mEngine.mousePos() - mPlayer->getComponent<CTransform>().pos);
         }
         break;
     case ActionType::MoveUp:
@@ -381,6 +382,24 @@ void ScenePlatform::sLifeSpan()
     }
 }
 
+void ScenePlatform::sRobotAttack()
+{
+    for (auto robot : mEntityManager.getEntities(EntityTag::Robot))
+    {
+        if (auto& rem = robot->getComponent<CCooldown>().remaining; rem > 0)
+        {
+            rem--;
+            continue;
+        }
+        
+        if (const auto dir = playerWithinSight(robot))
+        {
+            shootBlade(robot, dir.value());
+            robot->getComponent<CCooldown>().remaining = 60;
+        }
+    }
+}
+
 void ScenePlatform::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
@@ -399,6 +418,7 @@ void ScenePlatform::spawnRobot()
     robot->addComponent<CAnimation>(Constants::Animation::robot_running);
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
+    robot->addComponent<CCooldown>();
 }
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
@@ -408,13 +428,36 @@ void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
     mAssetManager.getAnimation(anim).setLoop(false);
 }
 
-void ScenePlatform::shootBlade()
+std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Entity> robot)
 {
+    for (const auto entity : mEntityManager.getEntities())
+    {
+        if (entity->tag() != EntityTag::Player && entity->tag() != EntityTag::Background && entity->tag() != EntityTag::Robot &&
+            entity->tag() != EntityTag::Blade)
+        {
+            const auto& animEntity = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
+
+            if (goldenhand::Physics::lineSegmentRectangleIntersect(mPlayer->getComponent<CTransform>().pos, robot->getComponent<CTransform>().pos,
+                entity->getComponent<CTransform>().pos, {animEntity.getSize().x / 2.f, animEntity.getSize().y / 2.f}))
+            {
+                return std::nullopt;
+            }
+        }
+    }
+
+    return mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos;
+}
+
+void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
+{
+    const float angle = atan2(dir.y, dir.x);
+    const auto halfBBDiam = sqrtf(pow(shooter->getComponent<CBoundingBox>().halfSize.x, 2) + pow(shooter->getComponent<CBoundingBox>().halfSize.y, 2));
+    const auto bladeSize = mAssetManager.getAnimation(Constants::Animation::blade).getSize().x;
+    const sf::Vector2f offset{ (halfBBDiam + bladeSize) * cos(angle), (halfBBDiam + bladeSize) * sin(angle) };
+
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
-
-    const int direction = mPlayer->getComponent<CTransform>().angle;
-
-    blade->addComponent<CTransform>(mPlayer->getComponent<CTransform>().pos, sf::Vector2f{ direction * mBulletConfig.speed, .0f }, .0f);
+    blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos + offset,
+        sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
     blade->addComponent<CAnimation>(Constants::Animation::blade);
     blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
     blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);

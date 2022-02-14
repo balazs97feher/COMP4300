@@ -30,6 +30,12 @@ namespace goldenhand
         static std::optional<sf::Vector2f> lineSegmentsIntersect(const sf::Vector2f& startL1, const sf::Vector2f& endL1,
             const sf::Vector2f& startL2, const sf::Vector2f& endL2);
 
+        /*
+        * Returns the intersection point of a line segment and a rectangle
+        */
+        static std::optional<sf::Vector2f> lineSegmentRectangleIntersect(const const sf::Vector2f& startLine, const sf::Vector2f& endLine,
+            const sf::Vector2f& rectPos, const sf::Vector2f& rectHalfSize);
+
         static float crossProduct(const sf::Vector2f & one, const sf::Vector2f & other);
 
         template<typename T>

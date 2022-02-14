@@ -114,3 +114,11 @@ public:
 };
 
 class CGravity : public goldenhand::Component {};
+
+class CCooldown : public goldenhand::Component
+{
+public:
+    int remaining;
+
+    CCooldown() : remaining{ 0 } {}
+};

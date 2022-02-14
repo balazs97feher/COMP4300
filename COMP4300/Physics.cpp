@@ -51,6 +51,21 @@ namespace goldenhand
         return nullopt;
     }
 
+    std::optional<sf::Vector2f> Physics::lineSegmentRectangleIntersect(const const sf::Vector2f& startLine, const sf::Vector2f& endLine, const sf::Vector2f& rectPos, const sf::Vector2f& rectHalfSize)
+    {
+        const sf::Vector2f topLeftCorner{ rectPos.x - rectHalfSize.x, rectPos.y - rectHalfSize.y };
+        const sf::Vector2f bottomLeftCorner{ rectPos.x - rectHalfSize.x, rectPos.y + rectHalfSize.y };
+        const sf::Vector2f bottomRightCorner{ rectPos.x + rectHalfSize.x, rectPos.y + rectHalfSize.y };
+        const sf::Vector2f topRightCorner{ rectPos.x + rectHalfSize.x, rectPos.y - rectHalfSize.y };
+
+        if (const auto top = lineSegmentsIntersect(startLine, endLine, topRightCorner, topLeftCorner)) return top;
+        if (const auto left = lineSegmentsIntersect(startLine, endLine, topLeftCorner, bottomLeftCorner)) return left;
+        if (const auto bottom = lineSegmentsIntersect(startLine, endLine, bottomLeftCorner, bottomRightCorner)) return bottom;
+        if (const auto right = lineSegmentsIntersect(startLine, endLine, bottomRightCorner, topRightCorner)) return right;
+
+        return nullopt;
+    }
+
     float Physics::crossProduct(const sf::Vector2f& one, const sf::Vector2f& other)
     {
         return one.x * other.y - other.x * one.y;
