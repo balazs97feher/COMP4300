@@ -6,6 +6,8 @@
 #include "Physics.h"
 #include "Scene.h"
 
+#include <unordered_map>
+
 class ScenePlatform : public goldenhand::Scene
 {
 public:
@@ -59,6 +61,10 @@ private:
     * Spawns a blade from the position of the shooter into the direction defined by the dir vector
     */
     void shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir);
+    /*
+    * Maps the id of each blade to the entity that spawned it
+    */
+    std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
     
     void spawnRobot();
     void destroyRobot(std::shared_ptr<Entity> robot);

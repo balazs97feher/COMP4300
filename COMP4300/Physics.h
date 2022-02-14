@@ -33,7 +33,7 @@ namespace goldenhand
         /*
         * Returns the intersection point of a line segment and a rectangle
         */
-        static std::optional<sf::Vector2f> lineSegmentRectangleIntersect(const const sf::Vector2f& startLine, const sf::Vector2f& endLine,
+        static std::optional<sf::Vector2f> lineSegmentRectangleIntersect(const sf::Vector2f& startLine, const sf::Vector2f& endLine,
             const sf::Vector2f& rectPos, const sf::Vector2f& rectHalfSize);
 
         static float crossProduct(const sf::Vector2f & one, const sf::Vector2f & other);

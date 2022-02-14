@@ -317,15 +317,17 @@ void ScenePlatform::sPhysics()
             }
         }
 
-        // check collision between player and robots
+        // check collision between blades and robots
         for (auto& robot : mEntityManager.getEntities(EntityTag::Robot))
         {
             if (one->tag() == EntityTag::Robot || one->tag() == EntityTag::Tile) continue;
+            if (one->tag() == EntityTag::Blade && mBladeOrigin[one->id()] == robot->id()) continue;
 
             if (one->tag() == EntityTag::Blade && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
                 one->getComponent<CBoundingBox>().halfSize, robot->getComponent<CTransform>().pos, robot->getComponent<CBoundingBox>().halfSize))
             {
                 one->destroy();
+                mBladeOrigin.erase(one->id());
                 destroyRobot(robot);
             }
         }
@@ -368,6 +370,7 @@ void ScenePlatform::sLifeSpan()
             if (entity->getComponent<CLifeSpan>().remaining == 0)
             {
                 entity->destroy();
+                if (entity->tag() == EntityTag::Blade) mBladeOrigin.erase(entity->id());
             }
         }
     }
@@ -451,16 +454,14 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
 {
     const float angle = atan2(dir.y, dir.x);
-    const auto halfBBDiam = sqrtf(pow(shooter->getComponent<CBoundingBox>().halfSize.x, 2) + pow(shooter->getComponent<CBoundingBox>().halfSize.y, 2));
-    const auto bladeSize = mAssetManager.getAnimation(Constants::Animation::blade).getSize().x;
-    const sf::Vector2f offset{ (halfBBDiam + bladeSize) * cos(angle), (halfBBDiam + bladeSize) * sin(angle) };
 
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
-    blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos + offset,
-        sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
+    blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos, sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
     blade->addComponent<CAnimation>(Constants::Animation::blade);
     blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
     blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);
+
+    mBladeOrigin[blade->id()] = shooter->id();
 }
 
 void ScenePlatform::saveLevel()
