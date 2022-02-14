@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include "GameEngine.h"
 #include "ScenePlatform.h"
+#include "Utils.h"
 
 #include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -240,11 +241,11 @@ void ScenePlatform::sMovement()
         {
             if (entity->getComponent<CTransform>().pos.x > entity->getComponent<CTransform>().prevPos.x)
             {
-                entity->getComponent<CTransform>().angle = 1;
+                entity->getComponent<CTransform>().angle = 0;
             }
             else if (entity->getComponent<CTransform>().pos.x < entity->getComponent<CTransform>().prevPos.x)
             {
-                entity->getComponent<CTransform>().angle = -1;
+                entity->getComponent<CTransform>().angle = pi;
             }
         }
         else
@@ -351,8 +352,8 @@ void ScenePlatform::sAnimation()
             }
             else
             {
-                if (entity->getComponent<CTransform>().angle == 1) animation.getSprite().setScale(1.f, 1.f);
-                else if (entity->getComponent<CTransform>().angle == -1) animation.getSprite().setScale(-1.f, 1.f);
+                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(1.f, 1.f);
+                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1.f, 1.f);
             
                 animation.update();
             }
@@ -417,7 +418,7 @@ void ScenePlatform::spawnRobot()
 {
     auto robot = mEntityManager.addEntity(EntityTag::Robot);
 
-    robot->addComponent<CTransform>(sf::Vector2f{ 700, 400 }, sf::Vector2f{ 2, 0 }, 1);
+    robot->addComponent<CTransform>(sf::Vector2f{ 700, 400 }, sf::Vector2f{ 2, 0 }, 0);
     robot->addComponent<CAnimation>(Constants::Animation::robot_running);
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();

@@ -184,6 +184,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneMenu.h" />
     <ClInclude Include="ScenePlatform.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
