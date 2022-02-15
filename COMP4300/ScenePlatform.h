@@ -34,7 +34,7 @@ public:
     virtual void sRender() override;
 
 private:
-    enum class CharacterState { Running, Jumping, Shooting, Dying };
+    enum class CharacterState { Standing, Running, Jumping, Shooting, Dying };
 
     goldenhand::AssetManager mAssetManager;
 
