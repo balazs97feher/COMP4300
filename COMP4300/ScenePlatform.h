@@ -22,8 +22,9 @@ public:
         Robot
     };
 
-    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
-    struct BulletConfig { float speed, rotation, lifespan; };
+    struct PlayerConfig { float runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
+    struct BulletConfig { float speed, rotation; int lifespan; };
+    struct RobotConfig { float startPosX, startPosY; int cooldown; };
 
     ScenePlatform(goldenhand::GameEngine& engine);
 
@@ -69,7 +70,7 @@ private:
     std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
     std::unordered_map<uint16_t, CharacterState> mCharacterStates;
     
-    void spawnRobot();
+    void spawnRobot(const sf::Vector2f startPos, const int cooldown);
     void destroyRobot(std::shared_ptr<Entity> robot);
     /*
     * Returns a direction vector from the robot to the player, if the player is visible

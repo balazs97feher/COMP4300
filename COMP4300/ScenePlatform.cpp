@@ -51,8 +51,13 @@ void ScenePlatform::initialize()
         float x, y;
         if (configType == "Player")
         {
-            configuration >> mPlayerConfig.startPosX >> mPlayerConfig.startPosY >> mPlayerConfig.runSpeed
-                >> mPlayerConfig.jumpSpeed >> mPlayerConfig.maxSpeed >> mPlayerConfig.trapViewRatio;
+            configuration >> mPlayerConfig.runSpeed >> mPlayerConfig.jumpSpeed >> mPlayerConfig.maxSpeed >> mPlayerConfig.trapViewRatio;
+        }
+        else if (configType == "Robot")
+        {
+            RobotConfig robotConfig;
+            configuration >> robotConfig.startPosX >> robotConfig.startPosY >> robotConfig.cooldown;
+            spawnRobot({ robotConfig.startPosX, robotConfig.startPosY }, robotConfig.cooldown);
         }
         else if (configType == "Bullet")
         {
@@ -82,7 +87,6 @@ void ScenePlatform::initialize()
     }
 
     spawnPlayer();
-    spawnRobot();
 }
 
 void ScenePlatform::update()
@@ -443,7 +447,7 @@ void ScenePlatform::sRobotAttack()
         if (const auto dir = playerWithinSight(robot))
         {
             shootBlade(robot, dir.value());
-            robot->getComponent<CCooldown>().remaining = 60;
+            robot->getComponent<CCooldown>().remaining = robot->getComponent<CCooldown>().total;
         }
     }
 }
@@ -463,15 +467,15 @@ void ScenePlatform::spawnPlayer()
     mEngine.setView(sf::View{ {wSize.x / 2, wSize.y / 2}, wSize });
 }
 
-void ScenePlatform::spawnRobot()
+void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
 {
     auto robot = mEntityManager.addEntity(EntityTag::Robot);
 
-    robot->addComponent<CTransform>(sf::Vector2f{ 700, 400 }, sf::Vector2f{ 2, 0 }, 0);
+    robot->addComponent<CTransform>(startPos, sf::Vector2f{ 2, 0 }, 0);
     robot->addComponent<CAnimation>(Constants::Animation::robot_running);
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
-    robot->addComponent<CCooldown>();
+    robot->addComponent<CCooldown>(cooldown);
 
     mCharacterStates[robot->id()] = CharacterState::Running;
 }
@@ -548,7 +552,7 @@ void ScenePlatform::saveLevel()
         fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
     }
     const auto playerPos = mPlayer->getComponent<CTransform>().pos;
-    fileStream << "Player " << playerPos.x << " " << playerPos.y << " " << mPlayerConfig.runSpeed
+    fileStream << "Player " << " " << mPlayerConfig.runSpeed
         << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed << " " << mPlayerConfig.trapViewRatio << std::endl;
     fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
 }
