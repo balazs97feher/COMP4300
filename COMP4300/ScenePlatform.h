@@ -34,6 +34,8 @@ public:
     virtual void sRender() override;
 
 private:
+    enum class CharacterState { Running, Jumping, Shooting, Dying };
+
     goldenhand::AssetManager mAssetManager;
 
     typedef goldenhand::EntityManager<EntityTag, ComponentTuple> EntityManager;
@@ -65,6 +67,7 @@ private:
     * Maps the id of each blade to the entity that spawned it
     */
     std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
+    std::unordered_map<uint16_t, CharacterState> mCharacterStates;
     
     void spawnRobot();
     void destroyRobot(std::shared_ptr<Entity> robot);

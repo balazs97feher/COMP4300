@@ -345,10 +345,28 @@ void ScenePlatform::sAnimation()
     {
         if (entity->hasComponent<CAnimation>())
         {
+            if (entity->tag() == EntityTag::Robot)
+            {
+                auto& animation = entity->getComponent<CAnimation>().animation;
+                switch (mCharacterStates[entity->id()])
+                {
+                    case CharacterState::Running:
+                        animation = Constants::Animation::robot_running;
+                        break;
+                    case CharacterState::Shooting:
+                        animation = Constants::Animation::robot_shooting;
+                        break;
+                    case CharacterState::Dying:
+                        animation = Constants::Animation::robot_dying;
+                        break;
+                }
+            }
+
             auto& animation = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
             if (animation.hasEnded())
             {
                 entity->destroy();
+                mCharacterStates.erase(entity->id());
             }
             else
             {
@@ -390,6 +408,8 @@ void ScenePlatform::sRobotAttack()
 {
     for (auto robot : mEntityManager.getEntities(EntityTag::Robot))
     {
+        if (mCharacterStates[robot->id()] == CharacterState::Dying) continue;
+
         if (auto& rem = robot->getComponent<CCooldown>().remaining; rem > 0)
         {
             rem--;
@@ -423,6 +443,8 @@ void ScenePlatform::spawnRobot()
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
     robot->addComponent<CCooldown>();
+
+    mCharacterStates[robot->id()] = CharacterState::Running;
 }
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
@@ -430,10 +452,20 @@ void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
     robot->getComponent<CTransform>().velocity = {};
     const auto anim = robot->getComponent<CAnimation>().animation = Constants::Animation::robot_dying;
     mAssetManager.getAnimation(anim).setLoop(false);
+    mCharacterStates[robot->id()] = CharacterState::Dying;
 }
 
 std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Entity> robot)
 {
+    // check if the robot faces toward the player
+    const auto angle = goldenhand::angle(goldenhand::dirVector(robot->getComponent<CTransform>().angle),
+        mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos);
+    if (angle > pi / 2 || angle < -pi / 2)
+    {
+        mCharacterStates[robot->id()] = CharacterState::Running;
+        return nullopt;
+    }
+
     for (const auto entity : mEntityManager.getEntities())
     {
         if (entity->tag() != EntityTag::Player && entity->tag() != EntityTag::Background && entity->tag() != EntityTag::Robot &&
@@ -444,11 +476,14 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
             if (goldenhand::Physics::lineSegmentRectangleIntersect(mPlayer->getComponent<CTransform>().pos, robot->getComponent<CTransform>().pos,
                 entity->getComponent<CTransform>().pos, {animEntity.getSize().x / 2.f, animEntity.getSize().y / 2.f}))
             {
+                mCharacterStates[robot->id()] = CharacterState::Running;
                 return std::nullopt;
             }
         }
     }
 
+    mCharacterStates[robot->id()] = CharacterState::Shooting;
+    
     return mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos;
 }
 
