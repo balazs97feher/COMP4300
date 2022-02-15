@@ -6,10 +6,12 @@
 #include "Physics.h"
 #include "Scene.h"
 
+#include <unordered_map>
+
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown> ComponentTuple;
 
     enum class EntityTag
     {
@@ -20,8 +22,9 @@ public:
         Robot
     };
 
-    struct PlayerConfig { float startPosX, startPosY, runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
-    struct BulletConfig { float speed, rotation, lifespan; };
+    struct PlayerConfig { float runSpeed, jumpSpeed, maxSpeed, trapViewRatio; };
+    struct BulletConfig { float speed, rotation; int lifespan; };
+    struct RobotConfig { float startPosX, startPosY; int cooldown; };
 
     ScenePlatform(goldenhand::GameEngine& engine);
 
@@ -32,6 +35,8 @@ public:
     virtual void sRender() override;
 
 private:
+    enum class CharacterState { Standing, Running, Jumping, Shooting, Dying };
+
     goldenhand::AssetManager mAssetManager;
 
     typedef goldenhand::EntityManager<EntityTag, ComponentTuple> EntityManager;
@@ -52,10 +57,25 @@ private:
     void sPhysics();
     void sAnimation();
     void sLifeSpan();
+    void sRobotAttack();
+
     void spawnPlayer();
-    void spawnRobot();
+    /*
+    * Spawns a blade from the position of the shooter into the direction defined by the dir vector
+    */
+    void shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir);
+    /*
+    * Maps the id of each blade to the entity that spawned it
+    */
+    std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
+    std::unordered_map<uint16_t, CharacterState> mCharacterStates;
+    
+    void spawnRobot(const sf::Vector2f startPos, const int cooldown);
     void destroyRobot(std::shared_ptr<Entity> robot);
-    void shootBlade();
+    /*
+    * Returns a direction vector from the robot to the player, if the player is visible
+    */
+    std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
 
     const char* mLevel = "./config/level1.txt";
     void saveLevel();

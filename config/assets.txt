@@ -5,6 +5,7 @@ Texture sky textures/sky.png 1
 Texture blade textures/blade.png 1
 Texture robot textures/robot.png 8
 Texture robot_dying textures/robot_dying.png 9
+Texture robot_shooting textures/robot_shooting.png 8
 Animation megaman_standing megaman 0 1 0
 Animation megaman_running megaman 2 10 4
 Animation megaman_jumping megaman_jumping 3 1 0
@@ -13,6 +14,7 @@ Animation grass_tile tiles 0 1 0
 Animation sky sky 0 1 0
 Animation blade blade 0 1 0
 Animation robot_running robot 0 8 5
+Animation robot_shooting robot_shooting 0 8 5
 Animation robot_dying robot_dying 0 9 3
 Sound jump sounds/jump.wav
 Font ayar fonts/ayar.ttf

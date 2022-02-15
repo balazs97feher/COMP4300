@@ -67,7 +67,7 @@ namespace goldenhand
     private:
         EntityVector mEntities;
         EntityMap mEntityMap;
-        size_t mTotalEntities;
+        uint16_t mTotalEntities;
     
         EntityVector mToAdd;
 

@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include "GameEngine.h"
 #include "ScenePlatform.h"
+#include "Utils.h"
 
 #include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -50,8 +51,13 @@ void ScenePlatform::initialize()
         float x, y;
         if (configType == "Player")
         {
-            configuration >> mPlayerConfig.startPosX >> mPlayerConfig.startPosY >> mPlayerConfig.runSpeed
-                >> mPlayerConfig.jumpSpeed >> mPlayerConfig.maxSpeed >> mPlayerConfig.trapViewRatio;
+            configuration >> mPlayerConfig.runSpeed >> mPlayerConfig.jumpSpeed >> mPlayerConfig.maxSpeed >> mPlayerConfig.trapViewRatio;
+        }
+        else if (configType == "Robot")
+        {
+            RobotConfig robotConfig;
+            configuration >> robotConfig.startPosX >> robotConfig.startPosY >> robotConfig.cooldown;
+            spawnRobot({ robotConfig.startPosX, robotConfig.startPosY }, robotConfig.cooldown);
         }
         else if (configType == "Bullet")
         {
@@ -81,7 +87,6 @@ void ScenePlatform::initialize()
     }
 
     spawnPlayer();
-    spawnRobot();
 }
 
 void ScenePlatform::update()
@@ -93,6 +98,7 @@ void ScenePlatform::update()
         sLifeSpan();
         sView();
         sMovement();
+        sRobotAttack();
         sPhysics();
         sAnimation();
         sRender();
@@ -132,7 +138,7 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::Shoot:
         if (action.getEventType() == InputEventType::Released)
         {
-            shootBlade();
+            shootBlade(mPlayer, mEngine.mousePos() - mPlayer->getComponent<CTransform>().pos);
         }
         break;
     case ActionType::MoveUp:
@@ -234,16 +240,16 @@ void ScenePlatform::sMovement()
         }
 
         entity->getComponent<CTransform>().setPos(entity->getComponent<CTransform>().pos + entity->getComponent<CTransform>().velocity);
-        
+
         if (entity->tag() != EntityTag::Blade)
         {
             if (entity->getComponent<CTransform>().pos.x > entity->getComponent<CTransform>().prevPos.x)
             {
-                entity->getComponent<CTransform>().angle = 1;
+                entity->getComponent<CTransform>().angle = 0;
             }
             else if (entity->getComponent<CTransform>().pos.x < entity->getComponent<CTransform>().prevPos.x)
             {
-                entity->getComponent<CTransform>().angle = -1;
+                entity->getComponent<CTransform>().angle = pi;
             }
         }
         else
@@ -260,96 +266,142 @@ void ScenePlatform::sPhysics()
         if (!one->hasComponent<CBoundingBox>()) continue;
 
         // check collision with tiles
-        for (auto& tile : mEntityManager.getEntities(EntityTag::Tile))
-        {            
-            if (one->tag() == EntityTag::Tile) continue;
-
-            if (const auto overlap = goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
-                tile->getComponent<CTransform>().pos, tile->getComponent<CBoundingBox>().halfSize))
+        if (one->tag() != EntityTag::Tile)
+        {
+            for (auto& tile : mEntityManager.getEntities(EntityTag::Tile))
             {
-                if (one->tag() == EntityTag::Blade)
+                if (const auto overlap = goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos, one->getComponent<CBoundingBox>().halfSize,
+                    tile->getComponent<CTransform>().pos, tile->getComponent<CBoundingBox>().halfSize))
                 {
-                    one->destroy();
-                    continue;
-                }
+                    if (one->tag() == EntityTag::Blade)
+                    {
+                        one->destroy();
+                        continue;
+                    }
 
-                auto& transform = one->getComponent<CTransform>();
+                    auto& transform = one->getComponent<CTransform>();
 
-                const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, one->getComponent<CBoundingBox>().halfSize,
-                    tile->getComponent<CTransform>().prevPos, tile->getComponent<CBoundingBox>().halfSize);
+                    const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, one->getComponent<CBoundingBox>().halfSize,
+                        tile->getComponent<CTransform>().prevPos, tile->getComponent<CBoundingBox>().halfSize);
 
-                // TODO: refine collision resolution
-                if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
-                {
-                    transform.pos.x -= overlap->width;
-                    if (one->tag() == EntityTag::Robot)
+                    // TODO: refine collision resolution
+                    if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
                     {
-                        transform.velocity.x *= -1;
+                        transform.pos.x -= overlap->width;
+                        if (one->tag() == EntityTag::Robot)
+                        {
+                            transform.velocity.x *= -1;
+                        }
+                        else
+                        {
+                            transform.velocity.x = 0.f;
+                        }
                     }
-                    else
+                    else if ((transform.prevPos.x > transform.pos.x) && (dimensionalOverlap.y > 0))
                     {
-                        transform.velocity.x = 0.f;
+                        transform.pos.x += overlap->width;
+                        if (one->tag() == EntityTag::Robot)
+                        {
+                            transform.velocity.x *= -1;
+                        }
+                        else
+                        {
+                            transform.velocity.x = 0.f;
+                        }
                     }
-                }
-                else if ((transform.prevPos.x > transform.pos.x) && (dimensionalOverlap.y > 0))
-                {
-                    transform.pos.x += overlap->width;
-                    if (one->tag() == EntityTag::Robot)
+                    else if ((transform.prevPos.y <= transform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.velocity.x *= -1;
+                        transform.pos.y -= overlap->height;
+                        transform.velocity.y = 0.f;
                     }
-                    else
+                    else if ((transform.prevPos.y > transform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.velocity.x = 0.f;
+                        transform.pos.y += overlap->height;
+                        transform.velocity.y = 0.f;
                     }
-                }
-                else if ((transform.prevPos.y <= transform.pos.y) && (dimensionalOverlap.x > 0))
-                {
-                    transform.pos.y -= overlap->height;
-                    transform.velocity.y = 0.f;
-                }
-                else if ((transform.prevPos.y > transform.pos.y) && (dimensionalOverlap.x > 0))
-                {
-                    transform.pos.y += overlap->height;
-                    transform.velocity.y = 0.f;
                 }
             }
         }
 
-        // check collision between player and robots
-        for (auto& robot : mEntityManager.getEntities(EntityTag::Robot))
+        // check collision between blades and entities
+        for (auto& blade : mEntityManager.getEntities(EntityTag::Blade))
         {
-            if (one->tag() == EntityTag::Robot || one->tag() == EntityTag::Tile) continue;
+            if (one->tag() == EntityTag::Blade || one->tag() == EntityTag::Tile) continue;
+            if ((one->tag() == EntityTag::Robot || one->tag() == EntityTag::Player) && mBladeOrigin[blade->id()] == one->id()) continue;
 
-            if (one->tag() == EntityTag::Blade && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
-                one->getComponent<CBoundingBox>().halfSize, robot->getComponent<CTransform>().pos, robot->getComponent<CBoundingBox>().halfSize))
+            if ((one->tag() == EntityTag::Robot || one->tag() == EntityTag::Player) && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
+                one->getComponent<CBoundingBox>().halfSize, blade->getComponent<CTransform>().pos, blade->getComponent<CBoundingBox>().halfSize))
             {
-                one->destroy();
-                destroyRobot(robot);
+                blade->destroy();
+                mBladeOrigin.erase(blade->id());
+
+                if (one->tag() == EntityTag::Robot)
+                {
+                    destroyRobot(one);
+                }
+                else
+                {
+                    mPlayer->destroy();
+                    spawnPlayer();
+                }
             }
         }
     }
+
+    if (mPlayer->getComponent<CTransform>().velocity.y != 0) mCharacterStates[mPlayer->id()] = CharacterState::Jumping;
+    else if (mPlayer->getComponent<CTransform>().velocity.x == 0) mCharacterStates[mPlayer->id()] = CharacterState::Standing;
+    else mCharacterStates[mPlayer->id()] = CharacterState::Running;
 }
 
 void ScenePlatform::sAnimation()
 {
-    if (mPlayer->getComponent<CTransform>().velocity.y != 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_jumping;
-    else if (mPlayer->getComponent<CTransform>().velocity.x == 0) mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_standing;
-    else mPlayer->getComponent<CAnimation>().animation = Constants::Animation::megaman_running;
-
     for (const auto& entity : mEntityManager.getEntities())
     {
         if (entity->hasComponent<CAnimation>())
         {
+            if (entity->tag() == EntityTag::Robot)
+            {
+                auto& animation = entity->getComponent<CAnimation>().animation;
+                switch (mCharacterStates[entity->id()])
+                {
+                    case CharacterState::Running:
+                        animation = Constants::Animation::robot_running;
+                        break;
+                    case CharacterState::Shooting:
+                        animation = Constants::Animation::robot_shooting;
+                        break;
+                    case CharacterState::Dying:
+                        animation = Constants::Animation::robot_dying;
+                        break;
+                }
+            }
+            else if (entity->tag() == EntityTag::Player)
+            {
+                auto& animation = entity->getComponent<CAnimation>().animation;
+                switch (mCharacterStates[entity->id()])
+                {
+                    case CharacterState::Standing:
+                        animation = Constants::Animation::megaman_standing;
+                        break;
+                    case CharacterState::Running:
+                        animation = Constants::Animation::megaman_running;
+                        break;
+                    case CharacterState::Jumping:
+                        animation = Constants::Animation::megaman_jumping;
+                        break;
+                }
+            }
+
             auto& animation = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
             if (animation.hasEnded())
             {
                 entity->destroy();
+                mCharacterStates.erase(entity->id());
             }
             else
             {
-                if (entity->getComponent<CTransform>().angle == 1) animation.getSprite().setScale(1.f, 1.f);
-                else if (entity->getComponent<CTransform>().angle == -1) animation.getSprite().setScale(-1.f, 1.f);
+                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(1.f, 1.f);
+                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1.f, 1.f);
             
                 animation.update();
             }
@@ -367,6 +419,7 @@ void ScenePlatform::sLifeSpan()
             if (entity->getComponent<CLifeSpan>().remaining == 0)
             {
                 entity->destroy();
+                if (entity->tag() == EntityTag::Blade) mBladeOrigin.erase(entity->id());
             }
         }
     }
@@ -376,8 +429,26 @@ void ScenePlatform::sLifeSpan()
     {
         mPlayer->destroy();
         spawnPlayer();
-        const sf::Vector2f wSize(mEngine.windowSize().x, mEngine.windowSize().y);
-        mEngine.setView(sf::View{ {wSize.x / 2, wSize.y / 2}, wSize });
+    }
+}
+
+void ScenePlatform::sRobotAttack()
+{
+    for (auto robot : mEntityManager.getEntities(EntityTag::Robot))
+    {
+        if (mCharacterStates[robot->id()] == CharacterState::Dying) continue;
+
+        if (auto& rem = robot->getComponent<CCooldown>().remaining; rem > 0)
+        {
+            rem--;
+            continue;
+        }
+        
+        if (const auto dir = playerWithinSight(robot))
+        {
+            shootBlade(robot, dir.value());
+            robot->getComponent<CCooldown>().remaining = robot->getComponent<CCooldown>().total;
+        }
     }
 }
 
@@ -389,16 +460,24 @@ void ScenePlatform::spawnPlayer()
     mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
+
+    mCharacterStates[mPlayer->id()] = CharacterState::Running;
+
+    const sf::Vector2f wSize(mEngine.windowSize().x, mEngine.windowSize().y);
+    mEngine.setView(sf::View{ {wSize.x / 2, wSize.y / 2}, wSize });
 }
 
-void ScenePlatform::spawnRobot()
+void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
 {
     auto robot = mEntityManager.addEntity(EntityTag::Robot);
 
-    robot->addComponent<CTransform>(sf::Vector2f{ 700, 400 }, sf::Vector2f{ 2, 0 }, 1);
+    robot->addComponent<CTransform>(startPos, sf::Vector2f{ 2, 0 }, 0);
     robot->addComponent<CAnimation>(Constants::Animation::robot_running);
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
+    robot->addComponent<CCooldown>(cooldown);
+
+    mCharacterStates[robot->id()] = CharacterState::Running;
 }
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
@@ -406,18 +485,52 @@ void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
     robot->getComponent<CTransform>().velocity = {};
     const auto anim = robot->getComponent<CAnimation>().animation = Constants::Animation::robot_dying;
     mAssetManager.getAnimation(anim).setLoop(false);
+    mCharacterStates[robot->id()] = CharacterState::Dying;
 }
 
-void ScenePlatform::shootBlade()
+std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Entity> robot)
 {
+    // check if the robot faces toward the player
+    const auto angle = goldenhand::angle(goldenhand::dirVector(robot->getComponent<CTransform>().angle),
+        mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos);
+    if (angle > pi / 2 || angle < -pi / 2)
+    {
+        mCharacterStates[robot->id()] = CharacterState::Running;
+        return nullopt;
+    }
+
+    for (const auto entity : mEntityManager.getEntities())
+    {
+        if (entity->tag() != EntityTag::Player && entity->tag() != EntityTag::Background && entity->tag() != EntityTag::Robot &&
+            entity->tag() != EntityTag::Blade)
+        {
+            const auto& animEntity = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
+
+            if (goldenhand::Physics::lineSegmentRectangleIntersect(mPlayer->getComponent<CTransform>().pos, robot->getComponent<CTransform>().pos,
+                entity->getComponent<CTransform>().pos, {animEntity.getSize().x / 2.f, animEntity.getSize().y / 2.f}))
+            {
+                mCharacterStates[robot->id()] = CharacterState::Running;
+                return std::nullopt;
+            }
+        }
+    }
+
+    mCharacterStates[robot->id()] = CharacterState::Shooting;
+    
+    return mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos;
+}
+
+void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
+{
+    const float angle = atan2(dir.y, dir.x);
+
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
-
-    const int direction = mPlayer->getComponent<CTransform>().angle;
-
-    blade->addComponent<CTransform>(mPlayer->getComponent<CTransform>().pos, sf::Vector2f{ direction * mBulletConfig.speed, .0f }, .0f);
+    blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos, sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
     blade->addComponent<CAnimation>(Constants::Animation::blade);
     blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
     blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);
+
+    mBladeOrigin[blade->id()] = shooter->id();
 }
 
 void ScenePlatform::saveLevel()
@@ -439,7 +552,7 @@ void ScenePlatform::saveLevel()
         fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
     }
     const auto playerPos = mPlayer->getComponent<CTransform>().pos;
-    fileStream << "Player " << playerPos.x << " " << playerPos.y << " " << mPlayerConfig.runSpeed
+    fileStream << "Player " << " " << mPlayerConfig.runSpeed
         << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed << " " << mPlayerConfig.trapViewRatio << std::endl;
     fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
 }

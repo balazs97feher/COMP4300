@@ -21,6 +21,11 @@ namespace goldenhand
             return mAlive;
         }
 
+        uint16_t id() const
+        {
+            return mId;
+        }
+
         void destroy()
         {
             mAlive = false;
@@ -54,10 +59,10 @@ namespace goldenhand
         }
 
     private:
-        Entity(const EntityTag tag, const size_t id) : mTag(tag), mId(id), mAlive(true) {}
+        Entity(const EntityTag tag, const uint16_t id) : mTag(tag), mId(id), mAlive(true) {}
 
         const EntityTag mTag;
-        const size_t mId;
+        const uint16_t mId;
         bool mAlive;
         ComponentTuple mComponents;
     };
