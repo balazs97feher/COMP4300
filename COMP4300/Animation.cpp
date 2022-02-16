@@ -14,6 +14,23 @@ namespace goldenhand
         mSprite.setOrigin(mSize.x / 2.0f, mSize.y / 2.0f);
     }
 
+    Animation::Animation(const Animation& a)
+        : mSprite{ a.mSprite}, mSize{ a.mSize }, mStartFrame{ a.mStartFrame }, mFrameCount{ a.mFrameCount }, mSpeed{ a.mSpeed },
+        mCurrentFrame{ a.mCurrentFrame }, mFrameCounter{ a.mFrameCounter }, mLoop{ a.mLoop } {}
+
+    Animation& Animation::operator=(const Animation& a)
+    {
+        mSprite = a.mSprite;
+        mSize = a.mSize;
+        mStartFrame = a.mStartFrame;
+        mFrameCount = a.mFrameCount;
+        mSpeed = a.mSpeed;
+        mCurrentFrame = a.mCurrentFrame;
+        mFrameCounter = a.mFrameCounter;
+        mLoop = a.mLoop;
+        return *this;
+    }
+
     void Animation::reset()
     {
         mCurrentFrame = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AssetManager.h"
-#include "Components.h"
+#include "Animation.h"
 #include "EntityManager.h"
 #include "Physics.h"
 #include "Scene.h"
@@ -11,7 +11,7 @@
 class ScenePlatform : public goldenhand::Scene
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, goldenhand::Animation, CDraggable, CLifeSpan, CGravity, CCooldown> ComponentTuple;
 
     enum class EntityTag
     {
@@ -36,6 +36,11 @@ public:
 
 private:
     enum class CharacterState { Standing, Running, Jumping, Shooting, Dying };
+    struct State
+    {
+        CharacterState previous;
+        CharacterState current;
+    };
 
     goldenhand::AssetManager mAssetManager;
 
@@ -68,7 +73,7 @@ private:
     * Maps the id of each blade to the entity that spawned it
     */
     std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
-    std::unordered_map<uint16_t, CharacterState> mCharacterStates;
+    std::unordered_map<uint16_t, State> mCharacterStates;
     
     void spawnRobot(const sf::Vector2f startPos, const int cooldown);
     void destroyRobot(std::shared_ptr<Entity> robot);
@@ -78,7 +83,7 @@ private:
     std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
 
     const char* mLevel = "./config/level1.txt";
-    void saveLevel();
+    //void saveLevel();
 
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;

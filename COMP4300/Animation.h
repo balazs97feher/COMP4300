@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Components.h"
+
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -10,13 +12,16 @@ namespace goldenhand
     struct TextureSheet
     {
         sf::Texture texture;
-        uint8_t frameCount;
+        uint8_t frameCount; // specifies the total number of frames in the texture
     };
 
-    class Animation
+    class Animation : public Component
     {
     public:
+        Animation() = default;
         Animation(const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed);
+        Animation(const Animation& a);
+        Animation& operator=(const Animation& a);
 
         void reset();
         void setLoop(const bool playInLoop);
@@ -31,9 +36,9 @@ namespace goldenhand
 
     private:
         sf::Sprite mSprite;
-        const sf::Vector2u mSize;
-        const uint8_t mStartFrame;
-        const uint8_t mFrameCount;
+        sf::Vector2u mSize;
+        uint8_t mStartFrame; // specifies the first frame on the texture that belongs to this specific animation
+        uint8_t mFrameCount; // specifies the number of frames that belong to this specific animation on the corresponding texture
         uint32_t mCurrentFrame;
         uint8_t mSpeed;
         uint32_t mFrameCounter;

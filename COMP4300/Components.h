@@ -50,15 +50,6 @@ public:
     }
 };
 
-class CAnimation : public goldenhand::Component
-{
-public:
-    std::string animation;
-
-    CAnimation() = default;
-    CAnimation(const std::string& a) : animation{ a } {}
-};
-
 class CShape : public goldenhand::Component
 {
 public:
