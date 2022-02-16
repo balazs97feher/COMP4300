@@ -333,9 +333,6 @@ void ScenePlatform::sPhysics()
             if ((one->tag() == EntityTag::Robot || one->tag() == EntityTag::Player) && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
                 one->getComponent<CBoundingBox>().halfSize, blade->getComponent<CTransform>().pos, blade->getComponent<CBoundingBox>().halfSize))
             {
-                blade->destroy();
-                mBladeOrigin.erase(blade->id());
-
                 if (one->tag() == EntityTag::Robot && mBladeOrigin[blade->id()] == mPlayer->id())
                 {
                     destroyRobot(one);
@@ -345,6 +342,9 @@ void ScenePlatform::sPhysics()
                     mPlayer->destroy();
                     spawnPlayer();
                 }
+
+                blade->destroy();
+                mBladeOrigin.erase(blade->id());
             }
         }
     }
