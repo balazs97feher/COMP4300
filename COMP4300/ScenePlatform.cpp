@@ -103,7 +103,7 @@ void ScenePlatform::update()
         sLifeSpan();
         sView();
         sMovement();
-        //sRobotAttack();
+        sRobotAttack();
         sPhysics();
         sAnimation();
         sRender();
@@ -485,7 +485,7 @@ void ScenePlatform::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
 
-    mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
+    mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 200 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::megaman_standing));
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
