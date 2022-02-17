@@ -46,5 +46,7 @@ namespace goldenhand
         uint8_t mSpeed;
         uint32_t mFrameCounter;
         bool mLoop;
+
+        void copySprite(const sf::Sprite& src, sf::Sprite& dest);
     };
 } // namespace goldenhand

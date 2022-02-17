@@ -63,8 +63,8 @@ namespace goldenhand
         {
             auto& c = getComponent<T>();
             c = T(component);
-            component.has = true;
-            return component;
+            c.has = true;
+            return c;
         }
 
     private:

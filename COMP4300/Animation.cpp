@@ -15,19 +15,22 @@ namespace goldenhand
     }
 
     Animation::Animation(const Animation& a)
-        : mName{ a.mName }, mSprite{ a.mSprite }, mSize{ a.mSize }, mStartFrame{ a.mStartFrame }, mFrameCount{ a.mFrameCount },
-        mSpeed{ a.mSpeed }, mCurrentFrame{ a.mCurrentFrame }, mFrameCounter{ a.mFrameCounter }, mLoop{ a.mLoop } {}
+        : mName {a.mName}, mSize{ a.mSize }, mStartFrame{ a.mStartFrame }, mFrameCount{ a.mFrameCount },
+        mSpeed{ a.mSpeed }, mCurrentFrame{ a.mCurrentFrame }, mFrameCounter{ 0 }, mLoop{ a.mLoop }
+    {
+        copySprite(a.mSprite, mSprite);
+    }
 
     Animation& Animation::operator=(const Animation& a)
     {
         mName = a.mName;
-        mSprite = a.mSprite;
+        copySprite(a.mSprite, mSprite);
         mSize = a.mSize;
         mStartFrame = a.mStartFrame;
         mFrameCount = a.mFrameCount;
         mSpeed = a.mSpeed;
         mCurrentFrame = a.mCurrentFrame;
-        mFrameCounter = a.mFrameCounter;
+        mFrameCounter = 0;
         mLoop = a.mLoop;
         return *this;
     }
@@ -67,8 +70,16 @@ namespace goldenhand
     {
         return mSize;
     }
+
     std::string_view Animation::getName() const
     {
         return mName;
+    }
+
+    void Animation::copySprite(const sf::Sprite& src, sf::Sprite& dest)
+    {
+        dest.setTexture(*src.getTexture());
+        dest.setTextureRect(src.getTextureRect());
+        dest.setOrigin(src.getOrigin());
     }
 } // namespace goldenhand

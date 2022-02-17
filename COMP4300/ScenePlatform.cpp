@@ -489,6 +489,7 @@ void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
     robot->addComponent<CGravity>();
     robot->addComponent<CCooldown>(cooldown);
     robot->addComponent<CState>(CharacterState::Running);
+    robot->addComponent<CDraggable>();
 }
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
@@ -566,7 +567,7 @@ void ScenePlatform::saveLevel()
         fileStream << "Robot " << robotPos.x << " " << robotPos.y << " " << robot->getComponent<CCooldown>().total << std::endl;
     }
     const auto playerPos = mPlayer->getComponent<CTransform>().pos;
-    fileStream << "Player " << " " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed
+    fileStream << "Player " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed
         << " " << mPlayerConfig.trapViewRatio << std::endl;
     fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
 }
