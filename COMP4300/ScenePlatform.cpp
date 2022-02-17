@@ -12,7 +12,6 @@
 #include <iostream>
 
 using namespace std;
-using goldenhand::Animation;
 
 ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     : Scene{ engine }, mAssetManager{ "./config/" }, mPhysics({ 0.f, .2f }), mDrawBB{ false }, mTextureDraw{ true }, mCloneSelected{ false }
@@ -69,7 +68,7 @@ void ScenePlatform::initialize()
             configuration >> name;
             auto background = mEntityManager.addEntity(EntityTag::Background);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
-            background->addComponent<Animation>(mAssetManager.getAnimation(name));
+            background->addComponent<CAnimation>(mAssetManager.getAnimation(name));
             auto& animation = mAssetManager.getAnimation(name);
             animation.getSprite().setScale(static_cast<float>(mEngine.windowSize().x) / animation.getSize().x,
                 static_cast<float>(mEngine.windowSize().y) / animation.getSize().y);
@@ -79,7 +78,7 @@ void ScenePlatform::initialize()
             configuration >> name >> x >> y;
             auto tile = mEntityManager.addEntity(EntityTag::Tile);
             tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
-            tile->addComponent<Animation>(mAssetManager.getAnimation(name));
+            tile->addComponent<CAnimation>(mAssetManager.getAnimation(name));
             tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
             tile->addComponent<CDraggable>();
         }
@@ -175,9 +174,9 @@ void ScenePlatform::sRender()
 {
     for (const auto& entity : mEntityManager.getEntities())
     {
-        if (mTextureDraw && entity->hasComponent<Animation>())
+        if (mTextureDraw && entity->hasComponent<CAnimation>())
         {
-            auto& sprite = entity->getComponent<Animation>().getSprite();
+            auto& sprite = entity->getComponent<CAnimation>().anim.getSprite();
             sprite.setPosition(entity->getComponent<CTransform>().pos);
 
             if (entity->tag() == EntityTag::Blade)
@@ -367,13 +366,13 @@ void ScenePlatform::sAnimation()
 {
     for (const auto& entity : mEntityManager.getEntities())
     {
-        if (entity->hasComponent<Animation>())
+        if (entity->hasComponent<CAnimation>())
         {
             if (entity->getComponent<CState>().stateChangedInFrame(mCurrentFrame))
             {
                 if (entity->tag() == EntityTag::Robot)
                 {
-                    auto& animation = entity->getComponent<Animation>();
+                    auto& animation = entity->getComponent<CAnimation>().anim;
                     switch (entity->getComponent<CState>().current())
                     {
                         case CharacterState::Running:
@@ -390,7 +389,7 @@ void ScenePlatform::sAnimation()
                 }
                 else if (entity->tag() == EntityTag::Player)
                 {
-                    auto& animation = entity->getComponent<Animation>();
+                    auto& animation = entity->getComponent<CAnimation>().anim;
                     switch (entity->getComponent<CState>().current())
                     {
                         case CharacterState::Standing:
@@ -406,7 +405,7 @@ void ScenePlatform::sAnimation()
                 }
             }
 
-            auto& animation = entity->getComponent<Animation>();
+            auto& animation = entity->getComponent<CAnimation>().anim;
             if (animation.hasEnded())
             {
                 entity->destroy();
@@ -470,7 +469,7 @@ void ScenePlatform::spawnPlayer()
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
 
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
-    mPlayer->addComponent<Animation>(mAssetManager.getAnimation(Constants::Animation::megaman_standing));
+    mPlayer->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::megaman_standing));
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
     mPlayer->addComponent<CState>(CharacterState::Running);
@@ -484,7 +483,7 @@ void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
     auto robot = mEntityManager.addEntity(EntityTag::Robot);
 
     robot->addComponent<CTransform>(startPos, sf::Vector2f{ 2, 0 }, 0);
-    robot->addComponent<Animation>(mAssetManager.getAnimation(Constants::Animation::robot_running));
+    robot->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::robot_running));
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
     robot->addComponent<CCooldown>(cooldown);
@@ -514,7 +513,7 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
         if (entity->tag() != EntityTag::Player && entity->tag() != EntityTag::Background && entity->tag() != EntityTag::Robot &&
             entity->tag() != EntityTag::Blade)
         {
-            const auto entitySize = entity->getComponent<Animation>().getSize();
+            const auto entitySize = entity->getComponent<CAnimation>().anim.getSize();
 
             if (goldenhand::Physics::lineSegmentRectangleIntersect(mPlayer->getComponent<CTransform>().pos, robot->getComponent<CTransform>().pos,
                 entity->getComponent<CTransform>().pos, { entitySize.x / 2.f, entitySize.y / 2.f}))
@@ -536,7 +535,7 @@ void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector
 
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
     blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos, sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
-    blade->addComponent<Animation>(mAssetManager.getAnimation(Constants::Animation::blade));
+    blade->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::blade));
     blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
     blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);
 
@@ -555,11 +554,11 @@ void ScenePlatform::saveLevel()
 
     for (const auto& decor : mEntityManager.getEntities(EntityTag::Background))
     {
-        fileStream << "Background " << decor->getComponent<Animation>().getName() << std::endl;
+        fileStream << "Background " << decor->getComponent<CAnimation>().anim.getName() << std::endl;
     }
     for (const auto& tile : mEntityManager.getEntities(EntityTag::Tile))
     {
-        fileStream << "Tile " << tile->getComponent<Animation>().getName() << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
+        fileStream << "Tile " << tile->getComponent<CAnimation>().anim.getName() << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
     }
     for (const auto& robot : mEntityManager.getEntities(EntityTag::Robot))
     {
@@ -576,9 +575,9 @@ std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const s
 {
     for (const auto entity : mEntityManager.getEntities())
     {
-        if (entity->hasComponent<Animation>() && entity->hasComponent<CDraggable>())
+        if (entity->hasComponent<CAnimation>() && entity->hasComponent<CDraggable>())
         {
-            const auto size = entity->getComponent<Animation>().getSize();
+            const auto size = entity->getComponent<CAnimation>().anim.getSize();
             const auto position = entity->getComponent<CTransform>().pos;
             if (goldenhand::Physics::isWithinRectangle(sf::Vector2f(spot.x, spot.y), position, sf::Vector2f(size.x, size.y)))
             {

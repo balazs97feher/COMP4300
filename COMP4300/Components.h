@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Animation.h"
+
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -50,20 +52,13 @@ public:
     }
 };
 
-class CShape : public goldenhand::Component
+class CAnimation : public goldenhand::Component
 {
 public:
-    sf::CircleShape circle;
-
-    CShape() = default;
-    CShape(const float radius, const int points, const sf::Color& fill, const sf::Color& outline, const float thickness)
-        : circle{ radius, points }
-    {
-        circle.setFillColor(fill);
-        circle.setOutlineColor(outline);
-        circle.setOutlineThickness(thickness);
-        circle.setOrigin(radius, radius); // defines the center point for all transformations
-    }
+    goldenhand::Animation anim;
+    
+    CAnimation() = default;
+    CAnimation(const goldenhand::Animation& a) : anim{ a } {}
 };
 
 class CBoundingBox : public goldenhand::Component

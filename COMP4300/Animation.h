@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Components.h"
-
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -16,7 +14,7 @@ namespace goldenhand
         uint8_t frameCount; // specifies the total number of frames in the texture
     };
 
-    class Animation : public Component
+    class Animation
     {
     public:
         Animation() = default;

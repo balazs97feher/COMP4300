@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AssetManager.h"
-#include "Animation.h"
+#include "Components.h"
 #include "EntityManager.h"
 #include "Physics.h"
 #include "Scene.h"
@@ -45,7 +45,7 @@ private:
 class ScenePlatform : public goldenhand::Scene
 {
 
-    typedef std::tuple<CTransform, CBoundingBox, goldenhand::Animation, CDraggable, CLifeSpan, CGravity, CCooldown, CState> ComponentTuple;
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown, CState> ComponentTuple;
 
 public:
 
