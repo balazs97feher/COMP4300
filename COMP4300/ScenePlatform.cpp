@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -86,6 +87,10 @@ void ScenePlatform::initialize()
         configuration >> configType;
     }
 
+    mDraggedCoords.setFont(mAssetManager.getFont(Constants::Font::ayar));
+    mDraggedCoords.setCharacterSize(24);
+    mDraggedCoords.setFillColor(sf::Color::White);
+
     spawnPlayer();
 }
 
@@ -152,6 +157,7 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::Select:
         if (action.getEventType() == InputEventType::Pressed && !mDraggedEntity)
         {
+            mMousePrevPos = mEngine.mousePos();
             auto selectedEntity = findSelectedEntity(mEngine.mousePos());
             if (selectedEntity)
             {
@@ -194,6 +200,15 @@ void ScenePlatform::sRender()
             mEngine.drawToWindow(mBB);
         }
     }
+
+    if (mDrawBB && mDraggedEntity)
+    {
+        const auto& pos = mDraggedEntity->getComponent<CTransform>().pos;
+        stringstream posString;
+        posString << "Dragged: x: " << int(pos.x) << " y: " << int(pos.y);
+        mDraggedCoords.setString(posString.str());
+        mEngine.drawToWindow(mDraggedCoords);
+    }
 }
 
 void ScenePlatform::sView()
@@ -218,14 +233,16 @@ void ScenePlatform::sView()
     {
         background->getComponent<CTransform>().setPos(mEngine.mapPixelToCoords(sf::Vector2i(wSize.x / 2, wSize.y / 2)));
     }
+
+    mDraggedCoords.setPosition(mEngine.mapPixelToCoords({ 20, 20 }));
 }
 
 void ScenePlatform::sMovement()
 {
     if (mDraggedEntity)
     {
-        mDraggedEntity->getComponent<CTransform>().setPos(sf::Vector2f{ static_cast<float>(mEngine.mousePos().x),
-            static_cast<float>(mEngine.mousePos().y) });
+        mDraggedEntity->getComponent<CTransform>().setPos(mDraggedEntity->getComponent<CTransform>().pos + mEngine.mousePos() - mMousePrevPos);
+        mMousePrevPos = mEngine.mousePos();
     }
 
     for (auto entity : mEntityManager.getEntities())

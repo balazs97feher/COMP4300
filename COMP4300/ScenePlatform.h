@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 
+#include <SFML/Graphics/Text.hpp>
+
 enum class CharacterState { Default, Standing, Running, Jumping, Shooting, Dying };
 
 class CState : public goldenhand::Component
@@ -84,6 +86,7 @@ private:
     goldenhand::Physics mPhysics;
     bool mDrawBB;
     bool mTextureDraw;
+    sf::Text mDraggedCoords;
     sf::RectangleShape mBB;
 
     void sView();
@@ -120,5 +123,6 @@ private:
 
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;
+    sf::Vector2f mMousePrevPos;
     std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2f spot);
 };
