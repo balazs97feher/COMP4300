@@ -4,8 +4,8 @@
 
 namespace goldenhand
 {
-    Animation::Animation(const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed)
-        : mSprite{ sheet.texture }, mSize{ sheet.texture.getSize().x / sheet.frameCount, sheet.texture.getSize().y },
+    Animation::Animation(const std::string_view name, const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed)
+        : mName{ name }, mSprite{ sheet.texture }, mSize{ sheet.texture.getSize().x / sheet.frameCount, sheet.texture.getSize().y },
         mStartFrame{ startFrame }, mFrameCount{ frameCount }, mSpeed{ speed }, mCurrentFrame{ 0 }, mFrameCounter{ 0 }, mLoop{ true }
     {
         assert(frameCount > 0);
@@ -15,11 +15,12 @@ namespace goldenhand
     }
 
     Animation::Animation(const Animation& a)
-        : mSprite{ a.mSprite}, mSize{ a.mSize }, mStartFrame{ a.mStartFrame }, mFrameCount{ a.mFrameCount }, mSpeed{ a.mSpeed },
-        mCurrentFrame{ a.mCurrentFrame }, mFrameCounter{ a.mFrameCounter }, mLoop{ a.mLoop } {}
+        : mName{ a.mName }, mSprite{ a.mSprite }, mSize{ a.mSize }, mStartFrame{ a.mStartFrame }, mFrameCount{ a.mFrameCount },
+        mSpeed{ a.mSpeed }, mCurrentFrame{ a.mCurrentFrame }, mFrameCounter{ a.mFrameCounter }, mLoop{ a.mLoop } {}
 
     Animation& Animation::operator=(const Animation& a)
     {
+        mName = a.mName;
         mSprite = a.mSprite;
         mSize = a.mSize;
         mStartFrame = a.mStartFrame;
@@ -65,5 +66,9 @@ namespace goldenhand
     sf::Vector2u Animation::getSize() const
     {
         return mSize;
+    }
+    std::string_view Animation::getName() const
+    {
+        return mName;
     }
 } // namespace goldenhand

@@ -1,7 +1,9 @@
 #pragma once
 #include "Animation.h"
 
+#include <list>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include <SFML/Audio/Sound.hpp>
@@ -18,6 +20,7 @@ namespace goldenhand
         void loadAssets();
 
         TextureSheet& getTexture(const std::string& name);
+        Animation& getAnimation(const std::string_view name);
         Animation& getAnimation(const std::string& name);
         sf::Sound& getSound(const std::string& name);
         sf::Font& getFont(const std::string& name);
@@ -31,7 +34,8 @@ namespace goldenhand
         void addFont(const std::string& name, const std::string& path);
 
         std::unordered_map<std::string, TextureSheet> mTextures;
-        std::unordered_map<std::string, Animation> mAnimations;
+        std::unordered_map<std::string_view, Animation> mAnimations;
+        std::list<std::string> mAnimationNames;
         std::unordered_map<std::string, sf::Sound> mSounds;
         std::vector<sf::SoundBuffer> mSoundBuffers;
         std::unordered_map<std::string, sf::Font> mFonts;

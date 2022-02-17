@@ -6,6 +6,7 @@
 #include <SFML/Graphics/Texture.hpp>
 
 #include <string>
+#include <string_view>
 
 namespace goldenhand
 {
@@ -19,7 +20,7 @@ namespace goldenhand
     {
     public:
         Animation() = default;
-        Animation(const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed);
+        Animation(const std::string_view name, const TextureSheet& sheet, const uint8_t startFrame, const uint8_t frameCount, const uint8_t speed);
         Animation(const Animation& a);
         Animation& operator=(const Animation& a);
 
@@ -33,8 +34,10 @@ namespace goldenhand
         bool hasEnded() const;
         sf::Sprite& getSprite();
         sf::Vector2u getSize() const;
+        std::string_view getName() const;
 
     private:
+        std::string_view mName;
         sf::Sprite mSprite;
         sf::Vector2u mSize;
         uint8_t mStartFrame; // specifies the first frame on the texture that belongs to this specific animation

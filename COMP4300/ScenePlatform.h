@@ -111,7 +111,7 @@ private:
     std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
 
     const char* mLevel = "./config/level1.txt";
-    //void saveLevel();
+    void saveLevel();
 
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;

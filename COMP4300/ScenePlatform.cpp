@@ -31,7 +31,7 @@ ScenePlatform::ScenePlatform(goldenhand::GameEngine& engine)
     registerKbdAction(sf::Keyboard::B, ActionType::ToggleBBDraw);
     registerKbdAction(sf::Keyboard::T, ActionType::ToggleTextureDraw);
     registerKbdAction(sf::Keyboard::C, ActionType::Clone);
-    //registerKbdAction(sf::Keyboard::L, ActionType::Save);
+    registerKbdAction(sf::Keyboard::L, ActionType::Save);
 
     registerMouseAction(sf::Mouse::Button::Left, ActionType::Select);
 
@@ -119,9 +119,9 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::Quit:
         if (action.getEventType() == InputEventType::Released) mEngine.changeScene(Constants::Scene::menu);
         break;
-    //case ActionType::Save:
-    //    if (action.getEventType() == InputEventType::Released) saveLevel();
-    //    break;
+    case ActionType::Save:
+        if (action.getEventType() == InputEventType::Released) saveLevel();
+        break;
     case ActionType::ToggleBBDraw:
         if (action.getEventType() == InputEventType::Released) mDrawBB = !mDrawBB;
         break;
@@ -542,29 +542,34 @@ void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector
     mBladeOrigin[blade->id()] = shooter->id();
 }
 
-//void ScenePlatform::saveLevel()
-//{
-//    filesystem::path level{ mLevel };
-//    if (filesystem::exists(level))
-//    {
-//        filesystem::remove(level);
-//    }
-//
-//    auto fileStream = std::ofstream{ mLevel, ios_base::out };
-//
-//    for (const auto& decor : mEntityManager.getEntities(EntityTag::Background))
-//    {
-//        fileStream << "Background " << decor->getComponent<CAnimation>().animation << std::endl;
-//    }
-//    for (const auto& tile : mEntityManager.getEntities(EntityTag::Tile))
-//    {
-//        fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
-//    }
-//    const auto playerPos = mPlayer->getComponent<CTransform>().pos;
-//    fileStream << "Player " << " " << mPlayerConfig.runSpeed
-//        << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed << " " << mPlayerConfig.trapViewRatio << std::endl;
-//    fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
-//}
+void ScenePlatform::saveLevel()
+{
+    filesystem::path level{ mLevel };
+    if (filesystem::exists(level))
+    {
+        filesystem::remove(level);
+    }
+
+    auto fileStream = std::ofstream{ mLevel, ios_base::out };
+
+    for (const auto& decor : mEntityManager.getEntities(EntityTag::Background))
+    {
+        fileStream << "Background " << decor->getComponent<Animation>().getName() << std::endl;
+    }
+    for (const auto& tile : mEntityManager.getEntities(EntityTag::Tile))
+    {
+        fileStream << "Tile " << tile->getComponent<Animation>().getName() << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
+    }
+    for (const auto& robot : mEntityManager.getEntities(EntityTag::Robot))
+    {
+        const auto robotPos = robot->getComponent<CTransform>().pos;
+        fileStream << "Robot " << robotPos.x << " " << robotPos.y << " " << robot->getComponent<CCooldown>().total << std::endl;
+    }
+    const auto playerPos = mPlayer->getComponent<CTransform>().pos;
+    fileStream << "Player " << " " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed
+        << " " << mPlayerConfig.trapViewRatio << std::endl;
+    fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
+}
 
 std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const sf::Vector2f spot)
 {
