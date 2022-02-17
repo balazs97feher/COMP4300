@@ -23,7 +23,9 @@ namespace goldenhand
         Animation& getAnimation(const std::string_view name);
         Animation& getAnimation(const std::string& name);
         sf::Sound& getSound(const std::string& name);
+        sf::Sound& getSound(const std::string_view name);
         sf::Font& getFont(const std::string& name);
+        sf::Font& getFont(const std::string_view name);
 
     private:
         const std::string mPathToAssets;

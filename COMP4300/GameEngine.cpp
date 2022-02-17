@@ -59,12 +59,12 @@ namespace goldenhand
         mRunning = false;
     }
 
-    void GameEngine::changeScene(const std::string& id)
+    void GameEngine::changeScene(const std::string_view id)
     {
         mCurrentScene = id;
     }
 
-    void GameEngine::createScene(const std::string& id)
+    void GameEngine::createScene(const std::string_view id)
     {
         if (id == Constants::Scene::platform) mSceneMap[id] = make_unique<ScenePlatform>(*this);
 

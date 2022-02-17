@@ -19,8 +19,8 @@ namespace goldenhand
         void run();
         void quit();
 
-        void changeScene(const std::string& id);
-        void createScene(const std::string& id);
+        void changeScene(const std::string_view id);
+        void createScene(const std::string_view id);
 
         const sf::View& getView() const;
         void setView(const sf::View& view);
@@ -41,7 +41,7 @@ namespace goldenhand
         sf::Vector2f mMousePos;
 
         std::string mCurrentScene;
-        std::unordered_map<std::string, std::unique_ptr<Scene>> mSceneMap;
+        std::unordered_map<std::string_view, std::unique_ptr<Scene>> mSceneMap;
         Scene* currentScene();
         bool mRunning;
 

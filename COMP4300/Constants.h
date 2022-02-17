@@ -18,15 +18,15 @@ namespace Constants
     }
     namespace Sound
     {
-        constexpr inline const char* jump = "jump";
+        constexpr inline std::string_view jump = "jump";
     }
     namespace Font
     {
-        constexpr inline const char* ayar = "ayar";
+        constexpr inline std::string_view ayar = "ayar";
     }
     namespace Scene
     {
-        constexpr inline const char* menu = "menu";
-        constexpr inline const char* platform = "platform";
+        constexpr inline std::string_view menu = "menu";
+        constexpr inline std::string_view platform = "platform";
     }
 }
