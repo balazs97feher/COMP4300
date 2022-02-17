@@ -69,8 +69,7 @@ void ScenePlatform::initialize()
             configuration >> name;
             auto background = mEntityManager.addEntity(EntityTag::Background);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
-            background->addComponent<CAnimation>(mAssetManager.getAnimation(name));
-            auto& animation = mAssetManager.getAnimation(name);
+            auto& animation = background->addComponent<CAnimation>(mAssetManager.getAnimation(name)).anim;
             animation.getSprite().setScale(static_cast<float>(mEngine.windowSize().x) / animation.getSize().x,
                 static_cast<float>(mEngine.windowSize().y) / animation.getSize().y);
         }
@@ -433,8 +432,9 @@ void ScenePlatform::sAnimation()
             }
             else
             {
-                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(1.f, 1.f);
-                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1.f, 1.f);
+                const auto scale = animation.getSprite().getScale();
+                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(abs(scale.x), abs(scale.y));
+                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1 * abs(scale.x), abs(scale.y));
             
                 animation.update();
             }
