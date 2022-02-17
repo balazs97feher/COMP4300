@@ -279,45 +279,44 @@ void ScenePlatform::sPhysics()
                         continue;
                     }
 
-                    auto& transform = one->getComponent<CTransform>();
+                    auto& oneTransform = one->getComponent<CTransform>();
 
-                    const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, one->getComponent<CBoundingBox>().halfSize,
+                    const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(oneTransform.prevPos, one->getComponent<CBoundingBox>().halfSize,
                         tile->getComponent<CTransform>().prevPos, tile->getComponent<CBoundingBox>().halfSize);
 
-                    // TODO: refine collision resolution
-                    if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
+                    if (oneCollidesFromLeft(one, tile, dimensionalOverlap))
                     {
-                        transform.pos.x -= overlap->width;
+                        oneTransform.pos.x -= overlap->width;
                         if (one->tag() == EntityTag::Robot)
                         {
-                            transform.velocity.x *= -1;
+                            oneTransform.velocity.x *= -1;
                         }
                         else
                         {
-                            transform.velocity.x = 0.f;
+                            oneTransform.velocity.x = 0.f;
                         }
                     }
-                    else if ((transform.prevPos.x > transform.pos.x) && (dimensionalOverlap.y > 0))
+                    else if (oneCollidesFromRight(one, tile, dimensionalOverlap))
                     {
-                        transform.pos.x += overlap->width;
+                        oneTransform.pos.x += overlap->width;
                         if (one->tag() == EntityTag::Robot)
                         {
-                            transform.velocity.x *= -1;
+                            oneTransform.velocity.x *= -1;
                         }
                         else
                         {
-                            transform.velocity.x = 0.f;
+                            oneTransform.velocity.x = 0.f;
                         }
                     }
-                    else if ((transform.prevPos.y <= transform.pos.y) && (dimensionalOverlap.x > 0))
+                    else if ((oneTransform.prevPos.y <= oneTransform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.pos.y -= overlap->height;
-                        transform.velocity.y = 0.f;
+                        oneTransform.pos.y -= overlap->height;
+                        oneTransform.velocity.y = 0.f;
                     }
-                    else if ((transform.prevPos.y > transform.pos.y) && (dimensionalOverlap.x > 0))
+                    else if ((oneTransform.prevPos.y > oneTransform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.pos.y += overlap->height;
-                        transform.velocity.y = 0.f;
+                        oneTransform.pos.y += overlap->height;
+                        oneTransform.velocity.y = 0.f;
                     }
                 }
             }
@@ -335,15 +334,16 @@ void ScenePlatform::sPhysics()
                 if (one->tag() == EntityTag::Robot && mBladeOrigin[blade->id()] == mPlayer->id())
                 {
                     destroyRobot(one);
+                    blade->destroy();
+                    mBladeOrigin.erase(blade->id());
                 }
                 else if (one->tag() == EntityTag::Player)
                 {
                     mPlayer->destroy();
+                    blade->destroy();
+                    mBladeOrigin.erase(blade->id());
                     spawnPlayer();
                 }
-
-                blade->destroy();
-                mBladeOrigin.erase(blade->id());
             }
         }
     }
@@ -527,6 +527,21 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
     robot->getComponent<CState>().changeState(CharacterState::Shooting, mCurrentFrame);
     
     return mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos;
+}
+
+bool ScenePlatform::oneCollidesFromLeft(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+    const sf::Vector2f dimensionalOverlap) const
+{
+    const auto& oneTransform = one->getComponent<CTransform>();
+    const auto& otherTransform = other->getComponent<CTransform>();
+    return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x < oneTransform.pos.x) || (otherTransform.prevPos.x > otherTransform.pos.x));
+}
+
+bool ScenePlatform::oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other, const sf::Vector2f dimensionalOverlap) const
+{
+    const auto& oneTransform = one->getComponent<CTransform>();
+    const auto& otherTransform = other->getComponent<CTransform>();
+    return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x > oneTransform.pos.x) || (otherTransform.prevPos.x < otherTransform.pos.x));
 }
 
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)

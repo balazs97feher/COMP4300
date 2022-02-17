@@ -110,6 +110,11 @@ private:
     */
     std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
 
+    bool oneCollidesFromLeft(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+        const sf::Vector2f dimensionalOverlap) const;
+    bool oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+        const sf::Vector2f dimensionalOverlap) const;
+
     const char* mLevel = "./config/level1.txt";
     void saveLevel();
 
