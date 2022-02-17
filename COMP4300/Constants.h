@@ -19,6 +19,7 @@ namespace Constants
     namespace Sound
     {
         constexpr inline std::string_view jump = "jump";
+        constexpr inline std::string_view shoot = "shoot";
     }
     namespace Font
     {

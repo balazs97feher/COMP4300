@@ -19,4 +19,5 @@ Animation robot_shooting robot_shooting 0 8 5
 Animation robot_dying robot_dying 0 9 3
 Animation finish finish 0 2 20
 Sound jump sounds/jump.wav
+Sound shoot sounds/shoot.wav
 Font ayar fonts/ayar.ttf

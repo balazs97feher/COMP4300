@@ -68,7 +68,7 @@ namespace goldenhand
 
         mSoundBuffers.push_back(soundBuffer);
 
-        mSounds[name] = sf::Sound{ soundBuffer };
+        mSounds[name] = sf::Sound{ mSoundBuffers.back() };
     }
 
     void AssetManager::addFont(const std::string& name, const std::string& path)

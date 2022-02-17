@@ -147,7 +147,11 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         }
         break;
     case ActionType::MoveUp:
-        if (action.getEventType() == InputEventType::Pressed && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
+        if (action.getEventType() == InputEventType::Pressed && velocity.y == 0)
+        {
+            velocity.y = -mPlayerConfig.jumpSpeed;
+            mAssetManager.getSound(Constants::Sound::jump).play();
+        }
         else if (action.getEventType() == InputEventType::Released) velocity.y = 0;
         break;
     case ActionType::Clone:
@@ -563,6 +567,8 @@ bool ScenePlatform::oneCollidesFromRight(const std::shared_ptr<Entity>& one, con
 
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
 {
+    mAssetManager.getSound(Constants::Sound::shoot).play();
+
     const float angle = atan2(dir.y, dir.x);
 
     auto blade = mEntityManager.addEntity(EntityTag::Blade);

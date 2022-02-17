@@ -39,7 +39,7 @@ namespace goldenhand
         std::unordered_map<std::string_view, Animation> mAnimations;
         std::list<std::string> mAnimationNames;
         std::unordered_map<std::string, sf::Sound> mSounds;
-        std::vector<sf::SoundBuffer> mSoundBuffers;
+        std::list<sf::SoundBuffer> mSoundBuffers;
         std::unordered_map<std::string, sf::Font> mFonts;
     };
 }
