@@ -43,6 +43,6 @@ Tile dirt_tile 1675 650
 Tile grass_tile 1675 600
 Player 3 10 15 0.2
 Bullet 15 90 50
-Robot 700 600 60
-Robot 800 650 40
+Robot 600 600 60
+Robot 900 650 40
 Robot 1300 450 30

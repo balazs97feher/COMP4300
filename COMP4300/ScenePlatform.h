@@ -8,10 +8,46 @@
 
 #include <unordered_map>
 
-class ScenePlatform : public goldenhand::Scene
+enum class CharacterState { Default, Standing, Running, Jumping, Shooting, Dying };
+
+class CState : public goldenhand::Component
 {
 public:
-    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown> ComponentTuple;
+    CState() : prev{ CharacterState::Default }, crnt{ CharacterState::Default } {}
+    CState(const CharacterState initState) : prev{ initState }, crnt{ initState } {}
+
+    CharacterState current() const
+    {
+        return crnt;
+    }
+
+    void changeState(const CharacterState newState, const int currentFrame)
+    {
+        if (crnt != newState)
+        {
+            prev = crnt;
+            crnt = newState;
+            lastStateChangeFrame = currentFrame;
+        }
+    }
+
+    bool stateChangedInFrame(const int frame) const
+    {
+        return frame == lastStateChangeFrame;
+    }
+
+private:
+    CharacterState prev;
+    CharacterState crnt;
+    int lastStateChangeFrame = 0;
+};
+
+class ScenePlatform : public goldenhand::Scene
+{
+
+    typedef std::tuple<CTransform, CBoundingBox, CAnimation, CDraggable, CLifeSpan, CGravity, CCooldown, CState> ComponentTuple;
+
+public:
 
     enum class EntityTag
     {
@@ -35,8 +71,6 @@ public:
     virtual void sRender() override;
 
 private:
-    enum class CharacterState { Standing, Running, Jumping, Shooting, Dying };
-
     goldenhand::AssetManager mAssetManager;
 
     typedef goldenhand::EntityManager<EntityTag, ComponentTuple> EntityManager;
@@ -68,7 +102,6 @@ private:
     * Maps the id of each blade to the entity that spawned it
     */
     std::unordered_map<uint16_t, uint16_t> mBladeOrigin;
-    std::unordered_map<uint16_t, CharacterState> mCharacterStates;
     
     void spawnRobot(const sf::Vector2f startPos, const int cooldown);
     void destroyRobot(std::shared_ptr<Entity> robot);
@@ -76,6 +109,11 @@ private:
     * Returns a direction vector from the robot to the player, if the player is visible
     */
     std::optional<sf::Vector2f> playerWithinSight(std::shared_ptr<Entity> robot);
+
+    bool oneCollidesFromLeft(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+        const sf::Vector2f dimensionalOverlap) const;
+    bool oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+        const sf::Vector2f dimensionalOverlap) const;
 
     const char* mLevel = "./config/level1.txt";
     void saveLevel();

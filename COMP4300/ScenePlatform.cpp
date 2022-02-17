@@ -68,7 +68,7 @@ void ScenePlatform::initialize()
             configuration >> name;
             auto background = mEntityManager.addEntity(EntityTag::Background);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
-            background->addComponent<CAnimation>(name);
+            background->addComponent<CAnimation>(mAssetManager.getAnimation(name));
             auto& animation = mAssetManager.getAnimation(name);
             animation.getSprite().setScale(static_cast<float>(mEngine.windowSize().x) / animation.getSize().x,
                 static_cast<float>(mEngine.windowSize().y) / animation.getSize().y);
@@ -78,7 +78,7 @@ void ScenePlatform::initialize()
             configuration >> name >> x >> y;
             auto tile = mEntityManager.addEntity(EntityTag::Tile);
             tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
-            tile->addComponent<CAnimation>(name);
+            tile->addComponent<CAnimation>(mAssetManager.getAnimation(name));
             tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
             tile->addComponent<CDraggable>();
         }
@@ -176,7 +176,7 @@ void ScenePlatform::sRender()
     {
         if (mTextureDraw && entity->hasComponent<CAnimation>())
         {
-            auto& sprite = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSprite();
+            auto& sprite = entity->getComponent<CAnimation>().anim.getSprite();
             sprite.setPosition(entity->getComponent<CTransform>().pos);
 
             if (entity->tag() == EntityTag::Blade)
@@ -279,45 +279,44 @@ void ScenePlatform::sPhysics()
                         continue;
                     }
 
-                    auto& transform = one->getComponent<CTransform>();
+                    auto& oneTransform = one->getComponent<CTransform>();
 
-                    const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(transform.prevPos, one->getComponent<CBoundingBox>().halfSize,
+                    const auto dimensionalOverlap = goldenhand::Physics::boxesDimensionalOverlap(oneTransform.prevPos, one->getComponent<CBoundingBox>().halfSize,
                         tile->getComponent<CTransform>().prevPos, tile->getComponent<CBoundingBox>().halfSize);
 
-                    // TODO: refine collision resolution
-                    if ((transform.prevPos.x <= transform.pos.x) && (dimensionalOverlap.y > 0))
+                    if (oneCollidesFromLeft(one, tile, dimensionalOverlap))
                     {
-                        transform.pos.x -= overlap->width;
+                        oneTransform.pos.x -= overlap->width;
                         if (one->tag() == EntityTag::Robot)
                         {
-                            transform.velocity.x *= -1;
+                            oneTransform.velocity.x *= -1;
                         }
                         else
                         {
-                            transform.velocity.x = 0.f;
+                            oneTransform.velocity.x = 0.f;
                         }
                     }
-                    else if ((transform.prevPos.x > transform.pos.x) && (dimensionalOverlap.y > 0))
+                    else if (oneCollidesFromRight(one, tile, dimensionalOverlap))
                     {
-                        transform.pos.x += overlap->width;
+                        oneTransform.pos.x += overlap->width;
                         if (one->tag() == EntityTag::Robot)
                         {
-                            transform.velocity.x *= -1;
+                            oneTransform.velocity.x *= -1;
                         }
                         else
                         {
-                            transform.velocity.x = 0.f;
+                            oneTransform.velocity.x = 0.f;
                         }
                     }
-                    else if ((transform.prevPos.y <= transform.pos.y) && (dimensionalOverlap.x > 0))
+                    else if ((oneTransform.prevPos.y <= oneTransform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.pos.y -= overlap->height;
-                        transform.velocity.y = 0.f;
+                        oneTransform.pos.y -= overlap->height;
+                        oneTransform.velocity.y = 0.f;
                     }
-                    else if ((transform.prevPos.y > transform.pos.y) && (dimensionalOverlap.x > 0))
+                    else if ((oneTransform.prevPos.y > oneTransform.pos.y) && (dimensionalOverlap.x > 0))
                     {
-                        transform.pos.y += overlap->height;
-                        transform.velocity.y = 0.f;
+                        oneTransform.pos.y += overlap->height;
+                        oneTransform.velocity.y = 0.f;
                     }
                 }
             }
@@ -332,25 +331,35 @@ void ScenePlatform::sPhysics()
             if ((one->tag() == EntityTag::Robot || one->tag() == EntityTag::Player) && goldenhand::Physics::boxesOverlap(one->getComponent<CTransform>().pos,
                 one->getComponent<CBoundingBox>().halfSize, blade->getComponent<CTransform>().pos, blade->getComponent<CBoundingBox>().halfSize))
             {
-                blade->destroy();
-                mBladeOrigin.erase(blade->id());
-
-                if (one->tag() == EntityTag::Robot)
+                if (one->tag() == EntityTag::Robot && mBladeOrigin[blade->id()] == mPlayer->id())
                 {
                     destroyRobot(one);
+                    blade->destroy();
+                    mBladeOrigin.erase(blade->id());
                 }
-                else
+                else if (one->tag() == EntityTag::Player)
                 {
                     mPlayer->destroy();
+                    blade->destroy();
+                    mBladeOrigin.erase(blade->id());
                     spawnPlayer();
                 }
             }
         }
     }
 
-    if (mPlayer->getComponent<CTransform>().velocity.y != 0) mCharacterStates[mPlayer->id()] = CharacterState::Jumping;
-    else if (mPlayer->getComponent<CTransform>().velocity.x == 0) mCharacterStates[mPlayer->id()] = CharacterState::Standing;
-    else mCharacterStates[mPlayer->id()] = CharacterState::Running;
+    if (mPlayer->getComponent<CTransform>().velocity.y != 0)
+    {
+        mPlayer->getComponent<CState>().changeState(CharacterState::Jumping, mCurrentFrame);
+    }
+    else if (mPlayer->getComponent<CTransform>().velocity.x == 0)
+    {
+        mPlayer->getComponent<CState>().changeState(CharacterState::Standing, mCurrentFrame);
+    }
+    else
+    {
+        mPlayer->getComponent<CState>().changeState(CharacterState::Running, mCurrentFrame);
+    }
 }
 
 void ScenePlatform::sAnimation()
@@ -359,44 +368,47 @@ void ScenePlatform::sAnimation()
     {
         if (entity->hasComponent<CAnimation>())
         {
-            if (entity->tag() == EntityTag::Robot)
+            if (entity->getComponent<CState>().stateChangedInFrame(mCurrentFrame))
             {
-                auto& animation = entity->getComponent<CAnimation>().animation;
-                switch (mCharacterStates[entity->id()])
+                if (entity->tag() == EntityTag::Robot)
                 {
-                    case CharacterState::Running:
-                        animation = Constants::Animation::robot_running;
-                        break;
-                    case CharacterState::Shooting:
-                        animation = Constants::Animation::robot_shooting;
-                        break;
-                    case CharacterState::Dying:
-                        animation = Constants::Animation::robot_dying;
-                        break;
+                    auto& animation = entity->getComponent<CAnimation>().anim;
+                    switch (entity->getComponent<CState>().current())
+                    {
+                        case CharacterState::Running:
+                            animation = mAssetManager.getAnimation(Constants::Animation::robot_running);
+                            break;
+                        case CharacterState::Shooting:
+                            animation = mAssetManager.getAnimation(Constants::Animation::robot_shooting);
+                            break;
+                        case CharacterState::Dying:
+                            animation = mAssetManager.getAnimation(Constants::Animation::robot_dying);
+                            animation.setLoop(false);
+                            break;
+                    }
                 }
-            }
-            else if (entity->tag() == EntityTag::Player)
-            {
-                auto& animation = entity->getComponent<CAnimation>().animation;
-                switch (mCharacterStates[entity->id()])
+                else if (entity->tag() == EntityTag::Player)
                 {
-                    case CharacterState::Standing:
-                        animation = Constants::Animation::megaman_standing;
-                        break;
-                    case CharacterState::Running:
-                        animation = Constants::Animation::megaman_running;
-                        break;
-                    case CharacterState::Jumping:
-                        animation = Constants::Animation::megaman_jumping;
-                        break;
+                    auto& animation = entity->getComponent<CAnimation>().anim;
+                    switch (entity->getComponent<CState>().current())
+                    {
+                        case CharacterState::Standing:
+                            animation = mAssetManager.getAnimation(Constants::Animation::megaman_standing);
+                            break;
+                        case CharacterState::Running:
+                            animation = mAssetManager.getAnimation(Constants::Animation::megaman_running);
+                            break;
+                        case CharacterState::Jumping:
+                            animation = mAssetManager.getAnimation(Constants::Animation::megaman_jumping);
+                            break;
+                    }
                 }
             }
 
-            auto& animation = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
+            auto& animation = entity->getComponent<CAnimation>().anim;
             if (animation.hasEnded())
             {
                 entity->destroy();
-                mCharacterStates.erase(entity->id());
             }
             else
             {
@@ -436,7 +448,7 @@ void ScenePlatform::sRobotAttack()
 {
     for (auto robot : mEntityManager.getEntities(EntityTag::Robot))
     {
-        if (mCharacterStates[robot->id()] == CharacterState::Dying) continue;
+        if (robot->getComponent<CState>().current() == CharacterState::Dying) continue;
 
         if (auto& rem = robot->getComponent<CCooldown>().remaining; rem > 0)
         {
@@ -457,11 +469,10 @@ void ScenePlatform::spawnPlayer()
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
 
     mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
-    mPlayer->addComponent<CAnimation>(Constants::Animation::megaman_standing);
+    mPlayer->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::megaman_standing));
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
-
-    mCharacterStates[mPlayer->id()] = CharacterState::Running;
+    mPlayer->addComponent<CState>(CharacterState::Running);
 
     const sf::Vector2f wSize(mEngine.windowSize().x, mEngine.windowSize().y);
     mEngine.setView(sf::View{ {wSize.x / 2, wSize.y / 2}, wSize });
@@ -472,20 +483,18 @@ void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
     auto robot = mEntityManager.addEntity(EntityTag::Robot);
 
     robot->addComponent<CTransform>(startPos, sf::Vector2f{ 2, 0 }, 0);
-    robot->addComponent<CAnimation>(Constants::Animation::robot_running);
+    robot->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::robot_running));
     robot->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::robot_running).getSize());
     robot->addComponent<CGravity>();
     robot->addComponent<CCooldown>(cooldown);
-
-    mCharacterStates[robot->id()] = CharacterState::Running;
+    robot->addComponent<CState>(CharacterState::Running);
+    robot->addComponent<CDraggable>();
 }
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
 {
     robot->getComponent<CTransform>().velocity = {};
-    const auto anim = robot->getComponent<CAnimation>().animation = Constants::Animation::robot_dying;
-    mAssetManager.getAnimation(anim).setLoop(false);
-    mCharacterStates[robot->id()] = CharacterState::Dying;
+    robot->getComponent<CState>().changeState(CharacterState::Dying, mCurrentFrame);
 }
 
 std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Entity> robot)
@@ -495,7 +504,7 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
         mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos);
     if (angle > pi / 2 || angle < -pi / 2)
     {
-        mCharacterStates[robot->id()] = CharacterState::Running;
+        robot->getComponent<CState>().changeState(CharacterState::Running, mCurrentFrame);
         return nullopt;
     }
 
@@ -504,20 +513,35 @@ std::optional<sf::Vector2f> ScenePlatform::playerWithinSight(std::shared_ptr<Ent
         if (entity->tag() != EntityTag::Player && entity->tag() != EntityTag::Background && entity->tag() != EntityTag::Robot &&
             entity->tag() != EntityTag::Blade)
         {
-            const auto& animEntity = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation);
+            const auto entitySize = entity->getComponent<CAnimation>().anim.getSize();
 
             if (goldenhand::Physics::lineSegmentRectangleIntersect(mPlayer->getComponent<CTransform>().pos, robot->getComponent<CTransform>().pos,
-                entity->getComponent<CTransform>().pos, {animEntity.getSize().x / 2.f, animEntity.getSize().y / 2.f}))
+                entity->getComponent<CTransform>().pos, { entitySize.x / 2.f, entitySize.y / 2.f}))
             {
-                mCharacterStates[robot->id()] = CharacterState::Running;
+                robot->getComponent<CState>().changeState(CharacterState::Running, mCurrentFrame);
                 return std::nullopt;
             }
         }
     }
 
-    mCharacterStates[robot->id()] = CharacterState::Shooting;
+    robot->getComponent<CState>().changeState(CharacterState::Shooting, mCurrentFrame);
     
     return mPlayer->getComponent<CTransform>().pos - robot->getComponent<CTransform>().pos;
+}
+
+bool ScenePlatform::oneCollidesFromLeft(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
+    const sf::Vector2f dimensionalOverlap) const
+{
+    const auto& oneTransform = one->getComponent<CTransform>();
+    const auto& otherTransform = other->getComponent<CTransform>();
+    return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x < oneTransform.pos.x) || (otherTransform.prevPos.x > otherTransform.pos.x));
+}
+
+bool ScenePlatform::oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other, const sf::Vector2f dimensionalOverlap) const
+{
+    const auto& oneTransform = one->getComponent<CTransform>();
+    const auto& otherTransform = other->getComponent<CTransform>();
+    return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x > oneTransform.pos.x) || (otherTransform.prevPos.x < otherTransform.pos.x));
 }
 
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
@@ -526,7 +550,7 @@ void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector
 
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
     blade->addComponent<CTransform>(shooter->getComponent<CTransform>().pos, sf::Vector2f{ cos(angle), sin(angle) } * mBulletConfig.speed, .0f);
-    blade->addComponent<CAnimation>(Constants::Animation::blade);
+    blade->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::blade));
     blade->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::blade).getSize());
     blade->addComponent<CLifeSpan>(mBulletConfig.lifespan);
 
@@ -545,15 +569,20 @@ void ScenePlatform::saveLevel()
 
     for (const auto& decor : mEntityManager.getEntities(EntityTag::Background))
     {
-        fileStream << "Background " << decor->getComponent<CAnimation>().animation << std::endl;
+        fileStream << "Background " << decor->getComponent<CAnimation>().anim.getName() << std::endl;
     }
     for (const auto& tile : mEntityManager.getEntities(EntityTag::Tile))
     {
-        fileStream << "Tile " << tile->getComponent<CAnimation>().animation << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
+        fileStream << "Tile " << tile->getComponent<CAnimation>().anim.getName() << " " << tile->getComponent<CTransform>().pos.x << " " << tile->getComponent<CTransform>().pos.y << std::endl;
+    }
+    for (const auto& robot : mEntityManager.getEntities(EntityTag::Robot))
+    {
+        const auto robotPos = robot->getComponent<CTransform>().pos;
+        fileStream << "Robot " << robotPos.x << " " << robotPos.y << " " << robot->getComponent<CCooldown>().total << std::endl;
     }
     const auto playerPos = mPlayer->getComponent<CTransform>().pos;
-    fileStream << "Player " << " " << mPlayerConfig.runSpeed
-        << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed << " " << mPlayerConfig.trapViewRatio << std::endl;
+    fileStream << "Player " << mPlayerConfig.runSpeed << " " << mPlayerConfig.jumpSpeed << " " << mPlayerConfig.maxSpeed
+        << " " << mPlayerConfig.trapViewRatio << std::endl;
     fileStream << "Bullet " << mBulletConfig.speed << " " << mBulletConfig.rotation << " " << mBulletConfig.lifespan;
 }
 
@@ -563,7 +592,7 @@ std::shared_ptr<ScenePlatform::Entity> ScenePlatform::findSelectedEntity(const s
     {
         if (entity->hasComponent<CAnimation>() && entity->hasComponent<CDraggable>())
         {
-            const auto size = mAssetManager.getAnimation(entity->getComponent<CAnimation>().animation).getSize();
+            const auto size = entity->getComponent<CAnimation>().anim.getSize();
             const auto position = entity->getComponent<CTransform>().pos;
             if (goldenhand::Physics::isWithinRectangle(sf::Vector2f(spot.x, spot.y), position, sf::Vector2f(size.x, size.y)))
             {

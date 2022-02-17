@@ -58,6 +58,15 @@ namespace goldenhand
             return component;
         }
 
+        template<typename T>
+        T& addComponent(const T& component)
+        {
+            auto& c = getComponent<T>();
+            c = T(component);
+            c.has = true;
+            return c;
+        }
+
     private:
         Entity(const EntityTag tag, const uint16_t id) : mTag(tag), mId(id), mAlive(true) {}
 

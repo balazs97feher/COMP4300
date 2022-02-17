@@ -57,7 +57,8 @@ namespace goldenhand
 
     void AssetManager::addAnimation(const std::string& name, const std::string& textureName, const int startFrame, const int frameCount, const int speed)
     {
-        mAnimations.emplace(name, Animation(getTexture(textureName), startFrame, frameCount, speed));
+        mAnimationNames.emplace_back(name);
+        mAnimations.emplace(mAnimationNames.back(), Animation(mAnimationNames.back(), getTexture(textureName), startFrame, frameCount, speed));
     }
 
     void AssetManager::addSound(const std::string& name, const std::string& path)
@@ -89,7 +90,7 @@ namespace goldenhand
         }
     }
 
-    Animation& AssetManager::getAnimation(const std::string& name)
+    Animation& AssetManager::getAnimation(const std::string_view name)
     {
         try
         {
@@ -100,6 +101,11 @@ namespace goldenhand
             cerr << "Animation " << name << " does not exist." << endl;
             exit(-1);
         }
+    }
+
+    Animation& AssetManager::getAnimation(const std::string& name)
+    {
+        return getAnimation(std::string_view{ name });
     }
 
     sf::Sound& AssetManager::getSound(const std::string& name)
