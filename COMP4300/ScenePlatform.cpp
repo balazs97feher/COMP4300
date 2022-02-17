@@ -98,7 +98,7 @@ void ScenePlatform::update()
         sLifeSpan();
         sView();
         sMovement();
-        sRobotAttack();
+        //sRobotAttack();
         sPhysics();
         sAnimation();
         sRender();

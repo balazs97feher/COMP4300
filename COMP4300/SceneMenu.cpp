@@ -28,16 +28,24 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    auto goToPlatform = [this]() {
+    auto startPlatform = [this]() {
+        this->mEngine.createScene(Constants::Scene::platform);
+    };
+    addItem("START", startPlatform);
+
+    auto continuePlatform = [this]() {
         this->mEngine.changeScene(Constants::Scene::platform);
     };
-    addItem("PLATFORM", goToPlatform);
+    addItem("CONTINUE", continuePlatform);
 }
 
 void SceneMenu::update()
 {
     if (!mHasEnded)
     {
+        const sf::Vector2f wSize{ static_cast<float>(mEngine.windowSize().x), static_cast<float>(mEngine.windowSize().y) };
+        mEngine.setView(sf::View( wSize / 2.f , wSize));
+
         for (auto& item : mItems) item.mText.setFillColor(mInactiveColor);
         mItems[mSelectedIdx].mText.setFillColor(mSelectedColor);
 
