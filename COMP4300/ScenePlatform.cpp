@@ -76,11 +76,8 @@ void ScenePlatform::initialize()
         else if (configType == "Tile")
         {
             configuration >> name >> x >> y;
-            auto tile = mEntityManager.addEntity(EntityTag::Tile);
-            tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
-            tile->addComponent<CAnimation>(mAssetManager.getAnimation(name));
-            tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
-            tile->addComponent<CDraggable>();
+            auto tile = spawnTile(name, { x, y });
+            if (name == Constants::Animation::finish) mFinish = tile;
         }
 
         configuration >> configType;
@@ -89,6 +86,11 @@ void ScenePlatform::initialize()
     mDraggedCoords.setFont(mAssetManager.getFont(Constants::Font::ayar));
     mDraggedCoords.setCharacterSize(24);
     mDraggedCoords.setFillColor(sf::Color::White);
+
+    mBanner.setString("WINNER");
+    mBanner.setCharacterSize(256);
+    mBanner.setFont(mAssetManager.getFont(Constants::Font::ayar));
+    mBanner.setFillColor(sf::Color::Blue);
 
     spawnPlayer();
 }
@@ -100,20 +102,25 @@ void ScenePlatform::update()
         mEntityManager.update();
 
         sLifeSpan();
-        sView();
+    }
+    sView();
+    if (!mHasEnded)
+    {
         sMovement();
         sRobotAttack();
         sPhysics();
         sAnimation();
-        sRender();
-
-        mCurrentFrame++;
     }
+
+    mCurrentFrame++;
+    sRender();
 }
 
 void ScenePlatform::sDoAction(const goldenhand::Action action)
 {
     using namespace goldenhand;
+
+    if (mHasEnded && action.getType() != ActionType::Quit) return;
 
     auto& velocity = mPlayer->getComponent<CTransform>().velocity;
 
@@ -212,6 +219,11 @@ void ScenePlatform::sRender()
         mDraggedCoords.setString(posString.str());
         mEngine.drawToWindow(mDraggedCoords);
     }
+
+    if (mHasEnded)
+    {
+        mEngine.drawToWindow(mBanner);
+    }
 }
 
 void ScenePlatform::sView()
@@ -281,6 +293,13 @@ void ScenePlatform::sMovement()
 
 void ScenePlatform::sPhysics()
 {
+    // win condition
+    if (goldenhand::Physics::boxesOverlap(mPlayer->getComponent<CTransform>().pos, mPlayer->getComponent<CBoundingBox>().halfSize,
+        mFinish->getComponent<CTransform>().pos, mFinish->getComponent<CBoundingBox>().halfSize))
+    {
+        win();
+    }
+
     for (auto& one : mEntityManager.getEntities())
     {
         if (!one->hasComponent<CBoundingBox>()) continue;
@@ -485,6 +504,17 @@ void ScenePlatform::sRobotAttack()
     }
 }
 
+std::shared_ptr<ScenePlatform::Entity> ScenePlatform::spawnTile(const string& animName, const sf::Vector2f pos)
+{
+    auto tile = mEntityManager.addEntity(EntityTag::Tile);
+    tile->addComponent<CTransform>(pos, sf::Vector2f{ 0, 0 }, 0.f);
+    tile->addComponent<CAnimation>(mAssetManager.getAnimation(animName));
+    tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(animName).getSize());
+    tile->addComponent<CDraggable>();
+
+    return tile;
+}
+
 void ScenePlatform::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
@@ -563,6 +593,15 @@ bool ScenePlatform::oneCollidesFromRight(const std::shared_ptr<Entity>& one, con
     const auto& oneTransform = one->getComponent<CTransform>();
     const auto& otherTransform = other->getComponent<CTransform>();
     return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x > oneTransform.pos.x) || (otherTransform.prevPos.x < otherTransform.pos.x));
+}
+
+void ScenePlatform::win()
+{
+    mHasEnded = true;
+    const sf::Vector2f windowCenter{ (mEngine.windowSize().x / 2.0f) - (mBanner.getLocalBounds().width / 2),
+        (mEngine.windowSize().y / 2.0f) - (mBanner.getLocalBounds().height / 2) };
+
+    mBanner.setPosition(mEngine.mapPixelToCoords({ static_cast<int>(windowCenter.x), static_cast<int>(windowCenter.y) }));
 }
 
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)

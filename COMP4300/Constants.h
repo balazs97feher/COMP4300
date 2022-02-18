@@ -15,6 +15,7 @@ namespace Constants
         constexpr inline std::string_view blade = "blade";
         constexpr inline std::string_view dirt_tile = "dirt_tile";
         constexpr inline std::string_view grass_tile = "grass_tile";
+        constexpr inline std::string_view finish = "finish";
     }
     namespace Sound
     {

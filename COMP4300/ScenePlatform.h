@@ -82,6 +82,7 @@ private:
     PlayerConfig mPlayerConfig;
     BulletConfig mBulletConfig;
     std::shared_ptr<Entity> mPlayer;
+    std::shared_ptr<Entity> mFinish;
 
     goldenhand::Physics mPhysics;
     bool mDrawBB;
@@ -96,6 +97,7 @@ private:
     void sLifeSpan();
     void sRobotAttack();
 
+    std::shared_ptr<Entity> spawnTile(const std::string& animName, const sf::Vector2f pos);
     void spawnPlayer();
     /*
     * Spawns a blade from the position of the shooter into the direction defined by the dir vector
@@ -117,6 +119,9 @@ private:
         const sf::Vector2f dimensionalOverlap) const;
     bool oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
         const sf::Vector2f dimensionalOverlap) const;
+
+    sf::Text mBanner;
+    void win();
 
     const char* mLevel = "./config/level1.txt";
     void saveLevel();
