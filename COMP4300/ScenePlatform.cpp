@@ -544,7 +544,7 @@ void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
 {
-    robot->getComponent<CTransform>().velocity = {};
+    robot->getComponent<CTransform>().velocity = robot->getComponent<CTransform>().velocity / 20.f;
     robot->getComponent<CState>().changeState(CharacterState::Dying, mCurrentFrame);
 }
 
