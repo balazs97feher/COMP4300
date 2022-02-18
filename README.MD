@@ -1,10 +1,8 @@
 ## COMP4300
 Building a custom 2D game engine following the public lectures of *Introduction to Game Programming (C++)* [course](https://www.youtube.com/watch?v=LpEdZbUdDe4&list=PL_xRyXins848jkwC9Coy7B4N5XTOnQZzz) of the Memorial University of Newfoundland, using [SFML](https://www.sfml-dev.org/index.php).
 
-Assignments:
-- [assignment 02](https://github.com/balazs97feher/COMP4300/tree/assignment-02)
-- [assignment 03](https://github.com/balazs97feher/COMP4300/tree/assignment-03)
-
+- Playing around with [ray-casting](https://www.youtube.com/watch?v=GlkAaMYrRqs)
+- Spaghetti, cache-killer initial ECS-ish system: [Attack of the clones](https://www.youtube.com/watch?v=YwuJoeYAjn8)
 
 ### Assets Configuration:
 There are four different line types in the Assets file, each of which correspond to a different type of Asset. They are as follows:
