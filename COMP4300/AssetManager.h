@@ -23,7 +23,9 @@ namespace goldenhand
         Animation& getAnimation(const std::string_view name);
         Animation& getAnimation(const std::string& name);
         sf::Sound& getSound(const std::string& name);
+        sf::Sound& getSound(const std::string_view name);
         sf::Font& getFont(const std::string& name);
+        sf::Font& getFont(const std::string_view name);
 
     private:
         const std::string mPathToAssets;
@@ -37,7 +39,7 @@ namespace goldenhand
         std::unordered_map<std::string_view, Animation> mAnimations;
         std::list<std::string> mAnimationNames;
         std::unordered_map<std::string, sf::Sound> mSounds;
-        std::vector<sf::SoundBuffer> mSoundBuffers;
+        std::list<sf::SoundBuffer> mSoundBuffers;
         std::unordered_map<std::string, sf::Font> mFonts;
     };
 }

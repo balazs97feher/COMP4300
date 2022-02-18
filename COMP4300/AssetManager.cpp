@@ -68,7 +68,7 @@ namespace goldenhand
 
         mSoundBuffers.push_back(soundBuffer);
 
-        mSounds[name] = sf::Sound{ soundBuffer };
+        mSounds[name] = sf::Sound{ mSoundBuffers.back() };
     }
 
     void AssetManager::addFont(const std::string& name, const std::string& path)
@@ -121,6 +121,11 @@ namespace goldenhand
         }
     }
 
+    sf::Sound& AssetManager::getSound(const std::string_view name)
+    {
+        return getSound(std::string{ name });
+    }
+
     sf::Font& AssetManager::getFont(const std::string& name)
     {
         try
@@ -132,5 +137,10 @@ namespace goldenhand
             cerr << "Font " << name << " does not exist." << endl;
             exit(-1);
         }
+    }
+
+    sf::Font& AssetManager::getFont(const std::string_view name)
+    {
+        return getFont(std::string{ name });
     }
 } // namespace goldenhand

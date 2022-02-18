@@ -15,18 +15,20 @@ namespace Constants
         constexpr inline std::string_view blade = "blade";
         constexpr inline std::string_view dirt_tile = "dirt_tile";
         constexpr inline std::string_view grass_tile = "grass_tile";
+        constexpr inline std::string_view finish = "finish";
     }
     namespace Sound
     {
-        constexpr inline const char* jump = "jump";
+        constexpr inline std::string_view jump = "jump";
+        constexpr inline std::string_view shoot = "shoot";
     }
     namespace Font
     {
-        constexpr inline const char* ayar = "ayar";
+        constexpr inline std::string_view ayar = "ayar";
     }
     namespace Scene
     {
-        constexpr inline const char* menu = "menu";
-        constexpr inline const char* platform = "platform";
+        constexpr inline std::string_view menu = "menu";
+        constexpr inline std::string_view platform = "platform";
     }
 }

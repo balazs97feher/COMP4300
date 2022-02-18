@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 
+#include <SFML/Graphics/Text.hpp>
+
 enum class CharacterState { Default, Standing, Running, Jumping, Shooting, Dying };
 
 class CState : public goldenhand::Component
@@ -80,10 +82,12 @@ private:
     PlayerConfig mPlayerConfig;
     BulletConfig mBulletConfig;
     std::shared_ptr<Entity> mPlayer;
+    std::shared_ptr<Entity> mFinish;
 
     goldenhand::Physics mPhysics;
     bool mDrawBB;
     bool mTextureDraw;
+    sf::Text mDraggedCoords;
     sf::RectangleShape mBB;
 
     void sView();
@@ -93,6 +97,7 @@ private:
     void sLifeSpan();
     void sRobotAttack();
 
+    std::shared_ptr<Entity> spawnTile(const std::string& animName, const sf::Vector2f pos);
     void spawnPlayer();
     /*
     * Spawns a blade from the position of the shooter into the direction defined by the dir vector
@@ -115,10 +120,14 @@ private:
     bool oneCollidesFromRight(const std::shared_ptr<Entity>& one, const std::shared_ptr<Entity>& other,
         const sf::Vector2f dimensionalOverlap) const;
 
+    sf::Text mBanner;
+    void win();
+
     const char* mLevel = "./config/level1.txt";
     void saveLevel();
 
     bool mCloneSelected;
     std::shared_ptr<Entity> mDraggedEntity;
+    sf::Vector2f mMousePrevPos;
     std::shared_ptr<Entity> findSelectedEntity(const sf::Vector2f spot);
 };

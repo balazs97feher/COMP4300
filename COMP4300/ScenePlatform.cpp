@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -68,23 +69,28 @@ void ScenePlatform::initialize()
             configuration >> name;
             auto background = mEntityManager.addEntity(EntityTag::Background);
             background->addComponent<CTransform>(sf::Vector2f{ mEngine.windowSize().x / 2.f, mEngine.windowSize().y / 2.f }, sf::Vector2f{ 0, 0 }, 0.f);
-            background->addComponent<CAnimation>(mAssetManager.getAnimation(name));
-            auto& animation = mAssetManager.getAnimation(name);
+            auto& animation = background->addComponent<CAnimation>(mAssetManager.getAnimation(name)).anim;
             animation.getSprite().setScale(static_cast<float>(mEngine.windowSize().x) / animation.getSize().x,
                 static_cast<float>(mEngine.windowSize().y) / animation.getSize().y);
         }
         else if (configType == "Tile")
         {
             configuration >> name >> x >> y;
-            auto tile = mEntityManager.addEntity(EntityTag::Tile);
-            tile->addComponent<CTransform>(sf::Vector2f{ x, y }, sf::Vector2f{ 0, 0 }, 0.f);
-            tile->addComponent<CAnimation>(mAssetManager.getAnimation(name));
-            tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(name).getSize());
-            tile->addComponent<CDraggable>();
+            auto tile = spawnTile(name, { x, y });
+            if (name == Constants::Animation::finish) mFinish = tile;
         }
 
         configuration >> configType;
     }
+
+    mDraggedCoords.setFont(mAssetManager.getFont(Constants::Font::ayar));
+    mDraggedCoords.setCharacterSize(24);
+    mDraggedCoords.setFillColor(sf::Color::White);
+
+    mBanner.setString("WINNER");
+    mBanner.setCharacterSize(256);
+    mBanner.setFont(mAssetManager.getFont(Constants::Font::ayar));
+    mBanner.setFillColor(sf::Color::Blue);
 
     spawnPlayer();
 }
@@ -96,20 +102,25 @@ void ScenePlatform::update()
         mEntityManager.update();
 
         sLifeSpan();
-        sView();
+    }
+    sView();
+    if (!mHasEnded)
+    {
         sMovement();
         sRobotAttack();
         sPhysics();
         sAnimation();
-        sRender();
-
-        mCurrentFrame++;
     }
+
+    mCurrentFrame++;
+    sRender();
 }
 
 void ScenePlatform::sDoAction(const goldenhand::Action action)
 {
     using namespace goldenhand;
+
+    if (mHasEnded && action.getType() != ActionType::Quit) return;
 
     auto& velocity = mPlayer->getComponent<CTransform>().velocity;
 
@@ -142,7 +153,11 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
         }
         break;
     case ActionType::MoveUp:
-        if (action.getEventType() == InputEventType::Pressed && velocity.y == 0) velocity.y = -mPlayerConfig.jumpSpeed;
+        if (action.getEventType() == InputEventType::Pressed && velocity.y == 0)
+        {
+            velocity.y = -mPlayerConfig.jumpSpeed;
+            mAssetManager.getSound(Constants::Sound::jump).play();
+        }
         else if (action.getEventType() == InputEventType::Released) velocity.y = 0;
         break;
     case ActionType::Clone:
@@ -152,6 +167,7 @@ void ScenePlatform::sDoAction(const goldenhand::Action action)
     case ActionType::Select:
         if (action.getEventType() == InputEventType::Pressed && !mDraggedEntity)
         {
+            mMousePrevPos = mEngine.mousePos();
             auto selectedEntity = findSelectedEntity(mEngine.mousePos());
             if (selectedEntity)
             {
@@ -194,6 +210,20 @@ void ScenePlatform::sRender()
             mEngine.drawToWindow(mBB);
         }
     }
+
+    if (mDrawBB && mDraggedEntity)
+    {
+        const auto& pos = mDraggedEntity->getComponent<CTransform>().pos;
+        stringstream posString;
+        posString << "Dragged: x: " << int(pos.x) << " y: " << int(pos.y);
+        mDraggedCoords.setString(posString.str());
+        mEngine.drawToWindow(mDraggedCoords);
+    }
+
+    if (mHasEnded)
+    {
+        mEngine.drawToWindow(mBanner);
+    }
 }
 
 void ScenePlatform::sView()
@@ -218,14 +248,16 @@ void ScenePlatform::sView()
     {
         background->getComponent<CTransform>().setPos(mEngine.mapPixelToCoords(sf::Vector2i(wSize.x / 2, wSize.y / 2)));
     }
+
+    mDraggedCoords.setPosition(mEngine.mapPixelToCoords({ 20, 20 }));
 }
 
 void ScenePlatform::sMovement()
 {
     if (mDraggedEntity)
     {
-        mDraggedEntity->getComponent<CTransform>().setPos(sf::Vector2f{ static_cast<float>(mEngine.mousePos().x),
-            static_cast<float>(mEngine.mousePos().y) });
+        mDraggedEntity->getComponent<CTransform>().setPos(mDraggedEntity->getComponent<CTransform>().pos + mEngine.mousePos() - mMousePrevPos);
+        mMousePrevPos = mEngine.mousePos();
     }
 
     for (auto entity : mEntityManager.getEntities())
@@ -261,6 +293,13 @@ void ScenePlatform::sMovement()
 
 void ScenePlatform::sPhysics()
 {
+    // win condition
+    if (goldenhand::Physics::boxesOverlap(mPlayer->getComponent<CTransform>().pos, mPlayer->getComponent<CBoundingBox>().halfSize,
+        mFinish->getComponent<CTransform>().pos, mFinish->getComponent<CBoundingBox>().halfSize))
+    {
+        win();
+    }
+
     for (auto& one : mEntityManager.getEntities())
     {
         if (!one->hasComponent<CBoundingBox>()) continue;
@@ -412,8 +451,9 @@ void ScenePlatform::sAnimation()
             }
             else
             {
-                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(1.f, 1.f);
-                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1.f, 1.f);
+                const auto scale = animation.getSprite().getScale();
+                if (goldenhand::equal(entity->getComponent<CTransform>().angle, 0.f)) animation.getSprite().setScale(abs(scale.x), abs(scale.y));
+                else if (goldenhand::equal(entity->getComponent<CTransform>().angle, pi)) animation.getSprite().setScale(-1 * abs(scale.x), abs(scale.y));
             
                 animation.update();
             }
@@ -464,11 +504,22 @@ void ScenePlatform::sRobotAttack()
     }
 }
 
+std::shared_ptr<ScenePlatform::Entity> ScenePlatform::spawnTile(const string& animName, const sf::Vector2f pos)
+{
+    auto tile = mEntityManager.addEntity(EntityTag::Tile);
+    tile->addComponent<CTransform>(pos, sf::Vector2f{ 0, 0 }, 0.f);
+    tile->addComponent<CAnimation>(mAssetManager.getAnimation(animName));
+    tile->addComponent<CBoundingBox>(mAssetManager.getAnimation(animName).getSize());
+    tile->addComponent<CDraggable>();
+
+    return tile;
+}
+
 void ScenePlatform::spawnPlayer()
 {
     mPlayer = mEntityManager.addEntity(EntityTag::Player);
 
-    mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 400 }, sf::Vector2f{ 0, 0 }, 1.0f);
+    mPlayer->addComponent<CTransform>(sf::Vector2f{ 200, 200 }, sf::Vector2f{ 0, 0 }, 1.0f);
     mPlayer->addComponent<CAnimation>(mAssetManager.getAnimation(Constants::Animation::megaman_standing));
     mPlayer->addComponent<CBoundingBox>(mAssetManager.getAnimation(Constants::Animation::megaman_standing).getSize());
     mPlayer->addComponent<CGravity>();
@@ -493,7 +544,7 @@ void ScenePlatform::spawnRobot(const sf::Vector2f startPos, const int cooldown)
 
 void ScenePlatform::destroyRobot(std::shared_ptr<Entity> robot)
 {
-    robot->getComponent<CTransform>().velocity = {};
+    robot->getComponent<CTransform>().velocity = robot->getComponent<CTransform>().velocity / 20.f;
     robot->getComponent<CState>().changeState(CharacterState::Dying, mCurrentFrame);
 }
 
@@ -544,8 +595,19 @@ bool ScenePlatform::oneCollidesFromRight(const std::shared_ptr<Entity>& one, con
     return (dimensionalOverlap.y > 0) && ((oneTransform.prevPos.x > oneTransform.pos.x) || (otherTransform.prevPos.x < otherTransform.pos.x));
 }
 
+void ScenePlatform::win()
+{
+    mHasEnded = true;
+    const sf::Vector2f windowCenter{ (mEngine.windowSize().x / 2.0f) - (mBanner.getLocalBounds().width / 2),
+        (mEngine.windowSize().y / 2.0f) - (mBanner.getLocalBounds().height / 2) };
+
+    mBanner.setPosition(mEngine.mapPixelToCoords({ static_cast<int>(windowCenter.x), static_cast<int>(windowCenter.y) }));
+}
+
 void ScenePlatform::shootBlade(std::shared_ptr<Entity> shooter, const sf::Vector2f& dir)
 {
+    mAssetManager.getSound(Constants::Sound::shoot).play();
+
     const float angle = atan2(dir.y, dir.x);
 
     auto blade = mEntityManager.addEntity(EntityTag::Blade);
