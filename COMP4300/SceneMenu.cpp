@@ -28,15 +28,8 @@ void SceneMenu::initialize()
         exit(-1);
     }
 
-    auto startPlatform = [this]() {
-        this->mEngine.createScene(Constants::Scene::platform);
-    };
-    addItem("START", startPlatform);
-
-    auto continuePlatform = [this]() {
-        this->mEngine.changeScene(Constants::Scene::platform);
-    };
-    addItem("CONTINUE", continuePlatform);
+    auto startPlatform = [](){};
+    addItem("PLACEHOLDER", startPlatform);
 }
 
 void SceneMenu::update()

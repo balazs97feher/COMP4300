@@ -2,7 +2,6 @@
 #include "Constants.h"
 #include "GameEngine.h"
 #include "SceneMenu.h"
-#include "ScenePlatform.h"
 
 #include <SFML/Window/Event.hpp>
 
@@ -15,9 +14,7 @@ using namespace std;
 
 namespace goldenhand
 {
-    GameEngine::GameEngine() : mCurrentScene{ Constants::Scene::menu }, mRunning{true}
-    {
-    }
+    GameEngine::GameEngine() : mCurrentScene{ Constants::Scene::menu }, mRunning{true} {}
 
     void GameEngine::initialize(const std::string& settingsFile)
     {
@@ -40,8 +37,7 @@ namespace goldenhand
             }
         }
 
-        mSceneMap[Constants::Scene::menu] = make_unique<SceneMenu>(*this);
-        mSceneMap[Constants::Scene::platform] = make_unique<ScenePlatform>(*this);
+        createScene(mCurrentScene);
     }
 
     void GameEngine::run()
@@ -66,7 +62,7 @@ namespace goldenhand
 
     void GameEngine::createScene(const std::string_view id)
     {
-        if (id == Constants::Scene::platform) mSceneMap[id] = make_unique<ScenePlatform>(*this);
+        if (id == Constants::Scene::menu) mSceneMap[id] = make_unique<SceneMenu>(*this);
 
         changeScene(id);
     }
